@@ -14,12 +14,11 @@ repositories {
     mavenCentral()
     mavenLocal()
     maven { url 'https://repository.jboss.org' }
-    maven { url 'https://jitpack.io' }
 }
 
 intellij {
     version ideaVersion
-    pluginName 'com.redhat.devtools.intellij.knative'
+    pluginName 'Knative by Red Hat'
     plugins 'terminal'
     updateSinceUntilBuild false
 }
