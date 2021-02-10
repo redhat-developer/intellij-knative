@@ -1,0 +1,40 @@
+plugins {
+    id 'idea'
+    id 'java'
+    id 'org.jetbrains.intellij' version '0.6.5'
+}
+
+group 'com.redhat.devtools.intellij'
+version projectVersion
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven { url 'https://repository.jboss.org' }
+    maven { url 'https://jitpack.io' }
+}
+
+intellij {
+    version ideaVersion
+    pluginName 'com.redhat.devtools.intellij.knative'
+    plugins 'terminal'
+    updateSinceUntilBuild false
+}
+
+dependencies {
+    compile 'com.redhat.devtools.intellij:intellij-common:0.0.1'
+}
+
+configurations {
+    compile {
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+    }
+}
+
+publishPlugin {
+    token    jetBrainsToken
+    channels jetBrainsChannel
+}

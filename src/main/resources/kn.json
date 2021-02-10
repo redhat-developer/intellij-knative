@@ -1,0 +1,28 @@
+{
+  "tools": {
+    "kn": {
+      "version": "0.20.0",
+      "versionCmd": "version",
+      "versionExtractRegExp": "Version: (v\\d+[\\.\\d+]*)\\s.*",
+      "versionMatchRegExpr": "0\\..*",
+      "baseDir": "$HOME/.knative",
+      "platforms": {
+        "win": {
+          "url": "https://github.com/knative/client/releases/download/v0.20.0/kn-windows-amd64.exe",
+          "cmdFileName": "kn-windows-amd64.exe",
+          "dlFileName": "kn-windows-amd64.exe"
+        },
+        "osx": {
+          "url": "https://github.com/knative/client/releases/download/v0.20.0/kn-darwin-amd64",
+          "cmdFileName": "kn-darwin-amd64",
+          "dlFileName": "kn-darwin-amd64"
+        },
+        "lnx": {
+          "url": "https://github.com/knative/client/releases/download/v0.20.0/kn-linux-amd64",
+          "cmdFileName": "kn-linux-amd64",
+          "dlFileName": "kn-linux-amd64"
+        }
+      }
+    }
+  }
+}
