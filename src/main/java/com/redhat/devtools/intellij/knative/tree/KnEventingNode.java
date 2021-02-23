@@ -10,8 +10,8 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.tree;
 
-public class KnativeServingNode extends ParentableNode<KnativeRootNode> {
-    protected KnativeServingNode(KnativeRootNode rootNode, KnativeRootNode parent) {
-        super(rootNode, parent, "Serving");
+public class KnEventingNode extends ParentableNode<KnRootNode> {
+    protected KnEventingNode(KnRootNode rootNode, KnRootNode parent) {
+        super(rootNode, parent, "Eventing");
     }
 }

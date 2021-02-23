@@ -38,21 +38,21 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class KnativeTreeStructure extends AbstractTreeStructure implements MutableModel<Object>, ConfigWatcher.Listener {
+public class KnTreeStructure extends AbstractTreeStructure implements MutableModel<Object>, ConfigWatcher.Listener {
 
-    private static final Icon CLUSTER_ICON = IconLoader.findIcon("/images/knative-logo.svg", KnativeTreeStructure.class);
+    private static final Icon CLUSTER_ICON = IconLoader.findIcon("/images/knative-logo.svg", KnTreeStructure.class);
     private static final Icon SERVICE_ICON = IconLoader.findIcon("/images/service.svg");
     private static final Icon REVISION_ICON = IconLoader.findIcon("/images/revision.svg");
 
     private final Project project;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private Config config;
-    private KnativeRootNode root;
-    private MutableModel<Object> mutableModelSupport = new MutableModelSupport<>();
+    private final KnRootNode root;
+    private final MutableModel<Object> mutableModelSupport = new MutableModelSupport<>();
 
-    public KnativeTreeStructure(Project project) {
+    public KnTreeStructure(Project project) {
         this.project = project;
-        this.root = new KnativeRootNode(project);
+        this.root = new KnRootNode(project);
         this.config = loadConfig();
         initConfigWatcher();
     }
@@ -77,18 +77,18 @@ public class KnativeTreeStructure extends AbstractTreeStructure implements Mutab
     public @NotNull Object[] getChildElements(@NotNull Object element) {
         Kn kn = root.getKn();
         if (kn != null) {
-            if (element instanceof KnativeRootNode) {
+            if (element instanceof KnRootNode) {
                 Object[] result = new Object[2];
                 try {
                     if (kn.isKnativeServingAware()) {
-                        result = ArrayUtil.append(result, new KnativeServingNode(root, root));
+                        result = ArrayUtil.append(result, new KnServingNode(root, root));
                     }
                 } catch (IOException e) {
                     // ignore
                 }
                 try {
                     if (kn.isKnativeEventingAware()) {
-                        result = ArrayUtil.append(result, new KnativeEventingNode(root, root));
+                        result = ArrayUtil.append(result, new KnEventingNode(root, root));
                     }
                 } catch (IOException e) {
                     // ignore
@@ -97,8 +97,8 @@ public class KnativeTreeStructure extends AbstractTreeStructure implements Mutab
                 return result;
             }
 
-            if (element instanceof KnativeServingNode) {
-                return getSeveringNodes((KnativeServingNode) element);
+            if (element instanceof KnServingNode) {
+                return getServiceNodes((KnServingNode) element);
             }
 
             if (element instanceof KnServiceNode) {
@@ -120,7 +120,7 @@ public class KnativeTreeStructure extends AbstractTreeStructure implements Mutab
         return new Object[0];
     }
 
-    private Object[] getSeveringNodes(KnativeServingNode element) {
+    private Object[] getServiceNodes(KnServingNode element) {
         Kn kn = element.getRootNode().getKn();
         try {
             List<Service> servicesList = kn.getServicesList();
@@ -134,27 +134,27 @@ public class KnativeTreeStructure extends AbstractTreeStructure implements Mutab
     @Override
     public @Nullable Object getParentElement(@NotNull Object element) {
         if (element instanceof ParentableNode) {
-            return ((ParentableNode) element).getParent();
+            return ((ParentableNode<?>) element).getParent();
         }
         return null;
     }
 
     @Override
-    public @NotNull NodeDescriptor createDescriptor(@NotNull Object element, @Nullable NodeDescriptor parentDescriptor) {
-        if (element instanceof KnativeRootNode) {
-            Kn kn = ((KnativeRootNode) element).getKn();
-            return new LabelAndIconDescriptor(project, element, kn != null ? kn.getNamespace() : "Loading", CLUSTER_ICON, parentDescriptor);
+    public @NotNull NodeDescriptor<?> createDescriptor(@NotNull Object element, @Nullable NodeDescriptor parentDescriptor) {
+        if (element instanceof KnRootNode) {
+            Kn kn = ((KnRootNode) element).getKn();
+            return new LabelAndIconDescriptor<>(project, element, kn != null ? kn.getNamespace() : "Loading", CLUSTER_ICON, parentDescriptor);
         }
 
-        if (element instanceof KnativeServingNode) {
-            return new LabelAndIconDescriptor(project, element, ((KnativeServingNode) element).getName(), AllIcons.Nodes.Package, parentDescriptor);
+        if (element instanceof KnServingNode) {
+            return new LabelAndIconDescriptor<>(project, element, ((KnServingNode) element).getName(), AllIcons.Nodes.Package, parentDescriptor);
         }
-        if (element instanceof KnativeEventingNode) {
-            return new LabelAndIconDescriptor(project, element, ((KnativeEventingNode) element).getName(), AllIcons.Nodes.Package, parentDescriptor);
+        if (element instanceof KnEventingNode) {
+            return new LabelAndIconDescriptor<>(project, element, ((KnEventingNode) element).getName(), AllIcons.Nodes.Package, parentDescriptor);
         }
 
         if (element instanceof KnServiceNode) {
-            return new LabelAndIconDescriptor(project, element, ((KnServiceNode) element).getName(), SERVICE_ICON, parentDescriptor);
+            return new LabelAndIconDescriptor<>(project, element, ((KnServiceNode) element).getName(), SERVICE_ICON, parentDescriptor);
         }
 
         if (element instanceof KnRevisionNode) {

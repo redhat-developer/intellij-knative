@@ -13,8 +13,10 @@ package com.redhat.devtools.intellij.knative.kn;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ServiceDeserializer extends StdNodeBasedDeserializer<Service> {
@@ -27,13 +29,16 @@ public class ServiceDeserializer extends StdNodeBasedDeserializer<Service> {
     public Service convert(JsonNode root, DeserializationContext deserializationContext) {
         String name = root.get("metadata").get("name").asText();
         JsonNode jsonStatus = root.get("status");
-
         ServiceStatus status = convertToStatus(jsonStatus);
 
         return new Service(name, status);
     }
 
+    @Nullable
     private ServiceStatus convertToStatus(JsonNode statusNode) {
+        if (statusNode == null) {
+            return null;
+        }
         String url = statusNode.get("url").asText();
         int observedGeneration = statusNode.get("observedGeneration").asInt();
         String latestReadyRevisionName = statusNode.get("latestReadyRevisionName").asText();
@@ -48,16 +53,16 @@ public class ServiceDeserializer extends StdNodeBasedDeserializer<Service> {
 
     private List<ServiceTraffic> convertToTraffic(JsonNode trafficNode) {
         if (trafficNode == null || !trafficNode.isArray()) {
-            return null;
+            return Collections.emptyList();
         }
         List<ServiceTraffic> traffic = new ArrayList<>();
         for (JsonNode jsonNode : trafficNode) {
-            String tag = jsonNode.get("tag") != null ? jsonNode.get("tag").asText() : null;
-            String revisionName = jsonNode.get("revisionName") != null ? jsonNode.get("revisionName").asText() : null;
-            String configurationName = jsonNode.get("configurationName") != null ? jsonNode.get("configurationName").asText() : null;
-            String latestRevision = jsonNode.get("latestRevision") != null ? jsonNode.get("latestRevision").asText() : null;
+            String tag = jsonNode.get("tag") != null ? jsonNode.get("tag").asText() : "";
+            String revisionName = jsonNode.get("revisionName") != null ? jsonNode.get("revisionName").asText() : "";
+            String configurationName = jsonNode.get("configurationName") != null ? jsonNode.get("configurationName").asText() : "";
+            String latestRevision = jsonNode.get("latestRevision") != null ? jsonNode.get("latestRevision").asText() : "";
             int percent = jsonNode.get("percent") != null ? jsonNode.get("percent").intValue() : -1;
-            String url = jsonNode.get("url") != null ? jsonNode.get("url").asText() : null;
+            String url = jsonNode.get("url") != null ? jsonNode.get("url").asText() : "";
 
             traffic.add(new ServiceTraffic(tag, revisionName, configurationName, latestRevision, percent, url));
         }
@@ -67,7 +72,7 @@ public class ServiceDeserializer extends StdNodeBasedDeserializer<Service> {
 
     private List<ServiceCondition> convertToConditions(JsonNode conditionsNode) {
         if (conditionsNode == null || !conditionsNode.isArray()) {
-            return null;
+            return Collections.emptyList();
         }
 
         List<ServiceCondition> result = new ArrayList<>();

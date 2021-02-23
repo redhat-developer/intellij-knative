@@ -11,33 +11,16 @@
 package com.redhat.devtools.intellij.knative.tree;
 
 import com.redhat.devtools.intellij.knative.kn.Service;
-import com.redhat.devtools.intellij.knative.kn.ServiceTraffic;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-
-public class KnServiceNode extends ParentableNode<KnativeServingNode> {
+public class KnServiceNode extends ParentableNode<KnServingNode> {
     private final Service service;
 
-    public KnServiceNode(KnativeRootNode rootNode, KnativeServingNode parent, Service service) {
+    public KnServiceNode(KnRootNode rootNode, KnServingNode parent, Service service) {
         super(rootNode, parent, service.getName());
         this.service = service;
     }
 
     public Service getService() {
         return service;
-    }
-
-    @Nullable
-    public ServiceTraffic findTrafficForRevision(String revisionName) {
-        List<ServiceTraffic> traffic = service.getStatus().getTraffic();
-        if (traffic != null) {
-            for (ServiceTraffic serviceTraffic : traffic) {
-                if (serviceTraffic.getRevisionName().equals(revisionName)) {
-                    return serviceTraffic;
-                }
-            }
-        }
-        return null;
     }
 }

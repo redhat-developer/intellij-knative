@@ -11,17 +11,17 @@
 package com.redhat.devtools.intellij.knative.tree;
 
 public abstract class ParentableNode<T> {
-    private final KnativeRootNode rootNode;
+    private final KnRootNode rootNode;
     private final T parent;
     private final String name;
 
-    protected ParentableNode(KnativeRootNode rootNode, T parent, String name) {
+    protected ParentableNode(KnRootNode rootNode, T parent, String name) {
         this.rootNode = rootNode;
         this.parent = parent;
         this.name = name;
     }
 
-    public KnativeRootNode getRootNode() {
+    public KnRootNode getRootNode() {
         return rootNode;
     }
 

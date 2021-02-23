@@ -13,6 +13,7 @@ package com.redhat.devtools.intellij.knative.kn;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
 import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.NetworkUtils;
@@ -28,12 +29,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class KnCli implements Kn{
+public class KnCli implements Kn {
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper(new JsonFactory());
-
-    private String command;
     private final Project project;
     private final KubernetesClient client;
+    private final String command;
     private Map<String, String> envVars;
 
     public KnCli(Project project, String command) {
@@ -50,7 +50,7 @@ public class KnCli implements Kn{
     @Override
     public boolean isKnativeServingAware() throws IOException {
         try {
-            return client.rootPaths().getPaths().stream().filter(path -> path.endsWith("serving.knative.dev")).findFirst().isPresent();
+            return client.rootPaths().getPaths().stream().anyMatch(path -> path.endsWith("serving.knative.dev"));
         } catch (KubernetesClientException e) {
             throw new IOException(e);
         }
@@ -59,7 +59,7 @@ public class KnCli implements Kn{
     @Override
     public boolean isKnativeEventingAware() throws IOException {
         try {
-            return client.rootPaths().getPaths().stream().filter(path -> path.endsWith("eventing.knative.dev")).findFirst().isPresent();
+            return client.rootPaths().getPaths().stream().anyMatch(path -> path.endsWith("eventing.knative.dev"));
         } catch (KubernetesClientException e) {
             throw new IOException(e);
         }
@@ -72,7 +72,11 @@ public class KnCli implements Kn{
 
     @Override
     public String getNamespace() {
-        return client.getNamespace();
+        String namespace = client.getNamespace();
+        if (Strings.isNullOrEmpty(namespace)) {
+            namespace = "default";
+        }
+        return namespace;
     }
 
     @Override

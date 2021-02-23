@@ -15,7 +15,7 @@ import com.redhat.devtools.intellij.knative.kn.Revision;
 public class KnRevisionNode extends ParentableNode<KnServiceNode> {
     private final Revision revision;
 
-    protected KnRevisionNode(KnativeRootNode rootNode, KnServiceNode parent, Revision revision) {
+    protected KnRevisionNode(KnRootNode rootNode, KnServiceNode parent, Revision revision) {
         super(rootNode, parent, revision.getName());
         this.revision = revision;
     }

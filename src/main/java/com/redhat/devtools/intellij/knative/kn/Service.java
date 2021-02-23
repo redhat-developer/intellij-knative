@@ -11,14 +11,16 @@
 package com.redhat.devtools.intellij.knative.kn;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.jetbrains.annotations.Nullable;
 
 @JsonDeserialize(using = ServiceDeserializer.class)
 public class Service {
 
-    private String name;
-    private ServiceStatus status;
+    private final String name;
+    @Nullable
+    private final ServiceStatus status;
 
-    public Service(String name, ServiceStatus status) {
+    public Service(String name, @Nullable ServiceStatus status) {
         this.name = name;
         this.status = status;
     }
@@ -27,6 +29,7 @@ public class Service {
         return name;
     }
 
+    @Nullable
     public ServiceStatus getStatus() {
         return status;
     }

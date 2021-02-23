@@ -10,23 +10,19 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.kn;
 
-import org.jetbrains.annotations.Nullable;
-
 import java.util.List;
 
 public class ServiceStatus {
 
-    private String url;
-    private int observedGeneration;
-    private String latestReadyRevisionName;
-    private String latestCreatedRevisionName;
-    private String addressUrl;
-    @Nullable
-    private List<ServiceTraffic> traffic;
-    @Nullable
-    private List<ServiceCondition> conditions;
+    private final String url;
+    private final int observedGeneration;
+    private final String latestReadyRevisionName;
+    private final String latestCreatedRevisionName;
+    private final String addressUrl;
+    private final List<ServiceTraffic> traffic;
+    private final List<ServiceCondition> conditions;
 
-    public ServiceStatus(String url, int observedGeneration, String latestReadyRevisionName, String latestCreatedRevisionName, String addressUrl, @Nullable List<ServiceTraffic> traffic, @Nullable List<ServiceCondition> conditions) {
+    public ServiceStatus(String url, int observedGeneration, String latestReadyRevisionName, String latestCreatedRevisionName, String addressUrl, List<ServiceTraffic> traffic, List<ServiceCondition> conditions) {
         this.url = url;
         this.observedGeneration = observedGeneration;
         this.latestReadyRevisionName = latestReadyRevisionName;
