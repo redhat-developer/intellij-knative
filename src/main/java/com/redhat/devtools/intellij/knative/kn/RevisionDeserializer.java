@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 
 import java.io.IOException;
+import java.util.List;
 
 public class RevisionDeserializer extends StdNodeBasedDeserializer<Revision> {
     protected RevisionDeserializer() {
@@ -24,6 +25,7 @@ public class RevisionDeserializer extends StdNodeBasedDeserializer<Revision> {
     @Override
     public Revision convert(JsonNode root, DeserializationContext deserializationContext) throws IOException {
         String name = root.get("metadata").get("name").asText();
-        return new Revision(name);
+        List<StatusCondition> conditions = DeserializerUtil.getConvertToConditions(root.get("status").get("conditions"));
+        return new Revision(name, conditions);
     }
 }

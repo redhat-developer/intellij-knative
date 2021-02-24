@@ -14,11 +14,11 @@ public class ServiceTraffic {
     private final String tag;
     private final String revisionName;
     private final String configurationName;
-    private final String latestRevision;
+    private final boolean latestRevision;
     private final int percent;
     private final String url;
 
-    public ServiceTraffic(String tag, String revisionName, String configurationName, String latestRevision, int percent, String url) {
+    public ServiceTraffic(String tag, String revisionName, String configurationName, boolean latestRevision, int percent, String url) {
         this.tag = tag;
         this.revisionName = revisionName;
         this.configurationName = configurationName;
@@ -39,7 +39,7 @@ public class ServiceTraffic {
         return configurationName;
     }
 
-    public String getLatestRevision() {
+    public boolean getLatestRevision() {
         return latestRevision;
     }
 

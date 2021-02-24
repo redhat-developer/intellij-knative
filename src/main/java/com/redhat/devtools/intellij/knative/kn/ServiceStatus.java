@@ -20,9 +20,9 @@ public class ServiceStatus {
     private final String latestCreatedRevisionName;
     private final String addressUrl;
     private final List<ServiceTraffic> traffic;
-    private final List<ServiceCondition> conditions;
+    private final List<StatusCondition> conditions;
 
-    public ServiceStatus(String url, int observedGeneration, String latestReadyRevisionName, String latestCreatedRevisionName, String addressUrl, List<ServiceTraffic> traffic, List<ServiceCondition> conditions) {
+    public ServiceStatus(String url, int observedGeneration, String latestReadyRevisionName, String latestCreatedRevisionName, String addressUrl, List<ServiceTraffic> traffic, List<StatusCondition> conditions) {
         this.url = url;
         this.observedGeneration = observedGeneration;
         this.latestReadyRevisionName = latestReadyRevisionName;
@@ -56,7 +56,7 @@ public class ServiceStatus {
         return traffic;
     }
 
-    public List<ServiceCondition> getConditions() {
+    public List<StatusCondition> getConditions() {
         return conditions;
     }
 }

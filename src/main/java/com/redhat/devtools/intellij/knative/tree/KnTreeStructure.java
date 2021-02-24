@@ -154,7 +154,7 @@ public class KnTreeStructure extends AbstractTreeStructure implements MutableMod
         }
 
         if (element instanceof KnServiceNode) {
-            return new LabelAndIconDescriptor<>(project, element, ((KnServiceNode) element).getName(), SERVICE_ICON, parentDescriptor);
+            return new KnServiceDescriptor(project, (KnServiceNode) element, SERVICE_ICON, parentDescriptor);
         }
 
         if (element instanceof KnRevisionNode) {

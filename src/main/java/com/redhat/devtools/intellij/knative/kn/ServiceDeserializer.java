@@ -41,12 +41,16 @@ public class ServiceDeserializer extends StdNodeBasedDeserializer<Service> {
         }
         String url = statusNode.get("url").asText();
         int observedGeneration = statusNode.get("observedGeneration").asInt();
-        String latestReadyRevisionName = statusNode.get("latestReadyRevisionName").asText();
-        String latestCreatedRevisionName = statusNode.get("latestCreatedRevisionName").asText();
-        String addressUrl = statusNode.get("address").get("url").asText();
+        String latestReadyRevisionName = statusNode.get("latestReadyRevisionName") != null ? statusNode.get("latestReadyRevisionName").asText() : "";
+        String latestCreatedRevisionName = statusNode.get("latestCreatedRevisionName") != null ? statusNode.get("latestCreatedRevisionName").asText() : "";
+
+        String addressUrl = "";
+        if (statusNode.get("address") != null && statusNode.get("address").get("url") != null) {
+            addressUrl = statusNode.get("address").get("url").asText();
+        }
 
         List<ServiceTraffic> traffic = convertToTraffic(statusNode.get("traffic"));
-        List<ServiceCondition> conditions = convertToConditions(statusNode.get("conditions"));
+        List<StatusCondition> conditions = DeserializerUtil.getConvertToConditions(statusNode.get("conditions"));
 
         return new ServiceStatus(url, observedGeneration, latestReadyRevisionName, latestCreatedRevisionName, addressUrl, traffic, conditions);
     }
@@ -60,7 +64,7 @@ public class ServiceDeserializer extends StdNodeBasedDeserializer<Service> {
             String tag = jsonNode.get("tag") != null ? jsonNode.get("tag").asText() : "";
             String revisionName = jsonNode.get("revisionName") != null ? jsonNode.get("revisionName").asText() : "";
             String configurationName = jsonNode.get("configurationName") != null ? jsonNode.get("configurationName").asText() : "";
-            String latestRevision = jsonNode.get("latestRevision") != null ? jsonNode.get("latestRevision").asText() : "";
+            boolean latestRevision = jsonNode.get("latestRevision") != null && jsonNode.get("latestRevision").asBoolean();
             int percent = jsonNode.get("percent") != null ? jsonNode.get("percent").intValue() : -1;
             String url = jsonNode.get("url") != null ? jsonNode.get("url").asText() : "";
 
@@ -70,19 +74,4 @@ public class ServiceDeserializer extends StdNodeBasedDeserializer<Service> {
         return traffic;
     }
 
-    private List<ServiceCondition> convertToConditions(JsonNode conditionsNode) {
-        if (conditionsNode == null || !conditionsNode.isArray()) {
-            return Collections.emptyList();
-        }
-
-        List<ServiceCondition> result = new ArrayList<>();
-        for (JsonNode jsonNode : conditionsNode) {
-            String lastTransitionTime = jsonNode.get("lastTransitionTime").asText();
-            String status = jsonNode.get("status").asText();
-            String type = jsonNode.get("type").asText();
-            result.add(new ServiceCondition(lastTransitionTime, status, type));
-        }
-
-        return result;
-    }
 }

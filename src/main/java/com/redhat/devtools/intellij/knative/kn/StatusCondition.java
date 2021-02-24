@@ -10,15 +10,27 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.kn;
 
-public class ServiceCondition {
-    private String lastTransitionTime;
-    private String status;
-    private String type;
+import org.jetbrains.annotations.Nullable;
 
-    public ServiceCondition(String lastTransitionTime, String status, String type) {
+public class StatusCondition {
+    private final String lastTransitionTime;
+    private final String status;
+    private final String type;
+    @Nullable
+    private final String reason;
+    @Nullable
+    private final String message;
+
+    public StatusCondition(String lastTransitionTime, String status, String type) {
+        this(lastTransitionTime, status, type, null, null);
+    }
+
+    public StatusCondition(String lastTransitionTime, String status, String type, @Nullable String reason, @Nullable String message) {
         this.lastTransitionTime = lastTransitionTime;
         this.status = status;
         this.type = type;
+        this.reason = reason;
+        this.message = message;
     }
 
     public String getLastTransitionTime() {
@@ -31,5 +43,15 @@ public class ServiceCondition {
 
     public String getType() {
         return type;
+    }
+
+    @Nullable
+    public String getReason() {
+        return reason;
+    }
+
+    @Nullable
+    public String getMessage() {
+        return message;
     }
 }
