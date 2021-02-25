@@ -22,10 +22,11 @@ import com.intellij.ui.tree.AsyncTreeModel;
 import com.intellij.ui.tree.StructureTreeModel;
 import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.common.tree.MutableModelSynchronizer;
-import com.redhat.devtools.intellij.knative.tree.KnativeTreeStructure;
+import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import org.jetbrains.annotations.NotNull;
 
 public class WindowToolFactory implements ToolWindowFactory {
     @Override
@@ -33,8 +34,8 @@ public class WindowToolFactory implements ToolWindowFactory {
         try {
             ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
 
-            KnativeTreeStructure structure = new KnativeTreeStructure(project);
-            StructureTreeModel<KnativeTreeStructure> model = buildModel(structure, project);
+            KnTreeStructure structure = new KnTreeStructure(project);
+            StructureTreeModel<KnTreeStructure> model = buildModel(structure, project);
             new MutableModelSynchronizer<>(model, structure, structure);
             Tree tree = new Tree(new AsyncTreeModel(model, project));
             tree.setCellRenderer(new NodeRenderer());
@@ -56,12 +57,12 @@ public class WindowToolFactory implements ToolWindowFactory {
      * @throws InstantiationException
      * @throws NoSuchMethodException
      */
-    private StructureTreeModel buildModel(KnativeTreeStructure structure, Project project) throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
+    private StructureTreeModel buildModel(KnTreeStructure structure, Project project) throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
         try {
-            Constructor<StructureTreeModel> constructor = StructureTreeModel.class.getConstructor(new Class[] {AbstractTreeStructure.class});
+            Constructor<StructureTreeModel> constructor = StructureTreeModel.class.getConstructor(new Class[]{AbstractTreeStructure.class});
             return constructor.newInstance(structure);
         } catch (NoSuchMethodException e) {
-            Constructor<StructureTreeModel> constructor = StructureTreeModel.class.getConstructor(new Class[] {AbstractTreeStructure.class, Disposable.class});
+            Constructor<StructureTreeModel> constructor = StructureTreeModel.class.getConstructor(new Class[]{AbstractTreeStructure.class, Disposable.class});
             return constructor.newInstance(structure, project);
         }
     }

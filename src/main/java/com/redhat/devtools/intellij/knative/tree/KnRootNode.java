@@ -13,13 +13,14 @@ package com.redhat.devtools.intellij.knative.tree;
 import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.kn.KnCliFactory;
+
 import java.util.concurrent.CompletableFuture;
 
-public class KnativeRootNode {
+public class KnRootNode {
     private final Project project;
     private Kn kn;
 
-    public KnativeRootNode(Project project) {
+    public KnRootNode(Project project) {
         this.project = project;
     }
 
