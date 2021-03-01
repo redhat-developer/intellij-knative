@@ -41,7 +41,8 @@ public interface Kn {
     /**
      * Fetch the Service data
      *
-     * @return
+     * @return list of services
+     * @throws IOException if communication encountered an error
      */
     List<Service> getServicesList() throws IOException;
 
@@ -49,6 +50,17 @@ public interface Kn {
      * Return the list of all Knative Revisions for service
      *
      * @param serviceName the Knative service name
+     * @return list of revision belonging to service
+     * @throws IOException if communication encountered an error
      */
     List<Revision> getRevisionsForService(String serviceName) throws IOException;
+
+    /**
+     * Get the Service component as YAML
+     *
+     * @param name name of service
+     * @return service component as YAML
+     * @throws IOException if communication encountered an error
+     */
+    String getServiceYAML(String name) throws IOException;
 }

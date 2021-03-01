@@ -91,6 +91,11 @@ public class KnCli implements Kn {
         return getCustomCollection(json, Revision.class);
     }
 
+    @Override
+    public String getServiceYAML(String name) throws IOException {
+        return ExecHelper.execute(command, envVars, "service", "describe", name, "-o", "yaml", "-n", getNamespace());
+    }
+
     private <T> List<T> getCustomCollection(String json, Class<T> customClass) throws IOException {
         if (!JSON_MAPPER.readTree(json).has("items")) return Collections.emptyList();
         if (JSON_MAPPER.readTree(json).get("items").isNull()) return Collections.emptyList();

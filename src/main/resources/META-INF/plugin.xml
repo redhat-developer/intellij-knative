@@ -23,6 +23,8 @@
     </extensions>
 
     <actions>
-        <!-- Add your actions here -->
+        <group id="com.redhat.devtools.intellij.knative.tree" popup="true">
+            <action class="com.redhat.devtools.intellij.knative.actions.OpenInEditorAction" text="Open in Editor"/>
+        </group>
     </actions>
 </idea-plugin>
