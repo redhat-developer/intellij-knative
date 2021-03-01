@@ -30,13 +30,13 @@ public class KnAction  extends StructureTreeAction {
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
         try {
-            this.actionPerformed(anActionEvent, path, selected, getTkn(anActionEvent));
+            this.actionPerformed(anActionEvent, path, selected, getKn(anActionEvent));
         } catch (IOException e) {
             Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Error");
         }
     }
 
-    private Kn getTkn(AnActionEvent anActionEvent) throws IOException {
+    private Kn getKn(AnActionEvent anActionEvent) throws IOException {
         Tree tree = getTree(anActionEvent);
         return ((KnRootNode)((KnTreeStructure)tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).getRootElement()).getKn();
     }
