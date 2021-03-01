@@ -217,7 +217,8 @@ public class KnTreeStructure extends AbstractTreeStructure implements MutableMod
         return newContext == null
                 || currentContext == null
                 || !StringUtils.equals(currentContext.getContext().getCluster(), newContext.getContext().getCluster())
-                || !StringUtils.equals(currentContext.getContext().getUser(), newContext.getContext().getUser());
+                || !StringUtils.equals(currentContext.getContext().getUser(), newContext.getContext().getUser())
+                || !StringUtils.equals(currentContext.getContext().getNamespace(), newContext.getContext().getNamespace());
     }
 
     private boolean hasNewToken(NamedContext newContext, Config newConfig, NamedContext currentContext, Config currentConfig) {
@@ -238,8 +239,9 @@ public class KnTreeStructure extends AbstractTreeStructure implements MutableMod
 
     protected void refresh() {
         try {
-            root.load();
-            mutableModelSupport.fireModified(root);
+            root.load().whenComplete((kn, err) -> {
+                mutableModelSupport.fireModified(root);
+            });
         } catch (Exception e) {
         }
     }

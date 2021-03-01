@@ -32,9 +32,9 @@ public class KnRootNode {
         return kn;
     }
 
-    public void load() {
+    public CompletableFuture<Kn> load() {
         KnCliFactory.getInstance().resetKn();
-        initializeKn();
+        return initializeKn();
     }
 
     public Project getProject() {
