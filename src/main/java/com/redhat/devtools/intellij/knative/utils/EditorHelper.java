@@ -21,16 +21,23 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
+import com.redhat.devtools.intellij.common.actions.StructureTreeAction;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
+import javax.swing.tree.TreePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class EditorHelper {
     private static Logger logger = LoggerFactory.getLogger(EditorHelper.class);
+
+    public static void openKnComponentInEditor(TreePath path) {
+        ParentableNode node = StructureTreeAction.getElement(path.getLastPathComponent());
+        openKnComponentInEditor(node);
+    }
 
     public static void openKnComponentInEditor(ParentableNode node) {
         if (node == null) {

@@ -19,6 +19,7 @@ import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
+import com.intellij.ui.ClickListener;
 import com.intellij.ui.PopupHandler;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.ContentFactory;
@@ -26,8 +27,10 @@ import com.intellij.ui.tree.AsyncTreeModel;
 import com.intellij.ui.tree.StructureTreeModel;
 import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.common.tree.MutableModelSynchronizer;
+import com.redhat.devtools.intellij.knative.listener.TreeDoubleClickListener;
 import com.redhat.devtools.intellij.knative.listener.TreePopupMenuListener;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
+import java.awt.event.MouseEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
@@ -49,6 +52,7 @@ public class WindowToolFactory implements ToolWindowFactory {
             ActionGroup group = (ActionGroup)actionManager.getAction("com.redhat.devtools.intellij.knative.tree");
             PopupHandler.installPopupHandler(tree, group, ActionPlaces.UNKNOWN, actionManager, new TreePopupMenuListener());
             toolWindow.getContentManager().addContent(contentFactory.createContent(new JBScrollPane(tree), "", false));
+            new TreeDoubleClickListener(tree);
         } catch (IllegalAccessException | InvocationTargetException | InstantiationException | NoSuchMethodException e) {
             throw new RuntimeException((e));
         }
