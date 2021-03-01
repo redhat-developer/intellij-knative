@@ -68,9 +68,9 @@ public class EditorHelper {
     }
 
     public static void updateVirtualFile(Document document, String newContent) {
-        /*if (document.getText().equalsIgnoreCase(newContent)) {
+        if (document.getText().equalsIgnoreCase(newContent)) {
             return;
-        }*/
+        }
         ApplicationManager.getApplication().runWriteAction(() -> {
             document.setReadOnly(false);
             document.setText(newContent);
