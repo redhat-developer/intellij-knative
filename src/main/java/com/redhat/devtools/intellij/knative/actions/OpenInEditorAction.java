@@ -12,6 +12,7 @@ package com.redhat.devtools.intellij.knative.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.redhat.devtools.intellij.knative.kn.Kn;
+import com.redhat.devtools.intellij.knative.tree.KnRevisionNode;
 import com.redhat.devtools.intellij.knative.tree.KnServiceNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import com.redhat.devtools.intellij.knative.utils.EditorHelper;
@@ -19,7 +20,7 @@ import javax.swing.tree.TreePath;
 
 public class OpenInEditorAction extends KnAction {
     public OpenInEditorAction() {
-        super(KnServiceNode.class);
+        super(KnServiceNode.class, KnRevisionNode.class);
     }
 
     @Override

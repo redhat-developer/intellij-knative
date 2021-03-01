@@ -40,9 +40,7 @@ public class EditorHelper {
     }
 
     public static void openKnComponentInEditor(ParentableNode node) {
-        if (node == null) {
-            return;
-        }
+        if (node == null) return;
 
         try {
             String yaml = KnHelper.getYamlFromNode(node);

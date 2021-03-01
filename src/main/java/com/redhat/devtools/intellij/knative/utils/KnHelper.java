@@ -11,6 +11,7 @@
 package com.redhat.devtools.intellij.knative.utils;
 
 import com.redhat.devtools.intellij.knative.kn.Kn;
+import com.redhat.devtools.intellij.knative.tree.KnRevisionNode;
 import com.redhat.devtools.intellij.knative.tree.KnServiceNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import java.io.IOException;
@@ -22,6 +23,8 @@ public class KnHelper {
         String content = "";
         if (node instanceof KnServiceNode) {
             content = knCli.getServiceYAML(node.getName());
+        } else if (node instanceof KnRevisionNode) {
+            content = knCli.getRevisionYAML(node.getName());
         }
         return content;
     }

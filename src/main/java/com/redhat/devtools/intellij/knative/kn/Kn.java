@@ -63,4 +63,13 @@ public interface Kn {
      * @throws IOException if communication encountered an error
      */
     String getServiceYAML(String name) throws IOException;
+
+    /**
+     * Get the Revision component as YAML
+     *
+     * @param name name of revision
+     * @return revision component as YAML
+     * @throws IOException if communication encountered an error
+     */
+    String getRevisionYAML(String name) throws IOException;
 }
