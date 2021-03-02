@@ -19,7 +19,6 @@ import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
-import com.intellij.ui.ClickListener;
 import com.intellij.ui.PopupHandler;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.ContentFactory;
@@ -30,11 +29,9 @@ import com.redhat.devtools.intellij.common.tree.MutableModelSynchronizer;
 import com.redhat.devtools.intellij.knative.listener.TreeDoubleClickListener;
 import com.redhat.devtools.intellij.knative.listener.TreePopupMenuListener;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
-import java.awt.event.MouseEvent;
-import org.jetbrains.annotations.NotNull;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import org.jetbrains.annotations.NotNull;
 
 public class WindowToolFactory implements ToolWindowFactory {
     @Override
