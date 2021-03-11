@@ -10,44 +10,40 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.kn;
 
-public interface KnConstants {
+public final class KnConstants {
     /**
      * Label
      */
-    String CONFIGURATION_GENERATION = "serving.knative.dev/configurationGeneration";
-
+    public static final String CONFIGURATION_GENERATION = "serving.knative.dev/configurationGeneration";
     /**
      * Label
      */
-    String CONFIGURATION = "serving.knative.dev/configuration";
-
+    public static final String CONFIGURATION = "serving.knative.dev/configuration";
     /**
      * Label
      */
-    String ROUTING_STATE = "serving.knative.dev/routingState";
-
+    public static final String ROUTING_STATE = "serving.knative.dev/routingState";
     /**
      * Label
      */
-    String SERVICE = "serving.knative.dev/service";
-
+    public static final String SERVICE = "serving.knative.dev/service";
     /**
      * Annotation
      */
-    String USER_IMAGE = "client.knative.dev/user-image";
-
+    public static final String USER_IMAGE = "client.knative.dev/user-image";
     /**
      * Annotation
      */
-    String CREATOR = "serving.knative.dev/creator";
-
+    public static final String CREATOR = "serving.knative.dev/creator";
     /**
      * Annotation
      */
-    String ROUTES = "serving.knative.dev/routes";
-
+    public static final String ROUTES = "serving.knative.dev/routes";
     /**
      * Annotation
      */
-    String ROUTING_STATE_MODIFIED = "serving.knative.dev/routingStateModified";
+    public static final String ROUTING_STATE_MODIFIED = "serving.knative.dev/routingStateModified";
+
+    private KnConstants() {
+    }
 }

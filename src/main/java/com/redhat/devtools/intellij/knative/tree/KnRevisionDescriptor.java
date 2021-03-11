@@ -20,6 +20,7 @@ import com.intellij.ui.SimpleTextAttributes;
 import com.redhat.devtools.intellij.knative.kn.ServiceStatus;
 import com.redhat.devtools.intellij.knative.kn.ServiceTraffic;
 import com.redhat.devtools.intellij.knative.kn.StatusCondition;
+import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -73,7 +74,7 @@ public class KnRevisionDescriptor extends PresentableNodeDescriptor<KnRevisionNo
             presentation.setTooltip("Revision: " + element.getName());
             presentation.addText(element.getName(), percent != 0 ? SimpleTextAttributes.REGULAR_ATTRIBUTES : WARNING_ATTRIBUTES);
         } else {
-            presentation.setTooltip(errorMessage.length() >= 100 ? errorMessage.substring(0, 100) + "..." : errorMessage);
+            presentation.setTooltip(TreeHelper.trimErrorMessage(errorMessage));
             presentation.addText(element.getName(), SimpleTextAttributes.ERROR_ATTRIBUTES);
         }
 
