@@ -31,6 +31,7 @@ public class KnServiceDescriptor extends PresentableNodeDescriptor<KnServiceNode
         super(project, parentDescriptor);
         this.element = element;
         this.nodeIcon = nodeIcon;
+        this.myName = element.getName();
     }
 
     @Override
