@@ -16,11 +16,12 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionPlaces;
+import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.PopupHandler;
-import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.tree.AsyncTreeModel;
 import com.intellij.ui.tree.StructureTreeModel;
@@ -29,9 +30,10 @@ import com.redhat.devtools.intellij.common.tree.MutableModelSynchronizer;
 import com.redhat.devtools.intellij.knative.listener.TreeDoubleClickListener;
 import com.redhat.devtools.intellij.knative.listener.TreePopupMenuListener;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import org.jetbrains.annotations.NotNull;
 
 public class WindowToolFactory implements ToolWindowFactory {
     @Override
@@ -46,9 +48,18 @@ public class WindowToolFactory implements ToolWindowFactory {
             tree.putClientProperty(Constants.STRUCTURE_PROPERTY, structure);
             tree.setCellRenderer(new NodeRenderer());
             ActionManager actionManager = ActionManager.getInstance();
-            ActionGroup group = (ActionGroup)actionManager.getAction("com.redhat.devtools.intellij.knative.tree");
+            ActionGroup group = (ActionGroup) actionManager.getAction("com.redhat.devtools.intellij.knative.tree");
             PopupHandler.installPopupHandler(tree, group, ActionPlaces.UNKNOWN, actionManager, new TreePopupMenuListener());
-            toolWindow.getContentManager().addContent(contentFactory.createContent(new JBScrollPane(tree), "", false));
+            SimpleToolWindowPanel panel = new SimpleToolWindowPanel(true, true);
+            panel.setContent(tree);
+
+            if (actionManager.isGroup("Knative.View.ActionsToolbar")) {
+                ActionToolbar actionToolbar = actionManager.createActionToolbar(Constants.TOOLBAR_PLACE, (ActionGroup) actionManager.getAction("Knative.View.ActionsToolbar"), true);
+                panel.setToolbar(actionToolbar.getComponent());
+            }
+
+            toolWindow.getContentManager().addContent(contentFactory.createContent(panel, "", false));
+
             new TreeDoubleClickListener(tree);
         } catch (IllegalAccessException | InvocationTargetException | InstantiationException | NoSuchMethodException e) {
             throw new RuntimeException((e));
