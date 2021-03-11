@@ -28,10 +28,12 @@ import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.common.tree.MutableModelSynchronizer;
 import com.redhat.devtools.intellij.knative.listener.TreeDoubleClickListener;
 import com.redhat.devtools.intellij.knative.listener.TreePopupMenuListener;
+import com.redhat.devtools.intellij.knative.tree.KnNodeComparator;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import org.jetbrains.annotations.NotNull;
 
 public class WindowToolFactory implements ToolWindowFactory {
     @Override
@@ -41,6 +43,7 @@ public class WindowToolFactory implements ToolWindowFactory {
 
             KnTreeStructure structure = new KnTreeStructure(project);
             StructureTreeModel<KnTreeStructure> model = buildModel(structure, project);
+            model.setComparator(new KnNodeComparator<>());
             new MutableModelSynchronizer<>(model, structure, structure);
             Tree tree = new Tree(new AsyncTreeModel(model, project));
             tree.putClientProperty(Constants.STRUCTURE_PROPERTY, structure);

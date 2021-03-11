@@ -14,7 +14,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class DeserializerUtil {
 
@@ -42,6 +45,18 @@ public class DeserializerUtil {
             result.add(new StatusCondition(lastTransitionTime, status, type, reason, message));
         }
 
+        return result;
+    }
+
+    public static Map<String, String> getStringMap(JsonNode jsonNode) {
+        if (jsonNode == null || !jsonNode.isObject()) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> result = new HashMap<>();
+        for (Iterator<Map.Entry<String, JsonNode>> it = jsonNode.fields(); it.hasNext(); ) {
+            Map.Entry<String, JsonNode> entry = it.next();
+            result.put(entry.getKey(), entry.getValue().textValue());
+        }
         return result;
     }
 }
