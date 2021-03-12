@@ -22,6 +22,7 @@ import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.PopupHandler;
+import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.tree.AsyncTreeModel;
 import com.intellij.ui.tree.StructureTreeModel;
@@ -51,7 +52,7 @@ public class WindowToolFactory implements ToolWindowFactory {
             ActionGroup group = (ActionGroup) actionManager.getAction("com.redhat.devtools.intellij.knative.tree");
             PopupHandler.installPopupHandler(tree, group, ActionPlaces.UNKNOWN, actionManager, new TreePopupMenuListener());
             SimpleToolWindowPanel panel = new SimpleToolWindowPanel(true, true);
-            panel.setContent(tree);
+            panel.setContent(new JBScrollPane(tree));
 
             if (actionManager.isGroup("com.redhat.devtools.intellij.knativev.view.actionsToolbar")) {
                 ActionToolbar actionToolbar = actionManager.createActionToolbar(Constants.TOOLBAR_PLACE, (ActionGroup) actionManager.getAction("com.redhat.devtools.intellij.knativev.view.actionsToolbar"), true);
