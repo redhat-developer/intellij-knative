@@ -11,7 +11,6 @@
 package com.redhat.devtools.intellij.knative.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.common.actions.StructureTreeAction;
 import com.redhat.devtools.intellij.knative.Constants;
@@ -31,18 +30,33 @@ public class RefreshAction extends StructureTreeAction {
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
-        selected = StructureTreeAction.getElement(selected);
-        KnTreeStructure structure = (KnTreeStructure) getTree(anActionEvent).getClientProperty(Constants.STRUCTURE_PROPERTY);
-        structure.fireModified(selected);
+        Tree tree = getTree(anActionEvent);
+        if (tree == null) {
+            return;
+        }
+        KnTreeStructure structure = (KnTreeStructure) tree.getClientProperty(Constants.STRUCTURE_PROPERTY);
+        if (Constants.TOOLBAR_PLACE.equals(anActionEvent.getPlace())) {
+            structure.fireModified(structure.getRootElement());
+        } else {
+            selected = StructureTreeAction.getElement(selected);
+            structure.fireModified(selected);
+        }
+
     }
 
     @Override
     public void update(AnActionEvent e) {
-        if (!(e.getData(PlatformDataKeys.CONTEXT_COMPONENT) instanceof Tree)) {
-            e.getPresentation().setEnabled(false);
-        } else {
-            e.getPresentation().setEnabled(true);
-            super.update(e);
+        if (Constants.TOOLBAR_PLACE.equals(e.getPlace())) {
+            e.getPresentation().setVisible(true);
+            Tree t = getTree(e);
+            if (t != null) {
+                Object structure = t.getClientProperty(Constants.STRUCTURE_PROPERTY);
+                e.getPresentation().setEnabled(structure instanceof KnTreeStructure);
+            } else {
+                e.getPresentation().setEnabled(false);
+            }
+            return;
         }
+        super.update(e);
     }
 }
