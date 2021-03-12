@@ -8,11 +8,15 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative;
+package com.redhat.devtools.intellij.knative.ui;
 
-public class Constants {
-    public static final String STRUCTURE_PROPERTY = Constants.class.getPackage().getName() + ".structure";
-    public static final String TOOLBAR_PLACE = Constants.class.getPackage().getName() + ".view.toolbar";
+import java.awt.Dimension;
+import java.awt.Font;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 
-    public static final String KIND_SERVICE = "service";
+public class UIConstants {
+    public static final Border BORDER_LABEL_NAME = new EmptyBorder(10, 0, 0, 0);
+    public static final Font TIMES_PLAIN_14 = new Font(Font.DIALOG, Font.PLAIN, Font.PLAIN);
+    public static final Dimension ROW_DIMENSION = new Dimension(400, 33);
 }

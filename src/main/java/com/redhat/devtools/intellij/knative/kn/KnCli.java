@@ -21,6 +21,8 @@ import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+
+import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -123,6 +125,11 @@ public class KnCli implements Kn {
         args.addAll(resourcesToDelete);
         args.addAll(Arrays.asList("-n", getNamespace()));
         return args.toArray(new String[0]);
+    }
+
+    @Override
+    public void createCustomResource(CustomResourceDefinitionContext crdContext, String objectAsString) throws IOException {
+        client.customResource(crdContext).create(getNamespace(), objectAsString);
     }
 
     private <T> List<T> getCustomCollection(String json, Class<T> customClass) throws IOException {

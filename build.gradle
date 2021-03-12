@@ -19,7 +19,7 @@ repositories {
 intellij {
     version ideaVersion
     pluginName 'Knative by Red Hat'
-    plugins 'terminal'
+    plugins 'terminal', 'yaml'
     updateSinceUntilBuild false
 }
 

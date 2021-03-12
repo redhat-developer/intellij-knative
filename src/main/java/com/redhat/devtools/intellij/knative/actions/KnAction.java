@@ -57,7 +57,7 @@ public class KnAction  extends StructureTreeAction {
         return ((KnRootNode)((KnTreeStructure)tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).getRootElement()).getKn();
     }
 
-    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Kn tkn) {}
+    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Kn kn) {}
 
     public void actionPerformed(AnActionEvent anActionEvent, TreePath[] path, Object[] selected, Kn kn) {
         actionPerformed(anActionEvent, path[0], selected[0], kn);

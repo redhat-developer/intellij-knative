@@ -18,6 +18,8 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.knative.Constants;
+import com.redhat.devtools.intellij.knative.kn.Kn;
+import com.redhat.devtools.intellij.knative.tree.KnRootNode;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import java.awt.Component;
@@ -78,6 +80,16 @@ public class TreeHelper {
             if (structure != null) {
                 structure.fireModified(node);
             }
+        }
+    }
+
+    public static Kn getKn(Project project) {
+        try {
+            KnTreeStructure treeStructure = (KnTreeStructure) getTree(project).getClientProperty(Constants.STRUCTURE_PROPERTY);
+            KnRootNode root = (KnRootNode) treeStructure.getRootElement();
+            return root.getKn();
+        } catch(Exception ex) {
+            return null;
         }
     }
 }

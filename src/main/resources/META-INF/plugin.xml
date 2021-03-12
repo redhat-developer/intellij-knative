@@ -17,6 +17,8 @@
          on how to target different products -->
     <depends>org.jetbrains.plugins.terminal</depends>
     <depends>com.intellij.modules.lang</depends>
+    <depends>org.jetbrains.plugins.yaml</depends>
+    <depends optional="true" config-file="plugin-json.xml">com.intellij.modules.json</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Knative" anchor="left" factoryClass="com.redhat.devtools.intellij.knative.WindowToolFactory"/>
@@ -24,6 +26,7 @@
 
     <actions>
         <group id="com.redhat.devtools.intellij.knative.tree" popup="true">
+            <action class="com.redhat.devtools.intellij.knative.actions.CreateServiceAction" text="New Service"/>
             <action class="com.redhat.devtools.intellij.knative.actions.OpenInEditorAction" text="Open in Editor"/>
             <action class="com.redhat.devtools.intellij.knative.actions.OpenInBrowserAction" text="Open in Browser"/>
             <action class="com.redhat.devtools.intellij.knative.actions.DeleteAction" text="Delete"/>

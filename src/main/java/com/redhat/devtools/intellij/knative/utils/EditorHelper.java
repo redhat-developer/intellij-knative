@@ -10,6 +10,8 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
@@ -22,8 +24,10 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
 import com.redhat.devtools.intellij.common.actions.StructureTreeAction;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
+import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Optional;
 import javax.swing.tree.TreePath;
@@ -57,7 +61,7 @@ public class EditorHelper {
                                             .filter(fileEditor -> fileEditor.getFile().getName().startsWith(name))
                                             .findFirst();
         if (!editor.isPresent()) {
-            VirtualFile virtualFile = createVirtualFile(name, content);
+            VirtualFile virtualFile = createVirtualFile(name, content, false);
             FileEditorManager.getInstance(project).openFile(virtualFile, true);
         } else {
             Editor openedEditor = FileEditorManager.getInstance(project).openTextEditor(new OpenFileDescriptor(project, editor.get().getFile()), true);
@@ -65,9 +69,9 @@ public class EditorHelper {
         }
     }
 
-    public static VirtualFile createVirtualFile(String name, String content) throws IOException {
+    public static VirtualFile createVirtualFile(String name, String content, boolean isWritable) throws IOException {
         VirtualFile vf = new LightVirtualFile(name, content);
-        vf.setWritable(false);
+        vf.setWritable(isWritable);
         return vf;
     }
 
