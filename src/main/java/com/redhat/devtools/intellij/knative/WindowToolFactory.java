@@ -53,8 +53,8 @@ public class WindowToolFactory implements ToolWindowFactory {
             SimpleToolWindowPanel panel = new SimpleToolWindowPanel(true, true);
             panel.setContent(tree);
 
-            if (actionManager.isGroup("Knative.View.ActionsToolbar")) {
-                ActionToolbar actionToolbar = actionManager.createActionToolbar(Constants.TOOLBAR_PLACE, (ActionGroup) actionManager.getAction("Knative.View.ActionsToolbar"), true);
+            if (actionManager.isGroup("com.redhat.devtools.intellij.knativev.view.actionsToolbar")) {
+                ActionToolbar actionToolbar = actionManager.createActionToolbar(Constants.TOOLBAR_PLACE, (ActionGroup) actionManager.getAction("com.redhat.devtools.intellij.knativev.view.actionsToolbar"), true);
                 panel.setToolbar(actionToolbar.getComponent());
             }
 

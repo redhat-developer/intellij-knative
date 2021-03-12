@@ -25,12 +25,13 @@
     <actions>
         <group id="com.redhat.devtools.intellij.knative.tree" popup="true">
             <action class="com.redhat.devtools.intellij.knative.actions.OpenInEditorAction" text="Open in Editor"/>
-            <action id="Knative.Refresh" class="com.redhat.devtools.intellij.knative.actions.RefreshAction"
+            <action id="com.redhat.devtools.intellij.knative.refresh"
+                    class="com.redhat.devtools.intellij.knative.actions.RefreshAction"
                     text="Refresh" icon="AllIcons.Actions.Refresh"/>
         </group>
 
-        <group id="Knative.View.ActionsToolbar">
-            <reference id="Knative.Refresh"/>
+        <group id="com.redhat.devtools.intellij.knativev.view.actionsToolbar">
+            <reference id="com.redhat.devtools.intellij.knative.refresh"/>
         </group>
     </actions>
 </idea-plugin>
