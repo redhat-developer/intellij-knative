@@ -195,6 +195,7 @@ public class CreateServiceDialog extends DialogWrapper {
     @Override
     protected @Nullable JComponent createCenterPanel() {
         final JPanel panel = new JPanel(new BorderLayout());
+        panel.setPreferredSize(new Dimension(600, 350));
         splitterPanel = new OnePixelSplitter(true, 1.00F) {
             protected Divider createDivider() {
                 Divider divider = super.createDivider();
