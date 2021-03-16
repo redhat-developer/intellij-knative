@@ -61,7 +61,7 @@ public class EditorHelper {
                                             .filter(fileEditor -> fileEditor.getFile().getName().startsWith(name))
                                             .findFirst();
         if (!editor.isPresent()) {
-            VirtualFile virtualFile = createVirtualFile(name, content, false);
+            VirtualFile virtualFile = createVirtualFile(name, content);
             FileEditorManager.getInstance(project).openFile(virtualFile, true);
         } else {
             Editor openedEditor = FileEditorManager.getInstance(project).openTextEditor(new OpenFileDescriptor(project, editor.get().getFile()), true);
@@ -69,9 +69,9 @@ public class EditorHelper {
         }
     }
 
-    public static VirtualFile createVirtualFile(String name, String content, boolean isWritable) throws IOException {
+    public static VirtualFile createVirtualFile(String name, String content) throws IOException {
         VirtualFile vf = new LightVirtualFile(name, content);
-        vf.setWritable(isWritable);
+        vf.setWritable(false);
         return vf;
     }
 

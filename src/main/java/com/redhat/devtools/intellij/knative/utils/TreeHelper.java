@@ -85,7 +85,7 @@ public class TreeHelper {
 
     public static Kn getKn(Project project) {
         try {
-            KnTreeStructure treeStructure = (KnTreeStructure) getTree(project).getClientProperty(Constants.STRUCTURE_PROPERTY);
+            KnTreeStructure treeStructure = getKnTreeStructure(project);
             KnRootNode root = (KnRootNode) treeStructure.getRootElement();
             return root.getKn();
         } catch(Exception ex) {

@@ -36,7 +36,7 @@ public class ServiceDeserializer extends StdNodeBasedDeserializer<Service> {
 
     @Nullable
     private ServiceStatus convertToStatus(JsonNode statusNode) {
-        if (statusNode == null) {
+        if (statusNode == null || statusNode.isEmpty()) {
             return null;
         }
         String url = statusNode.get("url").asText();
