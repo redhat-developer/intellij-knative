@@ -13,6 +13,4 @@ package com.redhat.devtools.intellij.knative;
 public class Constants {
     public static final String STRUCTURE_PROPERTY = Constants.class.getPackage().getName() + ".structure";
     public static final String TOOLBAR_PLACE = Constants.class.getPackage().getName() + ".view.toolbar";
-
-    public static final String KIND_SERVICE = "service";
 }
