@@ -26,6 +26,8 @@ import com.intellij.ui.OnePixelSplitter;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTabbedPane;
 import com.intellij.ui.mac.TouchbarDataKeys;
+import com.redhat.devtools.intellij.common.utils.ExecHelper;
+import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.utils.KnHelper;
 import com.redhat.devtools.intellij.knative.utils.YAMLUtils;
@@ -263,12 +265,14 @@ public class CreateServiceDialog extends DialogWrapper {
         }
 
         saveButton.addActionListener(e -> {
-            try {
-                KnHelper.saveOnCluster(this.project, editor.getEditor().getDocument().getText());
-                super.doOKAction();
-            } catch (IOException | KubernetesClientException ex) {
-                displayError(ex.getLocalizedMessage());
-            }
+            ExecHelper.submit(() -> {
+                try {
+                    KnHelper.saveOnCluster(this.project, editor.getEditor().getDocument().getText());
+                    UIHelper.executeInUI(() -> super.doOKAction());
+                } catch (IOException | KubernetesClientException ex) {
+                    UIHelper.executeInUI(() -> displayError(ex.getLocalizedMessage()));
+                }
+            });
         });
 
         cancelButton.addActionListener(e -> doCancelAction());

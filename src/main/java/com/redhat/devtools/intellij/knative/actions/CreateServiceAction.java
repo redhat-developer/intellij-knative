@@ -25,6 +25,7 @@ public class CreateServiceAction extends KnAction {
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Kn knCli) {
         CreateServiceDialog createDialog = new CreateServiceDialog("Create New Service", anActionEvent.getProject());
+        createDialog.setModal(false);
         createDialog.show();
         if (createDialog.isOK()) {
             TreeHelper.getKnTreeStructure(getEventProject(anActionEvent)).fireModified(getElement(selected));
