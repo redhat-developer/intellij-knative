@@ -72,19 +72,19 @@ public class CreateServiceDialog extends DialogWrapper {
     private OnePixelSplitter splitterPanel;
     private JTextArea txtAreaEventLog;
 
-    public CreateServiceDialog(String title, Project project) {
+    public CreateServiceDialog(String title, Project project, String namespace) {
         super(project, true);
         this.project = project;
         setTitle(title);
-        initEditor();
+        initEditor(namespace);
         buildStructure();
         init();
     }
 
-    private void initEditor() {
+    private void initEditor(String namespace) {
         String content = "";
         try {
-            content = YAMLUtils.getSnippet("service");
+            content = YAMLUtils.getSnippet("service").replace("$namespace", namespace);
         } catch (IOException e) {
             logger.warn(e.getLocalizedMessage());
         }

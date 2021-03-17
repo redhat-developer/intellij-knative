@@ -2,6 +2,7 @@ apiVersion: serving.knative.dev/v1 # Current version of Knative
 kind: Service
 metadata:
   name: "add service name"
+  namespace: "$namespace"
 spec:
   template:
     spec:
