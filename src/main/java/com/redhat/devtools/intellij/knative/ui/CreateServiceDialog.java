@@ -29,6 +29,7 @@ import com.intellij.ui.mac.TouchbarDataKeys;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
+import com.redhat.devtools.intellij.knative.utils.EditorHelper;
 import com.redhat.devtools.intellij.knative.utils.KnHelper;
 import com.redhat.devtools.intellij.knative.utils.YAMLUtils;
 import io.fabric8.kubernetes.client.KubernetesClientException;
@@ -59,9 +60,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-import static com.redhat.devtools.intellij.knative.utils.YAMLUtils.editValueInYAML;
-
 public class CreateServiceDialog extends DialogWrapper {
     private final Logger logger = LoggerFactory.getLogger(CreateServiceDialog.class);
     private JBTabbedPane contentPanel;
@@ -84,7 +82,7 @@ public class CreateServiceDialog extends DialogWrapper {
     private void initEditor(String namespace) {
         String content = "";
         try {
-            content = YAMLUtils.getSnippet("service").replace("$namespace", namespace);
+            content = EditorHelper.getSnippet("service").replace("$namespace", namespace);
         } catch (IOException e) {
             logger.warn(e.getLocalizedMessage());
         }
@@ -155,7 +153,7 @@ public class CreateServiceDialog extends DialogWrapper {
     private void updateYamlInEditor(String[] fieldPath, String value) {
         String yaml = editor.getEditor().getDocument().getText();
         try {
-            JsonNode node = editValueInYAML(yaml, fieldPath, value);
+            JsonNode node = YAMLHelper.editValueInYAML(yaml, fieldPath, value);
             if (node == null) {
                 return;
             }

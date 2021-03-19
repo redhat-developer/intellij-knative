@@ -1,5 +1,5 @@
 <idea-plugin>
     <extensions defaultExtensionNs="JavaScript.JsonSchema">
-        <ProviderFactory implementation="com.redhat.devtools.intellij.knative.validation.KnSchemasProviderFactory"/>
+        <ProviderFactory implementation="com.redhat.devtools.intellij.common.validation.SchemasProviderFactory"/>
     </extensions>
 </idea-plugin>
