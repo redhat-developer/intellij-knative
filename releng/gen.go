@@ -60,4 +60,8 @@ func main() {
 	dump(&v1.ServiceList{}, "serving.knative.dev/v1", "ServiceList")
 	dump(&v1.Revision{}, "serving.knative.dev/v1", "Revision")
 	dump(&v1.RevisionList{}, "serving.knative.dev/v1", "RevisionList")
+	dump(&v1.Configuration{}, "serving.knative.dev/v1", "Configuration")
+	dump(&v1.ConfigurationList{}, "serving.knative.dev/v1", "ConfigurationList")
+	dump(&v1.Route{}, "serving.knative.dev/v1", "Route")
+	dump(&v1.RouteList{}, "serving.knative.dev/v1", "RouteList")
 }
