@@ -31,7 +31,6 @@ import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.utils.EditorHelper;
 import com.redhat.devtools.intellij.knative.utils.KnHelper;
-import com.redhat.devtools.intellij.knative.utils.YAMLUtils;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.awt.BorderLayout;
 import java.awt.Component;

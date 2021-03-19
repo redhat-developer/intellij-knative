@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "$ref": "#/definitions/Service",
+  "$ref": "#/definitions/ServiceList",
   "definitions": {
     "AWSElasticBlockStoreVolumeSource": {
       "required": [
@@ -1017,6 +1017,24 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "ListMeta": {
+      "properties": {
+        "selfLink": {
+          "type": "string"
+        },
+        "resourceVersion": {
+          "type": "string"
+        },
+        "continue": {
+          "type": "string"
+        },
+        "remainingItemCount": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "LocalObjectReference": {
       "properties": {
         "name": {
@@ -2024,6 +2042,33 @@
         },
         "path": {
           "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ServiceList": {
+      "required": [
+        "metadata",
+        "items"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "apiVersion": {
+          "type": "string"
+        },
+        "metadata": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/ListMeta"
+        },
+        "items": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/Service"
+          },
+          "type": "array"
         }
       },
       "additionalProperties": false,

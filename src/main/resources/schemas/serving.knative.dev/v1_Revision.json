@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "$ref": "#/definitions/Service",
+  "$ref": "#/definitions/Revision",
   "definitions": {
     "AWSElasticBlockStoreVolumeSource": {
       "required": [
@@ -18,15 +18,6 @@
         },
         "readOnly": {
           "type": "boolean"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "Addressable": {
-      "properties": {
-        "url": {
-          "$ref": "#/definitions/URL"
         }
       },
       "additionalProperties": false,
@@ -416,6 +407,18 @@
           "type": "string"
         },
         "hostIP": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ContainerStatus": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "imageDigest": {
           "type": "string"
         }
       },
@@ -1642,6 +1645,30 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "Revision": {
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "apiVersion": {
+          "type": "string"
+        },
+        "metadata": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/ObjectMeta"
+        },
+        "spec": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/RevisionSpec"
+        },
+        "status": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/RevisionStatus"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "RevisionSpec": {
       "required": [
         "containers"
@@ -1806,14 +1833,41 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "RevisionTemplateSpec": {
+    "RevisionStatus": {
       "properties": {
-        "metadata": {
-          "$ref": "#/definitions/ObjectMeta"
+        "observedGeneration": {
+          "type": "integer"
         },
-        "spec": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
-          "$ref": "#/definitions/RevisionSpec"
+        "conditions": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/Condition"
+          },
+          "type": "array"
+        },
+        "annotations": {
+          "patternProperties": {
+            ".*": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "serviceName": {
+          "type": "string"
+        },
+        "logUrl": {
+          "type": "string"
+        },
+        "imageDigest": {
+          "type": "string"
+        },
+        "containerStatuses": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/ContainerStatus"
+          },
+          "type": "array"
         }
       },
       "additionalProperties": false,
@@ -1987,30 +2041,6 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "Service": {
-      "properties": {
-        "kind": {
-          "type": "string"
-        },
-        "apiVersion": {
-          "type": "string"
-        },
-        "metadata": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
-          "$ref": "#/definitions/ObjectMeta"
-        },
-        "spec": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
-          "$ref": "#/definitions/ServiceSpec"
-        },
-        "status": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
-          "$ref": "#/definitions/ServiceStatus"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
     "ServiceAccountTokenProjection": {
       "required": [
         "path"
@@ -2024,69 +2054,6 @@
         },
         "path": {
           "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "ServiceSpec": {
-      "required": [
-        "template"
-      ],
-      "properties": {
-        "template": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
-          "$ref": "#/definitions/RevisionTemplateSpec"
-        },
-        "traffic": {
-          "items": {
-            "$schema": "http://json-schema.org/draft-04/schema#",
-            "$ref": "#/definitions/TrafficTarget"
-          },
-          "type": "array"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "ServiceStatus": {
-      "properties": {
-        "observedGeneration": {
-          "type": "integer"
-        },
-        "conditions": {
-          "items": {
-            "$schema": "http://json-schema.org/draft-04/schema#",
-            "$ref": "#/definitions/Condition"
-          },
-          "type": "array"
-        },
-        "annotations": {
-          "patternProperties": {
-            ".*": {
-              "type": "string"
-            }
-          },
-          "type": "object"
-        },
-        "latestReadyRevisionName": {
-          "type": "string"
-        },
-        "latestCreatedRevisionName": {
-          "type": "string"
-        },
-        "url": {
-          "$ref": "#/definitions/URL"
-        },
-        "address": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
-          "$ref": "#/definitions/Addressable"
-        },
-        "traffic": {
-          "items": {
-            "$ref": "#/definitions/TrafficTarget"
-          },
-          "type": "array"
         }
       },
       "additionalProperties": false,
@@ -2185,85 +2152,6 @@
           "$ref": "#/definitions/LabelSelector"
         }
       },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "TrafficTarget": {
-      "properties": {
-        "tag": {
-          "type": "string"
-        },
-        "revisionName": {
-          "type": "string"
-        },
-        "configurationName": {
-          "type": "string"
-        },
-        "latestRevision": {
-          "type": "boolean"
-        },
-        "percent": {
-          "type": "integer"
-        },
-        "url": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
-          "$ref": "#/definitions/URL"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "URL": {
-      "required": [
-        "Scheme",
-        "Opaque",
-        "User",
-        "Host",
-        "Path",
-        "RawPath",
-        "ForceQuery",
-        "RawQuery",
-        "Fragment",
-        "RawFragment"
-      ],
-      "properties": {
-        "Scheme": {
-          "type": "string"
-        },
-        "Opaque": {
-          "type": "string"
-        },
-        "User": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
-          "$ref": "#/definitions/Userinfo"
-        },
-        "Host": {
-          "type": "string"
-        },
-        "Path": {
-          "type": "string"
-        },
-        "RawPath": {
-          "type": "string"
-        },
-        "ForceQuery": {
-          "type": "boolean"
-        },
-        "RawQuery": {
-          "type": "string"
-        },
-        "Fragment": {
-          "type": "string"
-        },
-        "RawFragment": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "Userinfo": {
-      "properties": {},
       "additionalProperties": false,
       "type": "object"
     },
