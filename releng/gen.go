@@ -4,15 +4,42 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/redhat-developer/knative-jsongenerator/jsonschema"
-	v1 "knative.dev/serving/pkg/apis/serving/v1"
+	"knative.dev/serving/pkg/apis/serving/v1"
+	knative "knative.dev/pkg/apis"
+	k8sv1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"os"
 	"encoding/json"
+	"reflect"
 )
+
+func arrayOrStringMapper(i reflect.Type) *jsonschema.Type {
+	if (i == reflect.TypeOf(k8sv1.Duration{})) {
+		return &jsonschema.Type{
+			Type: "string",
+			Pattern: "^[-+]?([0-9]*(\\.[0-9]*)?(ns|us|µs|μs|ms|s|m|h))+$",
+		}
+	}
+	if (i == reflect.TypeOf(k8sv1.Time{})) {
+		return &jsonschema.Type{
+			Type: "string",
+			Format: "data-time",
+		}
+	}
+	if (i == reflect.TypeOf(knative.VolatileTime{})) {
+		return &jsonschema.Type{
+			Type: "string",
+			Format: "data-time",
+		}
+	}
+	return nil
+}
 
 func dump(v interface{}, apiVersion string, kind string) {
 	fmt.Printf("Starting generation of %s %s\n", apiVersion, kind)
 	filename := fmt.Sprintf("%s_%s.json", apiVersion, kind)
-	reflector := jsonschema.Reflector{}
+	reflector := jsonschema.Reflector{
+		TypeMapper: arrayOrStringMapper,
+	}
 	reflect := reflector.Reflect(v)
 	JSON, _ := reflect.MarshalJSON()
 	file, _ := os.Create(filename)
