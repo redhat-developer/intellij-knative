@@ -8,6 +8,7 @@ spec:
     spec:
       containers:
         - image: "add image url" # Reference to the image of the app
+          name: "first"
           env:
             - name: TARGET # The environment variable printed out by the sample app
               value: "Sample"
