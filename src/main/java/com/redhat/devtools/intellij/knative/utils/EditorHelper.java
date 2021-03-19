@@ -32,6 +32,11 @@ import javax.swing.tree.TreePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+import static com.redhat.devtools.intellij.common.CommonConstants.PROJECT;
+import static com.redhat.devtools.intellij.knative.Constants.KIND;
+import static com.redhat.devtools.intellij.knative.Constants.TARGET_NODE;
+
 public class EditorHelper {
     private static Logger logger = LoggerFactory.getLogger(EditorHelper.class);
 
@@ -46,7 +51,7 @@ public class EditorHelper {
         try {
             String yaml = KnHelper.getYamlFromNode(node);
             if (!yaml.isEmpty()) {
-                openVirtualFileInEditor(node.getRootNode().getProject(), node.getName() + ".yaml", yaml);
+                openVirtualFileInEditor(node.getRootNode().getProject(), node.getName() + ".yaml", yaml, KnHelper.isWritable(node), "service", node);
             }
         } catch (IOException e) {
             logger.warn(e.getLocalizedMessage(), e);
@@ -54,12 +59,12 @@ public class EditorHelper {
         }
     }
 
-    public static void openVirtualFileInEditor(Project project, String name, String content) throws IOException {
+    private static void openVirtualFileInEditor(Project project, String name, String content, boolean isWritable, String kind, ParentableNode<?> targetNode) throws IOException {
         Optional<FileEditor> editor = Arrays.stream(FileEditorManager.getInstance(project).getAllEditors())
                                             .filter(fileEditor -> fileEditor.getFile().getName().startsWith(name))
                                             .findFirst();
         if (!editor.isPresent()) {
-            VirtualFile virtualFile = createVirtualFile(name, content);
+            VirtualFile virtualFile = createVirtualFile(project, name, content, isWritable, kind, targetNode);
             FileEditorManager.getInstance(project).openFile(virtualFile, true);
         } else {
             Editor openedEditor = FileEditorManager.getInstance(project).openTextEditor(new OpenFileDescriptor(project, editor.get().getFile()), true);
@@ -67,13 +72,18 @@ public class EditorHelper {
         }
     }
 
-    public static VirtualFile createVirtualFile(String name, String content) throws IOException {
+    private static VirtualFile createVirtualFile(Project project, String name, String content, boolean isWritable, String kind, ParentableNode<?> targetNode) throws IOException {
         VirtualFile vf = new LightVirtualFile(name, content);
-        vf.setWritable(false);
+        vf.setWritable(isWritable);
+        if (isWritable) {
+            vf.putUserData(PROJECT, project);
+            if (!kind.isEmpty()) vf.putUserData(KIND, kind);
+            if (targetNode != null) vf.putUserData(TARGET_NODE, targetNode);
+        }
         return vf;
     }
 
-    public static void updateVirtualFile(Document document, String newContent) {
+    private static void updateVirtualFile(Document document, String newContent) {
         if (document.getText().equalsIgnoreCase(newContent)) {
             return;
         }

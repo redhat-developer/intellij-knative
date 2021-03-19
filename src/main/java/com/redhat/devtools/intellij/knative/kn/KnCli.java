@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class KnCli implements Kn {
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper(new JsonFactory());
@@ -128,8 +129,35 @@ public class KnCli implements Kn {
     }
 
     @Override
+    public Map<String, Object> getCustomResource(String name, CustomResourceDefinitionContext crdContext) {
+        try {
+            if (crdContext.getScope().equalsIgnoreCase("Namespaced")) {
+                return new TreeMap<>(client.customResource(crdContext).get(getNamespace(), name));
+            }
+
+            return new TreeMap<>(client.customResource(crdContext).get(name));
+        } catch(KubernetesClientException e) {
+            // call failed bc resource doesn't exist - 404
+            return null;
+        }
+    }
+
+    @Override
+    public void editCustomResource(String name, CustomResourceDefinitionContext crdContext, String objectAsString) throws IOException {
+        if (crdContext.getScope().equalsIgnoreCase("Namespaced")) {
+            client.customResource(crdContext).edit(getNamespace(), name, objectAsString);
+        } else {
+            client.customResource(crdContext).edit(name, objectAsString);
+        }
+    }
+
+    @Override
     public void createCustomResource(CustomResourceDefinitionContext crdContext, String objectAsString) throws IOException {
-        client.customResource(crdContext).create(getNamespace(), objectAsString);
+        if (crdContext.getScope().equalsIgnoreCase("Namespaced")) {
+            client.customResource(crdContext).create(getNamespace(), objectAsString);
+        } else {
+            client.customResource(crdContext).create(objectAsString);
+        }
     }
 
     private <T> List<T> getCustomCollection(String json, Class<T> customClass) throws IOException {
