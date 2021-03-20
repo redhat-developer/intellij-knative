@@ -20,6 +20,7 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import com.redhat.devtools.intellij.knative.utils.KnHelper;
@@ -33,9 +34,9 @@ import org.slf4j.LoggerFactory;
 
 import static com.redhat.devtools.intellij.common.CommonConstants.LAST_MODIFICATION_STAMP;
 import static com.redhat.devtools.intellij.common.CommonConstants.PROJECT;
+import static com.redhat.devtools.intellij.knative.Constants.KNATIVE;
 import static com.redhat.devtools.intellij.knative.Constants.NOTIFICATION_ID;
 import static com.redhat.devtools.intellij.knative.Constants.TARGET_NODE;
-import static com.redhat.devtools.intellij.knative.Constants.KIND;
 
 public class SaveInEditorListener extends FileDocumentSynchronizationVetoer {
 
@@ -56,20 +57,21 @@ public class SaveInEditorListener extends FileDocumentSynchronizationVetoer {
 
         vf.putUserData(LAST_MODIFICATION_STAMP, currentModificationStamp);
         if (save(document, project)) {
-            try {
-                KnTreeStructure treeStructure = TreeHelper.getKnTreeStructure(project);
-                ParentableNode selected = vf.getUserData(TARGET_NODE);
-                if (selected != null) {
-                    treeStructure.fireModified(selected);
-                }
-            } catch (Exception e) {
-                logger.warn("Error: " + e.getLocalizedMessage(), e);
-            }
-            // notify user if saving was completed successfully
-            Notification notification = new Notification(NOTIFICATION_ID, "Save Successful", StringUtils.capitalize(vf.getUserData(KIND)) + " has been saved!", NotificationType.INFORMATION);
-            Notifications.Bus.notify(notification);
+            notify(document);
+            TreeHelper.refresh(project, vf.getUserData(TARGET_NODE));
         }
         return false;
+    }
+
+    private void notify(Document document) {
+        try {
+            String kind = YAMLHelper.getStringValueFromYAML(document.getText(), new String[] { "kind" });
+            String name = YAMLHelper.getStringValueFromYAML(document.getText(), new String[] { "metadata", "name" });
+            Notification notification = new Notification(NOTIFICATION_ID, "Save Successful", kind + " " + name + " has been saved!", NotificationType.INFORMATION);
+            Notifications.Bus.notify(notification);
+        } catch (IOException e) {
+            logger.warn(e.getLocalizedMessage());
+        }
     }
 
     private boolean save(Document document, Project project) {
@@ -88,7 +90,7 @@ public class SaveInEditorListener extends FileDocumentSynchronizationVetoer {
         // if file is not the one selected, skip it
         if (selectedEditor == null || !selectedEditor.getFile().equals(vf)) return false;
         // if file is not related to tekton, skip it
-        if (vf == null || vf.getUserData(KIND) == null || vf.getUserData(KIND).isEmpty()) {
+        if (vf == null || vf.getUserData(KNATIVE) == null || !vf.getUserData(KNATIVE).equalsIgnoreCase(NOTIFICATION_ID)) {
             return false;
         }
         return true;

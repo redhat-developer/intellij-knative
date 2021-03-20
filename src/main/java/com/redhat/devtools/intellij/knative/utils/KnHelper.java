@@ -41,12 +41,11 @@ public class KnHelper {
     }
 
     public static boolean saveOnCluster(Project project, String yaml) throws IOException {
-        Kn knCli = TreeHelper.getKn(project);
-
         if (!isSaveConfirmed("Do you want to push the changes to the cluster?")) {
             return false;
         }
-
+        
+        Kn knCli = TreeHelper.getKn(project);
         if (knCli == null) {
             throw new IOException("Unable to save the resource to the cluster. Internal error, please retry or restart the IDE.");
         }

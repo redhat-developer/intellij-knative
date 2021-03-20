@@ -18,6 +18,7 @@ import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.tree.KnRootNode;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
+import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import java.io.IOException;
 import javax.swing.tree.TreePath;
 
@@ -53,8 +54,7 @@ public class KnAction  extends StructureTreeAction {
     }
 
     private Kn getKn(AnActionEvent anActionEvent) throws IOException {
-        Tree tree = getTree(anActionEvent);
-        return ((KnRootNode)((KnTreeStructure)tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).getRootElement()).getKn();
+        return TreeHelper.getKn(anActionEvent.getProject());
     }
 
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Kn kn) {}
