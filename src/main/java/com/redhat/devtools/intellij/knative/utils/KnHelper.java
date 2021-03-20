@@ -16,6 +16,7 @@ import com.google.common.base.Strings;
 import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.common.utils.DeployModel;
 import com.intellij.openapi.ui.Messages;
+import com.redhat.devtools.intellij.common.utils.DeployModel;
 import com.redhat.devtools.intellij.common.utils.JSONHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;

@@ -22,7 +22,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Knative" anchor="left" factoryClass="com.redhat.devtools.intellij.knative.WindowToolFactory"/>
-        <fileDocumentSynchronizationVetoer implementation="com.redhat.devtools.intellij.knative.listener.SaveInEditorListener" order="first" />
+        <fileDocumentSynchronizationVetoer implementation="com.redhat.devtools.intellij.knative.listener.KnSaveInEditorListener" order="first" />
     </extensions>
 
     <actions>
