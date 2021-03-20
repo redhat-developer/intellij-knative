@@ -144,19 +144,27 @@ public class KnCli implements Kn {
 
     @Override
     public void editCustomResource(String name, CustomResourceDefinitionContext crdContext, String objectAsString) throws IOException {
-        if (crdContext.getScope().equalsIgnoreCase("Namespaced")) {
-            client.customResource(crdContext).edit(getNamespace(), name, objectAsString);
-        } else {
-            client.customResource(crdContext).edit(name, objectAsString);
+        try {
+            if (crdContext.getScope().equalsIgnoreCase("Namespaced")) {
+                client.customResource(crdContext).edit(getNamespace(), name, objectAsString);
+            } else {
+                client.customResource(crdContext).edit(name, objectAsString);
+            }
+        } catch(KubernetesClientException e) {
+            throw new IOException(e.getLocalizedMessage());
         }
     }
 
     @Override
     public void createCustomResource(CustomResourceDefinitionContext crdContext, String objectAsString) throws IOException {
-        if (crdContext.getScope().equalsIgnoreCase("Namespaced")) {
-            client.customResource(crdContext).create(getNamespace(), objectAsString);
-        } else {
-            client.customResource(crdContext).create(objectAsString);
+        try {
+            if (crdContext.getScope().equalsIgnoreCase("Namespaced")) {
+                client.customResource(crdContext).create(getNamespace(), objectAsString);
+            } else {
+                client.customResource(crdContext).create(objectAsString);
+            }
+        } catch(KubernetesClientException e) {
+                throw new IOException(e.getLocalizedMessage());
         }
     }
 

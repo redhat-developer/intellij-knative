@@ -18,17 +18,21 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
 import com.redhat.devtools.intellij.common.actions.StructureTreeAction;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Optional;
 import javax.swing.tree.TreePath;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,14 +77,29 @@ public class EditorHelper {
     }
 
     private static VirtualFile createVirtualFile(Project project, String name, String content, boolean isWritable, String kind, ParentableNode<?> targetNode) throws IOException {
-        VirtualFile vf = new LightVirtualFile(name, content);
-        vf.setWritable(isWritable);
+        VirtualFile vf;
+
         if (isWritable) {
+            vf = createTempFile(name, content);
             vf.putUserData(PROJECT, project);
             if (!kind.isEmpty()) vf.putUserData(KIND, kind);
             if (targetNode != null) vf.putUserData(TARGET_NODE, targetNode);
+        } else {
+            vf = new LightVirtualFile(name, content);
+            vf.setWritable(false);
         }
         return vf;
+    }
+
+    private static VirtualFile createTempFile(String name, String content) throws IOException {
+        File file = new File(System.getProperty("java.io.tmpdir"), name);
+        if (file.exists()){
+            file.delete();
+            LocalFileSystem.getInstance().refreshIoFiles(Arrays.asList(file));
+        }
+        FileUtils.write(file, content, StandardCharsets.UTF_8);
+        file.deleteOnExit();
+        return LocalFileSystem.getInstance().refreshAndFindFileByIoFile(file);
     }
 
     private static void updateVirtualFile(Document document, String newContent) {

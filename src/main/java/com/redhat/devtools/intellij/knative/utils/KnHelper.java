@@ -15,7 +15,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
 import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.common.utils.DeployModel;
+import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.JSONHelper;
+import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.tree.KnRevisionNode;
@@ -38,16 +40,30 @@ public class KnHelper {
         return content;
     }
 
-    public static void saveOnCluster(Project project, String yaml) throws IOException {
-        DeployModel deployModel = buildDeployModel(yaml);
-
+    public static boolean saveOnCluster(Project project, String yaml) throws IOException {
         Kn knCli = TreeHelper.getKn(project);
+
+        if (!isSaveConfirmed("Do you want to push the changes to the cluster?")) {
+            return false;
+        }
+
         if (knCli == null) {
             throw new IOException("Unable to save the resource to the cluster. Internal error, please retry or restart the IDE.");
         }
 
-        knCli.createCustomResource(deployModel.getCrdContext(), yaml);
         save(knCli, yaml);
+        return true;
+    }
+
+    private static boolean isSaveConfirmed(String confirmationMessage) {
+        int resultDialog = UIHelper.executeInUI(() ->
+                Messages.showYesNoDialog(
+                        confirmationMessage,
+                        "Save to cluster",
+                        null
+                ));
+
+        return resultDialog == Messages.OK;
     }
 
     private static void save(Kn knCli, String yaml) throws IOException {

@@ -74,8 +74,7 @@ public class SaveInEditorListener extends FileDocumentSynchronizationVetoer {
 
     private boolean save(Document document, Project project) {
         try {
-            KnHelper.saveOnCluster(project, document.getText());
-            return true;
+            return KnHelper.saveOnCluster(project, document.getText());
         } catch (IOException e) {
             Notification notification = new Notification(NOTIFICATION_ID, "Error", "An error occurred while saving \n" + e.getLocalizedMessage(), NotificationType.ERROR);
             Notifications.Bus.notify(notification);
