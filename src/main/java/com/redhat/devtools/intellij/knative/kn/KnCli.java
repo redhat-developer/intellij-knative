@@ -25,6 +25,8 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -99,6 +101,23 @@ public class KnCli implements Kn {
     @Override
     public String getRevisionYAML(String name) throws IOException {
         return ExecHelper.execute(command, envVars, "revision", "describe", name, "-o", "yaml", "-n", getNamespace());
+    }
+
+    @Override
+    public void deleteServices(List<String> services) throws IOException {
+        ExecHelper.execute(command, envVars, getDeleteArgs("service", services));
+    }
+
+    @Override
+    public void deleteRevisions(List<String> revisions) throws IOException {
+        ExecHelper.execute(command, envVars, getDeleteArgs("revision", revisions));
+    }
+
+    private String[] getDeleteArgs(String kind, List<String> resourcesToDelete) {
+        List<String> args = new ArrayList<>(Arrays.asList(kind, "delete"));
+        args.addAll(resourcesToDelete);
+        args.addAll(Arrays.asList("-n", getNamespace()));
+        return args.toArray(new String[0]);
     }
 
     private <T> List<T> getCustomCollection(String json, Class<T> customClass) throws IOException {

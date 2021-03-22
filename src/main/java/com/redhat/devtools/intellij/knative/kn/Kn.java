@@ -72,4 +72,20 @@ public interface Kn {
      * @throws IOException if communication encountered an error
      */
     String getRevisionYAML(String name) throws IOException;
+
+    /**
+     * Delete a list of services
+     *
+     * @param services the list of services to delete
+     * @throws IOException if communication errored
+     */
+    void deleteServices(List<String> services) throws IOException;
+
+    /**
+     * Delete a list of revisions
+     *
+     * @param revisions the list of revisions to delete
+     * @throws IOException if communication errored
+     */
+    void deleteRevisions(List<String> revisions) throws IOException;
 }
