@@ -27,8 +27,24 @@ public class KnAction  extends StructureTreeAction {
         super(filters);
     }
 
+    public KnAction(boolean acceptMultipleItems, Class... filters) {
+        super(acceptMultipleItems, filters);
+    }
+
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
+        try {
+            this.actionPerformed(anActionEvent, path, selected, getKn(anActionEvent));
+        } catch (IOException e) {
+            Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Error");
+        }
+    }
+
+    @Override
+    public void actionPerformed(AnActionEvent anActionEvent, TreePath[] path, Object[] selected) {
+        if (selected.length == 0) {
+            return;
+        }
         try {
             this.actionPerformed(anActionEvent, path, selected, getKn(anActionEvent));
         } catch (IOException e) {
@@ -42,5 +58,9 @@ public class KnAction  extends StructureTreeAction {
     }
 
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Kn tkn) {}
+
+    public void actionPerformed(AnActionEvent anActionEvent, TreePath[] path, Object[] selected, Kn kn) {
+        actionPerformed(anActionEvent, path[0], selected[0], kn);
+    }
 
 }
