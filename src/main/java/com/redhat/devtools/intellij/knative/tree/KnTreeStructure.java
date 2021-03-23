@@ -28,6 +28,7 @@ import com.redhat.devtools.intellij.knative.kn.Service;
 import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.NamedContext;
 import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
+import java.util.ArrayList;
 import org.apache.commons.codec.binary.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -110,25 +111,25 @@ public class KnTreeStructure extends AbstractTreeStructure implements MutableMod
     }
 
     private Object[] getRevisionNodes(KnServiceNode element) {
-        Kn kn = element.getRootNode().getKn();
+        List<Object> revisions = new ArrayList<>();
         try {
-            List<Revision> revisions = kn.getRevisionsForService(element.getName());
-            return revisions.stream().map(it -> new KnRevisionNode(element.getRootNode(), element, it)).toArray(KnRevisionNode[]::new);
+            Kn kn = element.getRootNode().getKn();
+            kn.getRevisionsForService(element.getName()).stream().forEach(it -> revisions.add(new KnRevisionNode(element.getRootNode(), element, it)));
         } catch (IOException e) {
-            e.printStackTrace();
+            revisions.add(new MessageNode(element.getRootNode(), element, "Failed to load revisions"));
         }
-        return new Object[0];
+        return revisions.toArray();
     }
 
     private Object[] getServiceNodes(KnServingNode element) {
-        Kn kn = element.getRootNode().getKn();
+        List<Object> services = new ArrayList<>();
         try {
-            List<Service> servicesList = kn.getServicesList();
-            return servicesList.stream().map(it -> new KnServiceNode(element.getRootNode(), element, it)).toArray(KnServiceNode[]::new);
+            Kn kn = element.getRootNode().getKn();
+            kn.getServicesList().stream().forEach(it -> services.add(new KnServiceNode(element.getRootNode(), element, it)));
         } catch (IOException e) {
-            e.printStackTrace();
+            services.add(new MessageNode(element.getRootNode(), element, "Failed to load services"));
         }
-        return new Object[0];
+        return services.toArray();
     }
 
     @Override

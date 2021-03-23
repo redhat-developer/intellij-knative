@@ -14,6 +14,8 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
+import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonToken;
 import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.NetworkUtils;
@@ -84,12 +86,18 @@ public class KnCli implements Kn {
     @Override
     public List<Service> getServicesList() throws IOException {
         String json = ExecHelper.execute(command, envVars, "service", "list", "-o", "json");
+        if (json.startsWith("No services found.")) {
+            return Collections.emptyList();
+        }
         return getCustomCollection(json, Service.class);
     }
 
     @Override
     public List<Revision> getRevisionsForService(String serviceName) throws IOException {
         String json = ExecHelper.execute(command, envVars, "revision", "list", "-o", "json", "-s", serviceName);
+        if (json.startsWith("No revisions found.")) {
+            return Collections.emptyList();
+        }
         return getCustomCollection(json, Revision.class);
     }
 
