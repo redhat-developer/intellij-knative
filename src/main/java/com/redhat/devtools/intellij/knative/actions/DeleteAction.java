@@ -37,28 +37,24 @@ public class DeleteAction extends KnAction {
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath[] path, Object[] selected, Kn kncli) {
         ParentableNode[] elements = Arrays.stream(selected).map(item -> getElement(item)).toArray(ParentableNode[]::new);
-        DeleteDialog deleteDialog = UIHelper.executeInUI(() -> {
-            String name, kind, title;
-            String dialogText = "Are you sure you want to delete ";
+        String title, dialogText = "Are you sure you want to delete ";
 
-            if (elements.length == 1) {
-                name = elements[0].getName();
-                kind = elements[0].getClass().getSimpleName().toLowerCase().replace("node", "");
-                title = "Delete " + name;
-                dialogText += kind + " " + name + " ?";
-            } else {
-                title = "Delete multiple items";
-                dialogText += "the following items?\n";
-                for (ParentableNode element: elements) {
-                    dialogText += element.getName() + "\n";
-                }
+        if (elements.length == 1) {
+            String name = elements[0].getName();
+            String kind = elements[0].getClass().getSimpleName().toLowerCase().replace("node", "");
+            title = "Delete " + name;
+            dialogText += kind + " " + name + " ?";
+        } else {
+            title = "Delete multiple items";
+            dialogText += "the following items?\n";
+            for (ParentableNode element: elements) {
+                dialogText += element.getName() + "\n";
             }
+        }
 
+        DeleteDialog deleteDialog = new DeleteDialog(null, title, dialogText);
+        deleteDialog.show();
 
-            DeleteDialog delDialog = new DeleteDialog(null, title, dialogText);
-            delDialog.show();
-            return delDialog;
-        });
         CompletableFuture.runAsync(() -> {
             if (deleteDialog.isOK()) {
                 Map<Class, List<ParentableNode>> resourcesByClass = groupResourcesByClass(elements);
