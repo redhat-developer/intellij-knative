@@ -26,10 +26,13 @@
         <group id="com.redhat.devtools.intellij.knative.tree" popup="true">
             <action class="com.redhat.devtools.intellij.knative.actions.OpenInEditorAction" text="Open in Editor"/>
             <action class="com.redhat.devtools.intellij.knative.actions.OpenInBrowserAction" text="Open in Browser"/>
-            <action class="com.redhat.devtools.intellij.knative.actions.DeleteAction" text="Delete"/>
+            <action class="com.redhat.devtools.intellij.knative.actions.DeleteAction" text="Delete"
+                    use-shortcut-of="$Delete">
+            </action>
             <action id="com.redhat.devtools.intellij.knative.refresh"
                     class="com.redhat.devtools.intellij.knative.actions.RefreshAction"
-                    text="Refresh" icon="AllIcons.Actions.Refresh"/>
+                    text="Refresh" icon="AllIcons.Actions.Refresh"
+                    use-shortcut-of="Refresh"/>
         </group>
 
         <group id="com.redhat.devtools.intellij.knativev.view.actionsToolbar">
