@@ -35,6 +35,9 @@ public class RefreshAction extends StructureTreeAction {
             return;
         }
         KnTreeStructure structure = (KnTreeStructure) tree.getClientProperty(Constants.STRUCTURE_PROPERTY);
+        if (structure == null) {
+            return;
+        }
         if (Constants.TOOLBAR_PLACE.equals(anActionEvent.getPlace())) {
             structure.fireModified(structure.getRootElement());
         } else {
