@@ -21,7 +21,6 @@ import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -84,12 +83,18 @@ public class KnCli implements Kn {
     @Override
     public List<Service> getServicesList() throws IOException {
         String json = ExecHelper.execute(command, envVars, "service", "list", "-o", "json");
+        if (json.startsWith("No services found.")) {
+            return Collections.emptyList();
+        }
         return getCustomCollection(json, Service.class);
     }
 
     @Override
     public List<Revision> getRevisionsForService(String serviceName) throws IOException {
         String json = ExecHelper.execute(command, envVars, "revision", "list", "-o", "json", "-s", serviceName);
+        if (json.startsWith("No revisions found.")) {
+            return Collections.emptyList();
+        }
         return getCustomCollection(json, Revision.class);
     }
 
