@@ -16,7 +16,7 @@ import com.intellij.notification.Notifications;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.redhat.devtools.intellij.common.listener.SaveInEditorListener;
+import com.redhat.devtools.intellij.common.editor.SaveInEditorListener;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import com.redhat.devtools.intellij.knative.utils.KnHelper;

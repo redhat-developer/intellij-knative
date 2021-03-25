@@ -21,6 +21,7 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
 import com.redhat.devtools.intellij.common.actions.StructureTreeAction;
+import com.redhat.devtools.intellij.common.editor.AllowNonProjectEditing;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.common.utils.VirtualFileHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
@@ -81,6 +82,7 @@ public class EditorHelper {
             vf = VirtualFileHelper.createTempFile(name, content);
             vf.putUserData(PROJECT, project);
             vf.putUserData(KNATIVE, NOTIFICATION_ID);
+            vf.putUserData(AllowNonProjectEditing.ALLOW_NON_PROJECT_EDITING, true);
             if (targetNode != null) vf.putUserData(TARGET_NODE, targetNode);
         } else {
             vf = new LightVirtualFile(name, content);
