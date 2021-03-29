@@ -96,7 +96,7 @@ public class CreateServiceDialog extends DialogWrapper {
         createLogPanel();
 
         cancelButton = new JButton(CommonBundle.getCancelButtonText());
-        saveButton = new JButton(CommonBundle.getAddButtonText());
+        saveButton = new JButton("Create");
 
         footerPanel = new JPanel(new BorderLayout());
     }
