@@ -12,20 +12,26 @@ package com.redhat.devtools.intellij.knative.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.redhat.devtools.intellij.knative.kn.Kn;
-import com.redhat.devtools.intellij.knative.tree.KnRevisionNode;
-import com.redhat.devtools.intellij.knative.tree.KnServiceNode;
+import com.redhat.devtools.intellij.knative.tree.KnServingNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
-import com.redhat.devtools.intellij.knative.utils.EditorHelper;
+import com.redhat.devtools.intellij.knative.ui.CreateServiceDialog;
+import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import javax.swing.tree.TreePath;
 
-public class OpenInEditorAction extends KnAction {
-    public OpenInEditorAction() {
-        super(KnServiceNode.class, KnRevisionNode.class);
+public class CreateServiceAction extends KnAction {
+    public CreateServiceAction() {
+        super(KnServingNode.class);
     }
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Kn knCli) {
         ParentableNode node = getElement(selected);
-        EditorHelper.openKnComponentInEditor(node);
+        String namespace = node.getRootNode().getKn().getNamespace();
+        CreateServiceDialog createDialog = new CreateServiceDialog("Create New Service", anActionEvent.getProject(), namespace);
+        createDialog.setModal(false);
+        createDialog.show();
+        if (createDialog.isOK()) {
+            TreeHelper.getKnTreeStructure(getEventProject(anActionEvent)).fireModified(getElement(selected));
+        }
     }
 }

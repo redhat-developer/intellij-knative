@@ -22,8 +22,10 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
 import com.redhat.devtools.intellij.common.actions.StructureTreeAction;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
+import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Optional;
 import javax.swing.tree.TreePath;
@@ -82,5 +84,13 @@ public class EditorHelper {
                 document.setReadOnly(true);
             }
         });
+    }
+
+    public static String getSnippet(String kind) throws IOException {
+        URL snippet = EditorHelper.class.getResource("/snippets/" + kind + ".yaml");
+        if (snippet == null) {
+            return "";
+        }
+        return YAMLHelper.JSONToYAML(YAMLHelper.URLToJSON(snippet));
     }
 }
