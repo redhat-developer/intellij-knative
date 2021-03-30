@@ -1,0 +1,5 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <daemon.highlightInfoFilter implementation="com.redhat.devtools.intellij.knative.kubernetes.KnativeHighlightInfoFilter"/>
+    </extensions>
+</idea-plugin>
