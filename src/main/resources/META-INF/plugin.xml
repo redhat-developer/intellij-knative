@@ -22,6 +22,8 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Knative" anchor="left" factoryClass="com.redhat.devtools.intellij.knative.WindowToolFactory"/>
+        <fileDocumentSynchronizationVetoer implementation="com.redhat.devtools.intellij.knative.listener.KnSaveInEditorListener" order="first" />
+        <nonProjectFileWritingAccessExtension implementation="com.redhat.devtools.intellij.common.editor.AllowNonProjectEditing" />
     </extensions>
 
     <actions>

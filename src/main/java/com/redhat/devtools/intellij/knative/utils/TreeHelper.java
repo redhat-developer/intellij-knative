@@ -74,15 +74,6 @@ public class TreeHelper {
         return (KnTreeStructure) property;
     }
 
-    public static void refresh(Project project, ParentableNode node) {
-        if (project != null && node != null) {
-            KnTreeStructure structure = getKnTreeStructure(project);
-            if (structure != null) {
-                structure.fireModified(node);
-            }
-        }
-    }
-
     public static Kn getKn(Project project) {
         try {
             KnTreeStructure treeStructure = getKnTreeStructure(project);
@@ -90,6 +81,15 @@ public class TreeHelper {
             return root.getKn();
         } catch(Exception ex) {
             return null;
+        }
+    }
+
+    public static void refresh(Project project, ParentableNode node) {
+        if (project != null && node != null) {
+            KnTreeStructure structure = getKnTreeStructure(project);
+            if (structure != null) {
+                structure.fireModified(node);
+            }
         }
     }
 }

@@ -14,6 +14,7 @@ import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 
 public interface Kn {
     /**
@@ -89,6 +90,26 @@ public interface Kn {
      * @throws IOException if communication errored
      */
     void deleteRevisions(List<String> revisions) throws IOException;
+
+    /**
+     * Get a custom resource from the cluster which is namespaced.
+     *
+     * @param name name of custom resource
+     * @param crdContext the custom resource definition context of the resource kind
+     * @return Object as HashMap, null if no resource was found
+     * @throws IOException if communication errored
+     */
+    Map<String, Object> getCustomResource(String name, CustomResourceDefinitionContext crdContext);
+
+    /**
+     * Edit a custom resource object which is a namespaced object
+     *
+     * @param name name of custom resource
+     * @param crdContext the custom resource definition context of the resource kind
+     * @param objectAsString new object as a JSON string
+     * @throws IOException if communication errored
+     */
+    void editCustomResource(String name, CustomResourceDefinitionContext crdContext, String objectAsString) throws IOException;
 
     /**
      * Create a custom resource which is a namespaced object.

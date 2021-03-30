@@ -11,9 +11,14 @@
 package com.redhat.devtools.intellij.knative.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
 import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.common.utils.DeployModel;
+import com.intellij.openapi.ui.Messages;
+import com.redhat.devtools.intellij.common.utils.DeployModel;
+import com.redhat.devtools.intellij.common.utils.JSONHelper;
+import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.tree.KnRevisionNode;
@@ -21,6 +26,7 @@ import com.redhat.devtools.intellij.knative.tree.KnServiceNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 import java.io.IOException;
+import java.util.Map;
 
 public class KnHelper {
 
@@ -35,15 +41,42 @@ public class KnHelper {
         return content;
     }
 
-    public static void saveOnCluster(Project project, String yaml) throws IOException {
-        DeployModel deployModel = buildDeployModel(yaml);
+    public static boolean saveOnCluster(Project project, String yaml) throws IOException {
+        if (!isSaveConfirmed("Do you want to push the changes to the cluster?")) {
+            return false;
+        }
 
         Kn knCli = TreeHelper.getKn(project);
         if (knCli == null) {
             throw new IOException("Unable to save the resource to the cluster. Internal error, please retry or restart the IDE.");
         }
 
-        knCli.createCustomResource(deployModel.getCrdContext(), yaml);
+        save(knCli, yaml);
+        return true;
+    }
+
+    private static boolean isSaveConfirmed(String confirmationMessage) {
+        int resultDialog = UIHelper.executeInUI(() ->
+                Messages.showYesNoDialog(
+                        confirmationMessage,
+                        "Save to cluster",
+                        null
+                ));
+
+        return resultDialog == Messages.OK;
+    }
+
+    private static void save(Kn knCli, String yaml) throws IOException {
+        DeployModel deployModel = buildDeployModel(yaml);
+
+        Map<String, Object> resource = knCli.getCustomResource(deployModel.getName(), deployModel.getCrdContext());
+        if (resource == null) {
+            knCli.createCustomResource(deployModel.getCrdContext(), yaml);
+        } else {
+            JsonNode customResource = JSONHelper.MapToJSON(resource);
+            ((ObjectNode) customResource).set("spec", deployModel.getSpec());
+            knCli.editCustomResource(deployModel.getName(), deployModel.getCrdContext(), customResource.toString());
+        }
     }
 
     private static DeployModel buildDeployModel(String yaml) throws IOException {
@@ -90,5 +123,9 @@ public class KnHelper {
 
     private static String getPluralByKind(String kind) {
         return kind.toLowerCase() + "s";
+    }
+
+    public static boolean isWritable(ParentableNode node) {
+        return node instanceof KnServiceNode;
     }
 }
