@@ -39,7 +39,7 @@ public class OpenInBrowserAction extends KnAction {
     private String getURL(Object selected) {
         String url = "";
         if (selected instanceof KnServiceNode) {
-            ServiceStatus status = ((KnServiceNode) selected).getService().getStatus();
+            ServiceStatus status = ((KnServiceNode) selected).getService(false).getStatus();
             if (status != null) {
                 url = status.getUrl();
             }

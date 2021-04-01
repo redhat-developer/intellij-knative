@@ -46,7 +46,7 @@ public class KnRevisionDescriptor extends PresentableNodeDescriptor<KnRevisionNo
             presentation.setIcon(nodeIcon);
         }
 
-        ServiceStatus status = element.getParent().getService().getStatus();
+        ServiceStatus status = element.getParent().getService(false).getStatus();
         String errorMessage = "";
         for (StatusCondition condition : element.getRevision().getConditions()) {
             if ("False".equals(condition.getStatus()) && "Ready".equals(condition.getType())) {

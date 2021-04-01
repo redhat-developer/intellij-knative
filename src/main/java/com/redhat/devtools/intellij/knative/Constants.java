@@ -16,7 +16,6 @@ import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 public class Constants {
     public static final String STRUCTURE_PROPERTY = Constants.class.getPackage().getName() + ".structure";
     public static final String TOOLBAR_PLACE = Constants.class.getPackage().getName() + ".view.toolbar";
-    public static final Key<ParentableNode> TARGET_NODE = Key.create("com.redhat.devtools.intellij.knative.targetnode");
     public static final Key<String> KNATIVE = Key.create("com.redhat.devtools.intellij.knative");
 
     public static final String NOTIFICATION_ID = "Knative";

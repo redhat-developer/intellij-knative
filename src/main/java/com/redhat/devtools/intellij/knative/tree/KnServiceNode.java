@@ -10,17 +10,18 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.tree;
 
+import com.intellij.util.Function;
 import com.redhat.devtools.intellij.knative.kn.Service;
 
 public class KnServiceNode extends ParentableNode<KnServingNode> {
-    private final Service service;
+    private final Function<Boolean, Service> service;
 
-    public KnServiceNode(KnRootNode rootNode, KnServingNode parent, Service service) {
-        super(rootNode, parent, service.getName());
+    public KnServiceNode(KnRootNode rootNode, KnServingNode parent, Function<Boolean, Service> service) {
+        super(rootNode, parent, service.fun(false).getName());
         this.service = service;
     }
 
-    public Service getService() {
-        return service;
+    public Service getService(boolean toUpdate) {
+        return service.fun(toUpdate);
     }
 }
