@@ -68,10 +68,12 @@ public class CreateServiceDialog extends DialogWrapper {
     private PsiAwareTextEditorImpl editor;
     private OnePixelSplitter splitterPanel;
     private JTextArea txtAreaEventLog;
+    private Runnable refreshFunction;
 
-    public CreateServiceDialog(String title, Project project, String namespace) {
+    public CreateServiceDialog(String title, Project project, String namespace, Runnable refreshFunction) {
         super(project, true);
         this.project = project;
+        this.refreshFunction = refreshFunction;
         setTitle(title);
         initEditor(namespace);
         buildStructure();
@@ -264,7 +266,8 @@ public class CreateServiceDialog extends DialogWrapper {
         saveButton.addActionListener(e -> {
             ExecHelper.submit(() -> {
                 try {
-                    KnHelper.saveOnCluster(this.project, editor.getEditor().getDocument().getText());
+                    KnHelper.saveOnCluster(this.project, editor.getEditor().getDocument().getText(), true);
+                    UIHelper.executeInUI(refreshFunction);
                     UIHelper.executeInUI(() -> super.doOKAction());
                 } catch (IOException | KubernetesClientException ex) {
                     UIHelper.executeInUI(() -> displayError(ex.getLocalizedMessage()));

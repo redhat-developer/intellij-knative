@@ -39,8 +39,8 @@ public class ServiceDeserializer extends StdNodeBasedDeserializer<Service> {
         if (statusNode == null || statusNode.isEmpty()) {
             return null;
         }
-        String url = statusNode.get("url").asText();
-        int observedGeneration = statusNode.get("observedGeneration").asInt();
+        String url = statusNode.get("url") != null ? statusNode.get("url").asText() : "";
+        int observedGeneration = statusNode.get("observedGeneration") != null ? statusNode.get("observedGeneration").asInt() : 1;
         String latestReadyRevisionName = statusNode.get("latestReadyRevisionName") != null ? statusNode.get("latestReadyRevisionName").asText() : "";
         String latestCreatedRevisionName = statusNode.get("latestCreatedRevisionName") != null ? statusNode.get("latestCreatedRevisionName").asText() : "";
 
