@@ -11,6 +11,14 @@
       <p>To run the instance of an OpenShift cluster locally, developers can use <a href="https://developers.redhat.com/products/crc/download/">CRC</a>.</p>
     ]]></description>
 
+    <change-notes><![CDATA[
+      <p><b>0.0.1</b></p>
+      <p>Initial release</p>
+      <p>Allow to create, edit, delete and open in browser services and revisions</p>
+      <p>It depends on the kubernetes plugin to switch namespace/project within the IDE</p>
+    ]]>
+    </change-notes>
+
     <idea-version since-build="193"/>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
