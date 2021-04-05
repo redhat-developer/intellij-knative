@@ -39,13 +39,13 @@ public class ServiceDeserializer extends StdNodeBasedDeserializer<Service> {
         if (statusNode == null || statusNode.isEmpty()) {
             return null;
         }
-        String url = statusNode.get("url").asText();
-        int observedGeneration = statusNode.get("observedGeneration").asInt();
-        String latestReadyRevisionName = statusNode.get("latestReadyRevisionName") != null ? statusNode.get("latestReadyRevisionName").asText() : "";
-        String latestCreatedRevisionName = statusNode.get("latestCreatedRevisionName") != null ? statusNode.get("latestCreatedRevisionName").asText() : "";
+        String url = statusNode.has("url") ? statusNode.get("url").asText() : "";
+        int observedGeneration = statusNode.has("observedGeneration") ? statusNode.get("observedGeneration").asInt() : 1;
+        String latestReadyRevisionName = statusNode.has("latestReadyRevisionName") ? statusNode.get("latestReadyRevisionName").asText() : "";
+        String latestCreatedRevisionName = statusNode.has("latestCreatedRevisionName") ? statusNode.get("latestCreatedRevisionName").asText() : "";
 
         String addressUrl = "";
-        if (statusNode.get("address") != null && statusNode.get("address").get("url") != null) {
+        if (statusNode.has("address") && statusNode.get("address").has("url")) {
             addressUrl = statusNode.get("address").get("url").asText();
         }
 
@@ -61,12 +61,12 @@ public class ServiceDeserializer extends StdNodeBasedDeserializer<Service> {
         }
         List<ServiceTraffic> traffic = new ArrayList<>();
         for (JsonNode jsonNode : trafficNode) {
-            String tag = jsonNode.get("tag") != null ? jsonNode.get("tag").asText() : "";
-            String revisionName = jsonNode.get("revisionName") != null ? jsonNode.get("revisionName").asText() : "";
-            String configurationName = jsonNode.get("configurationName") != null ? jsonNode.get("configurationName").asText() : "";
-            boolean latestRevision = jsonNode.get("latestRevision") != null && jsonNode.get("latestRevision").asBoolean();
-            int percent = jsonNode.get("percent") != null ? jsonNode.get("percent").intValue() : -1;
-            String url = jsonNode.get("url") != null ? jsonNode.get("url").asText() : "";
+            String tag = jsonNode.has("tag") ? jsonNode.get("tag").asText() : "";
+            String revisionName = jsonNode.has("revisionName") ? jsonNode.get("revisionName").asText() : "";
+            String configurationName = jsonNode.has("configurationName") ? jsonNode.get("configurationName").asText() : "";
+            boolean latestRevision = jsonNode.has("latestRevision") && jsonNode.get("latestRevision").asBoolean();
+            int percent = jsonNode.has("percent") ? jsonNode.get("percent").intValue() : -1;
+            String url = jsonNode.has("url") ? jsonNode.get("url").asText() : "";
 
             traffic.add(new ServiceTraffic(tag, revisionName, configurationName, latestRevision, percent, url));
         }

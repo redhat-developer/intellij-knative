@@ -53,7 +53,7 @@ public class KnSaveInEditorListener extends SaveInEditorListener {
 
     protected boolean save(Document document, Project project) {
         try {
-            return KnHelper.saveOnCluster(project, document.getText());
+            return KnHelper.saveOnCluster(project, document.getText(), false);
         } catch (IOException e) {
             Notification notification = new Notification(NOTIFICATION_ID, "Error", "An error occurred while saving \n" + e.getLocalizedMessage(), NotificationType.ERROR);
             Notifications.Bus.notify(notification);

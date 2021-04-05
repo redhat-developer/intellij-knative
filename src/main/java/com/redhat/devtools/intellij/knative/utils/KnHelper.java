@@ -14,7 +14,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
 import com.intellij.openapi.project.Project;
-import com.redhat.devtools.intellij.common.utils.DeployModel;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.DeployModel;
 import com.redhat.devtools.intellij.common.utils.JSONHelper;
@@ -41,8 +40,8 @@ public class KnHelper {
         return content;
     }
 
-    public static boolean saveOnCluster(Project project, String yaml) throws IOException {
-        if (!isSaveConfirmed("Do you want to push the changes to the cluster?")) {
+    public static boolean saveOnCluster(Project project, String yaml, boolean isCreate) throws IOException {
+        if (!isCreate && !isSaveConfirmed("Do you want to push the changes to the cluster?")) {
             return false;
         }
 
@@ -51,7 +50,11 @@ public class KnHelper {
             throw new IOException("Unable to save the resource to the cluster. Internal error, please retry or restart the IDE.");
         }
 
-        save(knCli, yaml);
+        if (isCreate) {
+            saveNew(knCli, yaml);
+        } else {
+            save(knCli, yaml);
+        }
         return true;
     }
 
@@ -77,6 +80,11 @@ public class KnHelper {
             ((ObjectNode) customResource).set("spec", deployModel.getSpec());
             knCli.editCustomResource(deployModel.getName(), deployModel.getCrdContext(), customResource.toString());
         }
+    }
+
+    private static void saveNew(Kn knCli, String yaml) throws IOException {
+        DeployModel deployModel = buildDeployModel(yaml);
+        knCli.createCustomResource(deployModel.getCrdContext(), yaml);
     }
 
     private static DeployModel buildDeployModel(String yaml) throws IOException {
