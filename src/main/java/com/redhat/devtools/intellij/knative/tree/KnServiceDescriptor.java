@@ -16,6 +16,7 @@ import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.ide.util.treeView.PresentableNodeDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.SimpleTextAttributes;
+import com.redhat.devtools.intellij.knative.kn.Service;
 import com.redhat.devtools.intellij.knative.kn.StatusCondition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,22 +27,26 @@ public class KnServiceDescriptor extends PresentableNodeDescriptor<KnServiceNode
 
     private final KnServiceNode element;
     private final Icon nodeIcon;
+    private boolean toUpdate;
 
     protected KnServiceDescriptor(Project project, KnServiceNode element, Icon nodeIcon, @Nullable NodeDescriptor parentDescriptor) {
         super(project, parentDescriptor);
         this.element = element;
         this.nodeIcon = nodeIcon;
         this.myName = element.getName();
+        this.toUpdate = false;
     }
 
     @Override
     protected void update(@NotNull PresentationData presentation) {
+        Service service = element.getService(toUpdate);
+        toUpdate = true;
         if (nodeIcon != null) {
             presentation.setIcon(nodeIcon);
         }
         String errorMessage = "";
-        if (element.getService().getStatus() != null) {
-            for (StatusCondition condition : element.getService().getStatus().getConditions()) {
+        if (service != null && service.getStatus() != null) {
+            for (StatusCondition condition : service.getStatus().getConditions()) {
                 if ("False".equals(condition.getStatus()) && "Ready".equals(condition.getType())) {
                     errorMessage = condition.getMessage();
                     break;

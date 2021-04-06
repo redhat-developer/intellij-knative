@@ -36,9 +36,9 @@ import org.slf4j.LoggerFactory;
 
 
 import static com.redhat.devtools.intellij.common.CommonConstants.PROJECT;
+import static com.redhat.devtools.intellij.common.CommonConstants.TARGET_NODE;
 import static com.redhat.devtools.intellij.knative.Constants.KNATIVE;
 import static com.redhat.devtools.intellij.knative.Constants.NOTIFICATION_ID;
-import static com.redhat.devtools.intellij.knative.Constants.TARGET_NODE;
 
 public class EditorHelper {
     private static Logger logger = LoggerFactory.getLogger(EditorHelper.class);

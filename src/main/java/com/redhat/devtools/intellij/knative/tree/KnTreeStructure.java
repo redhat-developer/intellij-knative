@@ -16,6 +16,7 @@ import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.util.ArrayUtil;
+import com.intellij.util.Function;
 import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
 import com.redhat.devtools.intellij.common.tree.MutableModel;
 import com.redhat.devtools.intellij.common.tree.MutableModelSupport;
@@ -23,12 +24,12 @@ import com.redhat.devtools.intellij.common.utils.ConfigHelper;
 import com.redhat.devtools.intellij.common.utils.ConfigWatcher;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.kn.Kn;
-import com.redhat.devtools.intellij.knative.kn.Revision;
 import com.redhat.devtools.intellij.knative.kn.Service;
 import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.NamedContext;
 import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.codec.binary.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -125,11 +126,26 @@ public class KnTreeStructure extends AbstractTreeStructure implements MutableMod
         List<Object> services = new ArrayList<>();
         try {
             Kn kn = element.getRootNode().getKn();
-            kn.getServicesList().stream().forEach(it -> services.add(new KnServiceNode(element.getRootNode(), element, it)));
+            kn.getServicesList().stream().forEach(it -> services.add(new KnServiceNode(element.getRootNode(), element, getService(kn, it))));
         } catch (IOException e) {
             services.add(new MessageNode(element.getRootNode(), element, "Failed to load services"));
         }
         return services.toArray();
+    }
+
+    private Function<Boolean, Service> getService(Kn kn, Service service) {
+        AtomicReference<Service> serviceObj = new AtomicReference<>(service);
+        return (toUpdate) -> {
+            if (!toUpdate) {
+                return serviceObj.get();
+            }
+            try {
+                serviceObj.set(kn.getService(service.getName()));
+                return serviceObj.get();
+            } catch (IOException e) {
+                return null;
+            }
+        };
     }
 
     @Override

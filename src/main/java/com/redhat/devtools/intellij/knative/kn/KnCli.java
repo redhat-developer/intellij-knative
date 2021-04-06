@@ -102,6 +102,13 @@ public class KnCli implements Kn {
     }
 
     @Override
+    public Service getService(String name) throws IOException {
+        String json = ExecHelper.execute(command, envVars, "service", "describe", name, "-o", "json", "-n", getNamespace());
+        JavaType customClassCollection = JSON_MAPPER.getTypeFactory().constructType(Service.class);
+        return JSON_MAPPER.readValue(json, customClassCollection);
+    }
+
+    @Override
     public String getServiceYAML(String name) throws IOException {
         return ExecHelper.execute(command, envVars, "service", "describe", name, "-o", "yaml", "-n", getNamespace());
     }

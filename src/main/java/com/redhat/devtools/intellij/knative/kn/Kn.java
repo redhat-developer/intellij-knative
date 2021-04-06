@@ -58,6 +58,15 @@ public interface Kn {
     List<Revision> getRevisionsForService(String serviceName) throws IOException;
 
     /**
+     * Return the service component
+     *
+     * @param name name of service
+     * @return service component
+     * @throws IOException if communication encountered an error
+     */
+    Service getService(String name) throws IOException;
+
+    /**
      * Get the Service component as YAML
      *
      * @param name name of service
