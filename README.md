@@ -14,19 +14,19 @@ This first release only support knative serving.
 
 The plugin supports two ways to create a new service. A simplified view with textboxes/inputs to be filled in and an editor view for advanced settings.
 
-![](images/0.0.1/knative1.gif)
+![](images/0.1.0/knative1.gif)
 
 ### Edit from the editor
 
 Services can be opened in the editor and edit it from there. It offers code assist and syntax validation based on JSON schemas.
 
-![](images/0.0.1/knative2.gif)
+![](images/0.1.0/knative2.gif)
 
 ### Delete multiple elements
 
 It is possible to delete several different elements, even if they are of different nature (ie services and revisions).
 
-![](images/0.0.1/knative3.gif)
+![](images/0.1.0/knative3.gif)
 
 ### Read only editor
 
@@ -40,7 +40,7 @@ Basic commands such as delete and refresh inherit and make use of shortcuts from
 
 Services can be opened in browser from the IDE.
 
-![](images/0.0.1/knative4.gif)
+![](images/0.1.0/knative4.gif)
 
 ### Running Kubernetes and OpenShift Clusters to use with plugin
 
