@@ -15,7 +15,6 @@
       <p><b>0.0.1</b></p>
       <p>Initial release</p>
       <p>Allow to create, edit, delete and open in browser services and revisions</p>
-      <p>It depends on the kubernetes plugin to switch namespace/project within the IDE</p>
     ]]>
     </change-notes>
 
