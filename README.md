@@ -1,6 +1,11 @@
 # IntelliJ Knative
+[plugin-repo]: https://plugins.jetbrains.com/plugin/16476-knative-by-red-hat
+[plugin-version-svg]: https://img.shields.io/jetbrains/plugin/v/16476-knative-by-red-hat.svg
+[plugin-downloads-svg]: https://img.shields.io/jetbrains/plugin/d/16476-knative-by-red-hat.svg
 ![Build status](https://github.com/redhat-developer/intellij-knative/actions/workflows/ci.yml/badge.svg?branch=main)
 ![Validate against IJ versions](https://github.com/redhat-developer/intellij-knative/actions/workflows/IJ.yml/badge.svg)
+[![JetBrains plugins][plugin-version-svg]][plugin-repo]
+[![JetBrains plugins][plugin-downloads-svg]][plugin-repo]
 
 ## Overview
 
