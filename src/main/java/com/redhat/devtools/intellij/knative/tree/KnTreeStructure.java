@@ -49,7 +49,7 @@ public class KnTreeStructure extends AbstractTreeStructure implements MutableMod
     private final Project project;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private Config config;
-    private final KnRootNode root;
+    private KnRootNode root;
     private final MutableModel<Object> mutableModelSupport = new MutableModelSupport<>();
 
     public KnTreeStructure(Project project) {
@@ -80,7 +80,7 @@ public class KnTreeStructure extends AbstractTreeStructure implements MutableMod
         Kn kn = root.getKn();
         if (kn != null) {
             if (element instanceof KnRootNode) {
-                Object[] result = new Object[2];
+                Object[] result = new Object[0];
                 try {
                     if (kn.isKnativeServingAware()) {
                         result = ArrayUtil.append(result, new KnServingNode(root, root));
@@ -157,7 +157,7 @@ public class KnTreeStructure extends AbstractTreeStructure implements MutableMod
     }
 
     @Override
-    public @NotNull NodeDescriptor<?> createDescriptor(@NotNull Object element, @Nullable NodeDescriptor parentDescriptor) {
+    public NodeDescriptor<?> createDescriptor(@NotNull Object element, @Nullable NodeDescriptor parentDescriptor) {
         if (element instanceof KnRootNode) {
             Kn kn = ((KnRootNode) element).getKn();
             return new LabelAndIconDescriptor<>(project, element, kn != null ? kn.getNamespace() : "Loading", CLUSTER_ICON, parentDescriptor);

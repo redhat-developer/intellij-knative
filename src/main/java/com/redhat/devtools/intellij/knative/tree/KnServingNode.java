@@ -10,8 +10,10 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.tree;
 
+import org.jetbrains.annotations.NotNull;
+
 public class KnServingNode extends ParentableNode<KnRootNode> {
-    protected KnServingNode(KnRootNode rootNode, KnRootNode parent) {
+    protected KnServingNode(@NotNull KnRootNode rootNode, @NotNull KnRootNode parent) {
         super(rootNode, parent, "Serving");
     }
 }

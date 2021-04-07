@@ -27,6 +27,10 @@ intellij {
 
 dependencies {
     compile 'com.redhat.devtools.intellij:intellij-common:0.0.3-SNAPSHOT'
+    testCompile 'org.mockito:mockito-inline:3.8.0'
+
+
+
 }
 
 configurations {
