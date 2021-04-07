@@ -26,7 +26,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           current-tag: ${{ steps.get_version.outputs.VERSION }}
           types-mapping: 'feat:Features,fix:Bug Fixes,docs:Documentation,refactor:Refactoring,build:Builds,chore:Other'
-          scopes-mapping: 'UI:UI,Hub:Hub'
+          scopes-mapping: 'UI:UI'
       - run: |
           echo '${{ steps.changelog.outputs.changelog }}'
       - name: Create Release
