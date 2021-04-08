@@ -36,7 +36,7 @@ import java.util.TreeMap;
 public class KnCli implements Kn {
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper(new JsonFactory());
     private final Project project;
-    private final KubernetesClient client;
+    private KubernetesClient client;
     private final String command;
     private Map<String, String> envVars;
 

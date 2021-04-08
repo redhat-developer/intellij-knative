@@ -1,0 +1,298 @@
+{
+  "apiVersion": "serving.knative.dev/v1",
+  "items": [
+    {
+      "apiVersion": "serving.knative.dev/v1",
+      "kind": "Revision",
+      "metadata": {
+        "annotations": {
+          "serving.knative.dev/creator": "minikube-user",
+          "serving.knative.dev/routes": "test",
+          "serving.knative.dev/routingStateModified": "2021-04-06T08:39:04Z"
+        },
+        "creationTimestamp": "2021-04-06T08:39:04Z",
+        "generation": 1,
+        "labels": {
+          "serving.knative.dev/configuration": "test",
+          "serving.knative.dev/configurationGeneration": "2",
+          "serving.knative.dev/routingState": "active",
+          "serving.knative.dev/service": "test"
+        },
+        "managedFields": [
+          {
+            "apiVersion": "serving.knative.dev/v1",
+            "fieldsType": "FieldsV1",
+            "fieldsV1": {
+              "f:metadata": {
+                "f:annotations": {
+                  ".": {},
+                  "f:serving.knative.dev/creator": {},
+                  "f:serving.knative.dev/routes": {},
+                  "f:serving.knative.dev/routingStateModified": {}
+                },
+                "f:labels": {
+                  ".": {},
+                  "f:serving.knative.dev/configuration": {},
+                  "f:serving.knative.dev/configurationGeneration": {},
+                  "f:serving.knative.dev/routingState": {},
+                  "f:serving.knative.dev/service": {}
+                },
+                "f:ownerReferences": {
+                  ".": {},
+                  "k:{\"uid\":\"ab3925a4-67fb-4e03-91f9-c58b662f3015\"}": {
+                    ".": {},
+                    "f:apiVersion": {},
+                    "f:blockOwnerDeletion": {},
+                    "f:controller": {},
+                    "f:kind": {},
+                    "f:name": {},
+                    "f:uid": {}
+                  }
+                }
+              },
+              "f:spec": {
+                ".": {},
+                "f:containerConcurrency": {},
+                "f:containers": {},
+                "f:enableServiceLinks": {},
+                "f:timeoutSeconds": {}
+              },
+              "f:status": {
+                ".": {},
+                "f:conditions": {},
+                "f:containerStatuses": {},
+                "f:imageDigest": {},
+                "f:observedGeneration": {},
+                "f:serviceName": {}
+              }
+            },
+            "manager": "controller",
+            "operation": "Update",
+            "time": "2021-04-06T08:39:08Z"
+          }
+        ],
+        "name": "test-00002",
+        "namespace": "default",
+        "ownerReferences": [
+          {
+            "apiVersion": "serving.knative.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "Configuration",
+            "name": "test",
+            "uid": "ab3925a4-67fb-4e03-91f9-c58b662f3015"
+          }
+        ],
+        "resourceVersion": "1022242",
+        "uid": "dab91741-accc-4821-82ec-17a001b28d37"
+      },
+      "spec": {
+        "containerConcurrency": 0,
+        "containers": [
+          {
+            "env": [
+              {
+                "name": "TARGET",
+                "value": "Sample"
+              }
+            ],
+            "image": "brushnet/hello-node:v2",
+            "name": "first",
+            "readinessProbe": {
+              "successThreshold": 1,
+              "tcpSocket": {
+                "port": 0
+              }
+            },
+            "resources": {}
+          }
+        ],
+        "enableServiceLinks": false,
+        "timeoutSeconds": 300
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2021-04-06T09:55:52Z",
+            "message": "The target is not receiving traffic.",
+            "reason": "NoTraffic",
+            "severity": "Info",
+            "status": "False",
+            "type": "Active"
+          },
+          {
+            "lastTransitionTime": "2021-04-06T08:39:18Z",
+            "status": "True",
+            "type": "ContainerHealthy"
+          },
+          {
+            "lastTransitionTime": "2021-04-06T08:39:18Z",
+            "status": "True",
+            "type": "Ready"
+          },
+          {
+            "lastTransitionTime": "2021-04-06T08:39:08Z",
+            "status": "True",
+            "type": "ResourcesAvailable"
+          }
+        ],
+        "containerStatuses": [
+          {
+            "imageDigest": "index.docker.io/brushnet/hello-node@sha256:143da693a314c9f06977bbe347682a4b00655ed7c2212aad7a930b5c49799027",
+            "name": "first"
+          }
+        ],
+        "imageDigest": "index.docker.io/brushnet/hello-node@sha256:143da693a314c9f06977bbe347682a4b00655ed7c2212aad7a930b5c49799027",
+        "observedGeneration": 1,
+        "serviceName": "test-00002"
+      }
+    },
+    {
+      "apiVersion": "serving.knative.dev/v1",
+      "kind": "Revision",
+      "metadata": {
+        "annotations": {
+          "serving.knative.dev/creator": "minikube-user",
+          "serving.knative.dev/routes": "test",
+          "serving.knative.dev/routingStateModified": "2021-04-06T09:53:22Z"
+        },
+        "creationTimestamp": "2021-04-06T08:36:20Z",
+        "generation": 1,
+        "labels": {
+          "serving.knative.dev/configuration": "test",
+          "serving.knative.dev/configurationGeneration": "1",
+          "serving.knative.dev/routingState": "active",
+          "serving.knative.dev/service": "test"
+        },
+        "managedFields": [
+          {
+            "apiVersion": "serving.knative.dev/v1",
+            "fieldsType": "FieldsV1",
+            "fieldsV1": {
+              "f:metadata": {
+                "f:annotations": {
+                  ".": {},
+                  "f:serving.knative.dev/creator": {},
+                  "f:serving.knative.dev/routes": {},
+                  "f:serving.knative.dev/routingStateModified": {}
+                },
+                "f:labels": {
+                  ".": {},
+                  "f:serving.knative.dev/configuration": {},
+                  "f:serving.knative.dev/configurationGeneration": {},
+                  "f:serving.knative.dev/routingState": {},
+                  "f:serving.knative.dev/service": {}
+                },
+                "f:ownerReferences": {
+                  ".": {},
+                  "k:{\"uid\":\"ab3925a4-67fb-4e03-91f9-c58b662f3015\"}": {
+                    ".": {},
+                    "f:apiVersion": {},
+                    "f:blockOwnerDeletion": {},
+                    "f:controller": {},
+                    "f:kind": {},
+                    "f:name": {},
+                    "f:uid": {}
+                  }
+                }
+              },
+              "f:spec": {
+                ".": {},
+                "f:containerConcurrency": {},
+                "f:containers": {},
+                "f:enableServiceLinks": {},
+                "f:timeoutSeconds": {}
+              },
+              "f:status": {
+                ".": {},
+                "f:conditions": {},
+                "f:containerStatuses": {},
+                "f:imageDigest": {},
+                "f:observedGeneration": {},
+                "f:serviceName": {}
+              }
+            },
+            "manager": "controller",
+            "operation": "Update",
+            "time": "2021-04-06T09:53:22Z"
+          }
+        ],
+        "name": "test-00001",
+        "namespace": "default",
+        "ownerReferences": [
+          {
+            "apiVersion": "serving.knative.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "Configuration",
+            "name": "test",
+            "uid": "ab3925a4-67fb-4e03-91f9-c58b662f3015"
+          }
+        ],
+        "resourceVersion": "1022371",
+        "uid": "2a26ca4f-b2ea-4c31-9785-39e6f2d69a2e"
+      },
+      "spec": {
+        "containerConcurrency": 0,
+        "containers": [
+          {
+            "env": [
+              {
+                "name": "TARGET",
+                "value": "Sample"
+              }
+            ],
+            "image": "gcr.io/knative-samples/helloworld-go",
+            "name": "first",
+            "readinessProbe": {
+              "successThreshold": 1,
+              "tcpSocket": {
+                "port": 0
+              }
+            },
+            "resources": {}
+          }
+        ],
+        "enableServiceLinks": false,
+        "timeoutSeconds": 300
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2021-04-06T09:55:58Z",
+            "message": "The target is not receiving traffic.",
+            "reason": "NoTraffic",
+            "severity": "Info",
+            "status": "False",
+            "type": "Active"
+          },
+          {
+            "lastTransitionTime": "2021-04-06T08:36:32Z",
+            "status": "True",
+            "type": "ContainerHealthy"
+          },
+          {
+            "lastTransitionTime": "2021-04-06T08:36:32Z",
+            "status": "True",
+            "type": "Ready"
+          },
+          {
+            "lastTransitionTime": "2021-04-06T08:36:32Z",
+            "status": "True",
+            "type": "ResourcesAvailable"
+          }
+        ],
+        "containerStatuses": [
+          {
+            "imageDigest": "gcr.io/knative-samples/helloworld-go@sha256:5ea96ba4b872685ff4ddb5cd8d1a97ec18c18fae79ee8df0d29f446c5efe5f50",
+            "name": "first"
+          }
+        ],
+        "imageDigest": "gcr.io/knative-samples/helloworld-go@sha256:5ea96ba4b872685ff4ddb5cd8d1a97ec18c18fae79ee8df0d29f446c5efe5f50",
+        "observedGeneration": 1,
+        "serviceName": "test-00001"
+      }
+    }
+  ],
+  "kind": "RevisionList"
+}
