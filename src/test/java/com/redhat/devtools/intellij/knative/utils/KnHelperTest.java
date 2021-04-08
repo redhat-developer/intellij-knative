@@ -15,11 +15,14 @@ import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
 import com.intellij.testFramework.fixtures.IdeaProjectTestFixture;
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
 import com.intellij.testFramework.fixtures.TestFixtureBuilder;
+import com.redhat.devtools.intellij.common.utils.UIHelper;
+import com.redhat.devtools.intellij.knative.BaseTest;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.tree.KnRevisionNode;
 import com.redhat.devtools.intellij.knative.tree.KnRootNode;
 import com.redhat.devtools.intellij.knative.tree.KnServiceNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
+import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
@@ -28,13 +31,19 @@ import org.mockito.MockedStatic;
 
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
-public class KnHelperTest {
+public class KnHelperTest extends BaseTest {
 
+    private static final String RESOURCE_PATH = "utils/knhelper/";
     private static final String YAML_CONTENT = "test";
     private CodeInsightTestFixture myFixture;
     private Project project;
@@ -90,13 +99,11 @@ public class KnHelperTest {
     }
 
     @Test
-    public void SaveOnCluster_SavedNotConfirmed_False() {
-
-    }
-
-    @Test
     public void SaveOnCluster_IsCreateIsTrue_IsSaveConfirmedNotCalled() {
-
+        try(MockedStatic<UIHelper> uiHelperMockedStatic = mockStatic(UIHelper.class)) {
+            KnHelper.saveOnCluster(project, "test", true);
+            uiHelperMockedStatic.verify(times(0), () -> UIHelper.executeInUI(any(Runnable.class)));
+        } catch (IOException e) { }
     }
 
     @Test
@@ -112,17 +119,106 @@ public class KnHelperTest {
     }
 
     @Test
-    public void SaveOnCluster_IsCreateFalse_True() {
-
+    public void SaveOnCluster_InvalidYamlMissingKind_Throw() throws IOException {
+        String yaml = load(RESOURCE_PATH + "missingkind_service.yaml");
+        try (MockedStatic<TreeHelper> theMock = mockStatic(TreeHelper.class)) {
+            theMock.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+            try {
+                KnHelper.saveOnCluster(project, yaml, true);
+            } catch (IOException e) {
+                assertEquals("Knative configuration has not a valid format. Kind field is not found.", e.getLocalizedMessage());
+            }
+        }
     }
 
     @Test
-    public void SaveOnCluster_IsCreateTrue_True() throws Exception {
-       /* try (MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
-            treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
-            PowerMockito.doNothing().when(KnHelper.class, "saveNew", kn, YAML_CONTENT);
-            boolean result = KnHelper.saveOnCluster(project, "", true);
-            assertEquals(true, result);
-        }*/
+    public void SaveOnCluster_InvalidYamlMissingName_Throw() throws IOException {
+        String yaml = load(RESOURCE_PATH + "missingname_service.yaml");
+        try (MockedStatic<TreeHelper> theMock = mockStatic(TreeHelper.class)) {
+            theMock.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+            try {
+                KnHelper.saveOnCluster(project, yaml, true);
+            } catch (IOException e) {
+                assertEquals("Knative service has not a valid format. Name field is not valid or found.", e.getLocalizedMessage());
+            }
+        }
+    }
+
+    @Test
+    public void SaveOnCluster_InvalidYamlMissingApiVersion_Throw() throws IOException {
+        String yaml = load(RESOURCE_PATH + "missingapiversion_service.yaml");
+        try (MockedStatic<TreeHelper> theMock = mockStatic(TreeHelper.class)) {
+            theMock.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+            try {
+                KnHelper.saveOnCluster(project, yaml, true);
+            } catch (IOException e) {
+                assertEquals("Knative service has not a valid format. ApiVersion field is not found.", e.getLocalizedMessage());
+            }
+        }
+    }
+
+    @Test
+    public void SaveOnCluster_InvalidYamlMissingCRD_Throw() throws IOException {
+        String yaml = load(RESOURCE_PATH + "missingcrd_service.yaml");
+        try (MockedStatic<TreeHelper> theMock = mockStatic(TreeHelper.class)) {
+            theMock.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+            try {
+                KnHelper.saveOnCluster(project, yaml, true);
+            } catch (IOException e) {
+                assertEquals("Knative service has not a valid format. ApiVersion field contains an invalid value.", e.getLocalizedMessage());
+            }
+        }
+    }
+
+    @Test
+    public void SaveOnCluster_InvalidYamlMissingSpec_Throw() throws IOException {
+        String yaml = load(RESOURCE_PATH + "missingspec_service.yaml");
+        try (MockedStatic<TreeHelper> theMock = mockStatic(TreeHelper.class)) {
+            theMock.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+            try {
+                KnHelper.saveOnCluster(project, yaml, true);
+            } catch (IOException e) {
+                assertEquals("Knative service has not a valid format. Spec field is not found.", e.getLocalizedMessage());
+            }
+        }
+    }
+
+    @Test
+    public void SaveOnCluster_SaveNewSucceed_True() throws IOException {
+        String yaml = load(RESOURCE_PATH + "service.yaml");
+        doAnswer((a) -> true).when(kn).createCustomResource(any(CustomResourceDefinitionContext.class), anyString());
+        try (MockedStatic<TreeHelper> theMock = mockStatic(TreeHelper.class)) {
+            theMock.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+            try {
+                boolean result = KnHelper.saveOnCluster(project, yaml, true);
+                assertTrue(result);
+            } catch (IOException e) {
+            }
+        }
+    }
+
+    @Test
+    public void GetPluralByKind_WordEndingWithS_PluralWithES() {
+        assertEquals("buses", KnHelper.getPluralByKind("bus"));
+    }
+
+    @Test
+    public void GetPluralByKind_WordEndingWithY_PluralWithIES() {
+        assertEquals("cities", KnHelper.getPluralByKind("city"));
+    }
+
+    @Test
+    public void GetPluralByKind_WordNotEndingWithSorY_PluralWithS() {
+        assertEquals("services", KnHelper.getPluralByKind("service"));
+    }
+
+    @Test
+    public void IsWritable_NodeIsService_True() {
+       assertTrue(KnHelper.isWritable(knServiceNode));
+    }
+
+    @Test
+    public void IsWritable_NodeIsNotAService_False() {
+        assertFalse(KnHelper.isWritable(knRevisionNode));
     }
 }
