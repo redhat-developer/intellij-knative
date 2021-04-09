@@ -10,33 +10,21 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.tree;
 
-import com.intellij.openapi.project.Project;
+import com.redhat.devtools.intellij.knative.BaseTest;
 import com.redhat.devtools.intellij.knative.kn.Revision;
 import java.util.Collections;
-import org.junit.Before;
 import org.junit.Test;
 
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 
-public class KnRevisionNodeTest {
-    private KnRootNode knRootNode;
-    private KnServiceNode knServiceNode;
-
-    @Before
-    public void before() {
-        Project project = mock(Project.class);
-        knRootNode = spy(new KnRootNode(project));
-        knServiceNode = mock(KnServiceNode.class);
-    }
+public class KnRevisionNodeTest extends BaseTest {
 
     @Test
     public void Constructor_KnRevisionNode() {
         Revision revision = new Revision("revision", Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap());
         KnRevisionNode knRevisionNode = new KnRevisionNode(knRootNode, knServiceNode, revision);
-        assertEquals("revisions", knRevisionNode.getName());
+        assertEquals("revision", knRevisionNode.getName());
         assertEquals(knRootNode, knRevisionNode.getRootNode());
         assertEquals(knServiceNode, knRevisionNode.getParent());
         assertEquals(revision, knRevisionNode.getRevision());

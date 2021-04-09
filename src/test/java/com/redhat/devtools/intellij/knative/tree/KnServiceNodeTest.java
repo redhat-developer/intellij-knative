@@ -10,27 +10,21 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.tree;
 
-import com.intellij.openapi.project.Project;
 import com.intellij.util.Function;
+import com.redhat.devtools.intellij.knative.BaseTest;
 import com.redhat.devtools.intellij.knative.kn.Service;
 import org.junit.Before;
 import org.junit.Test;
 
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 
-public class KnServiceNodeTest {
-    private KnRootNode knRootNode;
-    private KnServingNode knServingNode;
+public class KnServiceNodeTest extends BaseTest {
     private Service serviceIfTrue, serviceIfFalse;
 
     @Before
-    public void before() {
-        Project project = mock(Project.class);
-        knRootNode = spy(new KnRootNode(project));
-        knServingNode = mock(KnServingNode.class);
+    public void setUp() throws Exception {
+        super.setUp();
         serviceIfTrue = new Service("true", null);
         serviceIfFalse = new Service("false", null);
     }

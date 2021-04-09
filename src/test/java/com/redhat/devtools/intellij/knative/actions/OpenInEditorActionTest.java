@@ -13,17 +13,9 @@ package com.redhat.devtools.intellij.knative.actions;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
-import com.intellij.openapi.actionSystem.Presentation;
-import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.common.actions.StructureTreeAction;
-import com.redhat.devtools.intellij.common.actions.TreeAction;
-import com.redhat.devtools.intellij.knative.tree.KnRootNode;
-import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import com.redhat.devtools.intellij.knative.utils.EditorHelper;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 
@@ -34,29 +26,7 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
-public class OpenInEditorActionTest {
-
-    private Presentation presentation;
-    private Tree tree;
-    private KnTreeStructure knTreeStructure;
-    private TreeAction treeAction;
-
-    @Before
-    public void setUp() throws Exception {
-        //presentation = mock(Presentation.class);
-        tree = mock(Tree.class);
-        TreeSelectionModel model = mock(TreeSelectionModel.class);
-        TreePath path = mock(TreePath.class);
-        KnRootNode applicationsRootNode = mock(KnRootNode.class);
-        when(path.getLastPathComponent()).thenReturn(applicationsRootNode);
-        when(tree.getSelectionModel()).thenReturn(model);
-        when(model.getSelectionPath()).thenReturn(path);
-        when(model.getSelectionPaths()).thenReturn(new TreePath[] {path});
-        presentation = new Presentation();
-
-        knTreeStructure = mock(KnTreeStructure.class);
-        treeAction = mock(TreeAction.class);
-    }
+public class OpenInEditorActionTest extends ActionTest {
 
     @Test
     public void ActionPerformed_OpenKnComponentInEditorIsCalled() {
@@ -71,6 +41,5 @@ public class OpenInEditorActionTest {
                 editorHelperMockedStatic.verify(() -> EditorHelper.openKnComponentInEditor(any(ParentableNode.class)), times(1));
             }
         }
-
     }
 }

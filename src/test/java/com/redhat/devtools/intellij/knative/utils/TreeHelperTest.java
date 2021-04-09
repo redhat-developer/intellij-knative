@@ -10,23 +10,17 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.utils;
 
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
-import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
-import com.intellij.testFramework.fixtures.IdeaProjectTestFixture;
-import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
-import com.intellij.testFramework.fixtures.TestFixtureBuilder;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentManager;
 import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.knative.Constants;
+import com.redhat.devtools.intellij.knative.FixtureBaseTest;
 import com.redhat.devtools.intellij.knative.kn.Kn;
-import com.redhat.devtools.intellij.knative.tree.KnRootNode;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
-import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import javax.swing.JViewport;
 import org.apache.commons.lang.StringUtils;
 import org.junit.After;
@@ -45,9 +39,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class TreeHelperTest {
-    private CodeInsightTestFixture myFixture;
-    private Project project;
+public class TreeHelperTest extends FixtureBaseTest {
     private ToolWindowManager toolWindowManager;
     private ToolWindow toolWindow;
     private ContentManager contentManager;
@@ -56,18 +48,11 @@ public class TreeHelperTest {
     private JBScrollPane jbScrollPane;
     private JViewport jViewport;
     private Tree tree;
-    private KnTreeStructure knTreeStructure;
-    private ParentableNode parentableNode;
     private MockedStatic<ToolWindowManager> toolWindowManagerMockedStatic;
 
     @Before
     public void setUp() throws Exception {
-        IdeaTestFixtureFactory factory = IdeaTestFixtureFactory.getFixtureFactory();
-        TestFixtureBuilder<IdeaProjectTestFixture> fixtureBuilder = factory.createLightFixtureBuilder();
-        IdeaProjectTestFixture fixture = fixtureBuilder.getFixture();
-        myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture);
-        myFixture.setUp();
-        project = myFixture.getProject();
+        super.setUp();
         toolWindowManager = mock(ToolWindowManager.class);
         toolWindowManagerMockedStatic = mockStatic(ToolWindowManager.class);
         toolWindowManagerMockedStatic.when(() -> ToolWindowManager.getInstance(any())).thenReturn(toolWindowManager);
@@ -78,8 +63,6 @@ public class TreeHelperTest {
         jbScrollPane = mock(JBScrollPane.class);
         jViewport = mock(JViewport.class);
         tree = mock(Tree.class);
-        knTreeStructure = mock(KnTreeStructure.class);
-        parentableNode = mock(ParentableNode.class);
     }
 
     @After
@@ -188,7 +171,7 @@ public class TreeHelperTest {
 
     @Test
     public void GetTree_Project_Tree() {
-        GetTree();
+        getTree();
         Tree resultingTree = TreeHelper.getTree(project);
         assertNotNull(resultingTree);
         assertEquals(tree, resultingTree);
@@ -201,14 +184,14 @@ public class TreeHelperTest {
 
     @Test
     public void GetKnTreeStructure_ProjectWithoutClientProperty_Null() {
-        GetTree();
+        getTree();
         when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(null);
         assertNull(TreeHelper.getKnTreeStructure(project));
     }
 
     @Test
     public void GetKnTreeStructure_Project_KnTreeStructure() {
-        GetKnTreeStructure();
+        getKnTreeStructure();
         KnTreeStructure resultingStructure = TreeHelper.getKnTreeStructure(project);
         assertNotNull(resultingStructure);
         assertEquals(knTreeStructure, resultingStructure);
@@ -221,11 +204,9 @@ public class TreeHelperTest {
 
     @Test
     public void GetKn_Project_Kn() {
-        Kn kn = mock(Kn.class);
-        KnRootNode knRootNode = mock(KnRootNode.class);
         when(knTreeStructure.getRootElement()).thenReturn(knRootNode);
         when(knRootNode.getKn()).thenReturn(kn);
-        GetKnTreeStructure();
+        getKnTreeStructure();
         Kn resultingKn = TreeHelper.getKn(project);
         assertNotNull(resultingKn);
         assertEquals(kn, resultingKn);
@@ -239,14 +220,14 @@ public class TreeHelperTest {
 
     @Test
     public void Refresh_NodeIsNull_Nothing() {
-        GetKnTreeStructure();
+        getKnTreeStructure();
         TreeHelper.refresh(project, null);
         verify(knTreeStructure, never()).fireModified(any());
     }
 
     @Test
     public void Refresh_ProjectWithoutTreeStructure_Nothing() {
-        GetTree();
+        getTree();
         when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(null);
         TreeHelper.refresh(project, parentableNode);
         verify(knTreeStructure, never()).fireModified(any());
@@ -254,12 +235,12 @@ public class TreeHelperTest {
 
     @Test
     public void Refresh_ProjectAndNodeAreValid_Refresh() {
-        GetKnTreeStructure();
+        getKnTreeStructure();
         TreeHelper.refresh(project, parentableNode);
         verify(knTreeStructure).fireModified(any());
     }
 
-    private void GetTree() {
+    private void getTree() {
         when(toolWindowManager.getToolWindow("Knative")).thenReturn(toolWindow);
         when(toolWindow.getContentManager()).thenReturn(contentManager);
         when(contentManager.getContent(0)).thenReturn(content);
@@ -269,8 +250,8 @@ public class TreeHelperTest {
         when(jViewport.getView()).thenReturn(tree);
     }
 
-    private void GetKnTreeStructure() {
-        GetTree();
+    private void getKnTreeStructure() {
+        getTree();
         when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(knTreeStructure);
     }
 }

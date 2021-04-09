@@ -11,9 +11,8 @@
 package com.redhat.devtools.intellij.knative.tree;
 
 import com.intellij.ide.util.treeView.NodeDescriptor;
-import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
-import com.redhat.devtools.intellij.knative.kn.Kn;
+import com.redhat.devtools.intellij.knative.BaseTest;
 import com.redhat.devtools.intellij.knative.kn.Revision;
 import com.redhat.devtools.intellij.knative.kn.Service;
 import java.io.IOException;
@@ -33,31 +32,14 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-public class KnTreeStructureTest {
-
-    private KnTreeStructure knTreeStructure;
-    private KnRootNode knRootNode;
-    private Project project;
-    private Kn kn;
-    private KnServingNode knServingNode;
-    private KnServiceNode knServiceNode;
-    private KnEventingNode knEventingNode;
-    private KnRevisionNode knRevisionNode;
+public class KnTreeStructureTest extends BaseTest {
 
     @Before
-    public void before() throws Exception {
-        project = mock(Project.class);
+    public void setUp() throws Exception {
+        super.setUp();
         knTreeStructure = mock(KnTreeStructure.class, org.mockito.Mockito.CALLS_REAL_METHODS);
-        knRootNode = spy(new KnRootNode(project));
-        knServingNode = mock(KnServingNode.class);
-        knServiceNode = mock(KnServiceNode.class);
-        knEventingNode = mock(KnEventingNode.class);
-        knRevisionNode = mock(KnRevisionNode.class);
-
-        kn = mock(Kn.class);
 
         Field rootField = KnTreeStructure.class.getDeclaredField("root");
         rootField.setAccessible(true);
@@ -70,19 +52,15 @@ public class KnTreeStructureTest {
     }
 
     @Test
-    public void GetChildElements_ElementIsRootWithNoKnative_EmptyArray() throws IOException {
-        when(kn.isKnativeServingAware()).thenReturn(false);
-        when(kn.isKnativeEventingAware()).thenReturn(false);
-        Object[] nodes = knTreeStructure.getChildElements(knRootNode);
+    public void GetChildElements_ElementIsRootWithNoKnativeInstalled_EmptyArray() throws IOException {
+        Object[] nodes = getChildElements(false, false);
 
         assertTrue(nodes.length == 0);
     }
 
     @Test
-    public void GetChildElements_ElementIsRootWithKnativeServing_ArrayWithServing() throws IOException {
-        when(kn.isKnativeServingAware()).thenReturn(true);
-        when(kn.isKnativeEventingAware()).thenReturn(false);
-        Object[] nodes = knTreeStructure.getChildElements(knRootNode);
+    public void GetChildElements_ElementIsRootWithOnlyKnativeServing_ArrayWithServing() throws IOException {
+        Object[] nodes = getChildElements(true, false);
 
         assertTrue(nodes.length == 1);
         assertNotNull(nodes[0]);
@@ -90,10 +68,8 @@ public class KnTreeStructureTest {
     }
 
     @Test
-    public void GetChildElements_ElementIsRootWithKnativeEventing_ArrayWithEventing() throws IOException {
-        when(kn.isKnativeServingAware()).thenReturn(false);
-        when(kn.isKnativeEventingAware()).thenReturn(true);
-        Object[] nodes = knTreeStructure.getChildElements(knRootNode);
+    public void GetChildElements_ElementIsRootWithOnlyKnativeEventing_ArrayWithEventing() throws IOException {
+        Object[] nodes = getChildElements(false, true);
 
         assertTrue(nodes.length == 1);
         assertNotNull(nodes[0]);
@@ -102,15 +78,19 @@ public class KnTreeStructureTest {
 
     @Test
     public void GetChildElements_ElementIsRootWithKnativeServingAndEventing_ArrayWithServingAndEventing() throws IOException {
-        when(kn.isKnativeServingAware()).thenReturn(true);
-        when(kn.isKnativeEventingAware()).thenReturn(true);
-        Object[] nodes = knTreeStructure.getChildElements(knRootNode);
+        Object[] nodes = getChildElements(true, true);
 
         assertTrue(nodes.length == 2);
         assertNotNull(nodes[0]);
         assertTrue(nodes[0] instanceof KnServingNode);
         assertNotNull(nodes[1]);
         assertTrue(nodes[1] instanceof KnEventingNode);
+    }
+
+    private Object[] getChildElements(boolean hasKnativeServing, boolean hasKnativeEventing) throws IOException {
+        when(kn.isKnativeServingAware()).thenReturn(hasKnativeServing);
+        when(kn.isKnativeEventingAware()).thenReturn(hasKnativeEventing);
+        return knTreeStructure.getChildElements(knRootNode);
     }
 
     @Test
@@ -174,36 +154,32 @@ public class KnTreeStructureTest {
 
     @Test
     public void GetDescriptor_ElementIsKnRoot_LabelAndIconDescriptor() {
-        NodeDescriptor nodeDescriptor = knTreeStructure.createDescriptor(knRootNode, null);
-        assertTrue(nodeDescriptor instanceof LabelAndIconDescriptor);
-        assertEquals(knRootNode, nodeDescriptor.getElement());
+        assertNodeDescriptor(knRootNode, LabelAndIconDescriptor.class);
     }
 
     @Test
     public void GetDescriptor_ElementIsKnServing_LabelAndIconDescriptor() {
-        NodeDescriptor nodeDescriptor = knTreeStructure.createDescriptor(knServingNode, null);
-        assertTrue(nodeDescriptor instanceof LabelAndIconDescriptor);
-        assertEquals(knServingNode, nodeDescriptor.getElement());
+        assertNodeDescriptor(knServingNode, LabelAndIconDescriptor.class);
     }
 
     @Test
     public void GetDescriptor_ElementIsKnEventing_LabelAndIconDescriptor() {
-        NodeDescriptor nodeDescriptor = knTreeStructure.createDescriptor(knEventingNode, null);
-        assertTrue(nodeDescriptor instanceof LabelAndIconDescriptor);
-        assertEquals(knEventingNode, nodeDescriptor.getElement());
+        assertNodeDescriptor(knEventingNode, LabelAndIconDescriptor.class);
     }
 
     @Test
     public void GetDescriptor_ElementIsKnServiceNode_KnServiceDescriptor() {
-        NodeDescriptor nodeDescriptor = knTreeStructure.createDescriptor(knServiceNode, null);
-        assertTrue(nodeDescriptor instanceof KnServiceDescriptor);
-        assertEquals(knServiceNode, nodeDescriptor.getElement());
+        assertNodeDescriptor(knServiceNode, KnServiceDescriptor.class);
     }
 
     @Test
     public void GetDescriptor_ElementIsKnRevisionNode_KnRevisionDescriptor() {
-        NodeDescriptor nodeDescriptor = knTreeStructure.createDescriptor(knRevisionNode, null);
-        assertTrue(nodeDescriptor instanceof KnRevisionDescriptor);
-        assertEquals(knRevisionNode, nodeDescriptor.getElement());
+        assertNodeDescriptor(knRevisionNode, KnRevisionDescriptor.class);
+    }
+
+    private void assertNodeDescriptor(Object element, Class nodeDescriptorType) {
+        NodeDescriptor nodeDescriptor = knTreeStructure.createDescriptor(element, null);
+        assertTrue(nodeDescriptor.getClass().equals(nodeDescriptorType));
+        assertEquals(element, nodeDescriptor.getElement());
     }
 }

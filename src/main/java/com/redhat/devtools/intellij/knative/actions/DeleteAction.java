@@ -11,6 +11,7 @@
 package com.redhat.devtools.intellij.knative.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.knative.kn.Kn;
@@ -55,20 +56,22 @@ public class DeleteAction extends KnAction {
         DeleteDialog deleteDialog = new DeleteDialog(null, title, dialogText);
         deleteDialog.show();
 
-        CompletableFuture.runAsync(() -> {
-            if (deleteDialog.isOK()) {
-                Map<Class, List<ParentableNode>> resourcesByClass = groupResourcesByClass(elements);
-                for(Class type: resourcesByClass.keySet()) {
-                    try {
-                        deleteResources(type, resourcesByClass, kncli);
-                        TreeHelper.refresh(anActionEvent.getProject(), (ParentableNode) resourcesByClass.get(type).get(0).getParent());
-                    } catch (IOException e) {
-                        UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Error"));
-                    }
-                }
-            }
-        });
+        if (deleteDialog.isOK()) {
+            CompletableFuture.runAsync(() -> executeDelete(anActionEvent.getProject(), kncli, elements));
+        }
 
+    }
+
+    public void executeDelete(Project project, Kn kncli, ParentableNode[] elements) {
+        Map<Class, List<ParentableNode>> resourcesByClass = groupResourcesByClass(elements);
+        for(Class type: resourcesByClass.keySet()) {
+            try {
+                deleteResources(type, resourcesByClass, kncli);
+                TreeHelper.refresh(project, (ParentableNode) resourcesByClass.get(type).get(0).getParent());
+            } catch (IOException e) {
+                UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Error"));
+            }
+        }
     }
 
     private Map<Class, List<ParentableNode>> groupResourcesByClass(ParentableNode[] elements) {

@@ -11,8 +11,8 @@
 package com.redhat.devtools.intellij.knative.tree;
 
 import com.intellij.icons.AllIcons;
-import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
+import com.redhat.devtools.intellij.knative.BaseTest;
 import com.redhat.devtools.intellij.knative.kn.KnConstants;
 import com.redhat.devtools.intellij.knative.kn.Revision;
 import java.util.Collections;
@@ -23,23 +23,17 @@ import org.junit.Test;
 
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 
-public class KnNodeComparatorTest {
+public class KnNodeComparatorTest extends BaseTest {
 
-    private KnRootNode knRootNode;
-    private KnServiceNode knServiceNode;
     private KnNodeComparator knNodeComparator;
     private KnRevisionDescriptor knRevisionDescriptor, knRevisionDescriptor1, knRevisionDescriptor2;
     private LabelAndIconDescriptor labelAndIconDescriptor;
 
     @Before
-    public void before() {
+    public void setUp() throws Exception {
+        super.setUp();
         knNodeComparator = new KnNodeComparator();
-        Project project = mock(Project.class);
-        knRootNode = spy(new KnRootNode(project));
-        knServiceNode = mock(KnServiceNode.class);
 
         Map<String, String> labels = new HashMap<>();
         labels.put(KnConstants.CONFIGURATION_GENERATION, "1");

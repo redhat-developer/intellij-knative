@@ -10,14 +10,9 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.tree;
 
-import com.intellij.openapi.project.Project;
-import com.redhat.devtools.intellij.knative.kn.Kn;
+import com.redhat.devtools.intellij.knative.BaseTest;
 import com.redhat.devtools.intellij.knative.kn.KnCliFactory;
-import com.redhat.devtools.intellij.knative.utils.KnHelper;
-import com.redhat.devtools.intellij.knative.utils.TreeHelper;
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 
@@ -31,20 +26,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class KnRootTest {
-
-    private Project project;
-    private Kn kn;
-
-    @Before
-    public void before() {
-        project = mock(Project.class);
-        kn = mock(Kn.class);
-    }
+public class KnRootTest extends BaseTest {
 
     @Test
     public void Constructor_KnRootNode() {
-        KnRootNode knRootNode = new KnRootNode(project);
+        knRootNode = new KnRootNode(project);
         assertNull(knRootNode.getKn());
         assertEquals(project, knRootNode.getProject());
 

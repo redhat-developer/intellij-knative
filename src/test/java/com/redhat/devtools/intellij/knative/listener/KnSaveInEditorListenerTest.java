@@ -18,20 +18,13 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
-import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
-import com.intellij.testFramework.fixtures.IdeaProjectTestFixture;
-import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
-import com.intellij.testFramework.fixtures.TestFixtureBuilder;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
-import com.redhat.devtools.intellij.knative.BaseTest;
-import com.redhat.devtools.intellij.knative.tree.KnRootNode;
-import com.redhat.devtools.intellij.knative.tree.ParentableNode;
+import com.redhat.devtools.intellij.knative.FixtureBaseTest;
 import com.redhat.devtools.intellij.knative.utils.KnHelper;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import java.io.IOException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedStatic;
@@ -50,103 +43,76 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class KnSaveInEditorListenerTest extends BaseTest {
+public class KnSaveInEditorListenerTest extends FixtureBaseTest {
 
-    private CodeInsightTestFixture myFixture;
     private KnSaveInEditorListener knSaveInEditorListener;
     private static final String RESOURCE_PATH = "listener/knSaveInEditorListener/";
-    private Project project;
-    private ParentableNode parentableNode;
-    private KnRootNode knRootNode;
 
     @Before
-    public void before() throws Exception {
-        IdeaTestFixtureFactory factory = IdeaTestFixtureFactory.getFixtureFactory();
-        TestFixtureBuilder<IdeaProjectTestFixture> fixtureBuilder = factory.createLightFixtureBuilder();
-        IdeaProjectTestFixture fixture = fixtureBuilder.getFixture();
-        myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture);
-        myFixture.setUp();
+    public void setUp() throws Exception {
+        super.setUp();
         knSaveInEditorListener = new KnSaveInEditorListener();
-        project = mock(Project.class);
-        parentableNode = mock(ParentableNode.class);
-        knRootNode = mock(KnRootNode.class);
-
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        myFixture.tearDown();
     }
 
     @Test
     public void Notify_ValidDocument_SendNotification() throws IOException {
-        String yaml = load(RESOURCE_PATH + "service.yaml");
-        Document document = createDocument(yaml);
+        Document document = createDocument();
         Application application = mock(Application.class);
         when(application.isUnitTestMode()).thenReturn(true);
         try(MockedStatic<YAMLHelper> yamlHelperMockedStatic = mockStatic(YAMLHelper.class)) {
             knSaveInEditorListener.notify(document);
-            yamlHelperMockedStatic.verify(times(2), () -> YAMLHelper.getStringValueFromYAML(anyString(), any()));
+            yamlHelperMockedStatic.verify(() -> YAMLHelper.getStringValueFromYAML(anyString(), any()), times(2));
         }
     }
 
     @Test
     public void Refresh_NodeIsNull_Nothing() {
-        try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
-            knSaveInEditorListener.refresh(project, null);
-            treeHelperMockedStatic.verify(times(0), () -> TreeHelper.refresh(any(), any()));
-        }
+        executeRefresh(project, null, 0);
     }
 
     @Test
     public void Refresh_NodeIsUnknownType_Nothing() {
-        try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
-            knSaveInEditorListener.refresh(project, knRootNode);
-            treeHelperMockedStatic.verify(times(0), () -> TreeHelper.refresh(any(), any()));
-        }
+        executeRefresh(project, knRootNode, 0);
     }
 
     @Test
     public void Refresh_NodeIsParentableNode_Refresh() {
+        executeRefresh(null, parentableNode, 1);
+    }
+
+    private void executeRefresh(Project project, Object node, int numberOfInvocations) {
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
-            knSaveInEditorListener.refresh(null, parentableNode);
-            treeHelperMockedStatic.verify(times(1), () -> TreeHelper.refresh(any(), any()));
+            knSaveInEditorListener.refresh(project, node);
+            treeHelperMockedStatic.verify(() -> TreeHelper.refresh(any(), any()), times(numberOfInvocations));
         }
     }
 
     @Test
     public void Save_SaveOnClusterIsFalse_False() throws IOException {
-        String yaml = load(RESOURCE_PATH + "service.yaml");
-        Document document = createDocument(yaml);
+        Document document = createDocument();
         try(MockedStatic<KnHelper> knHelperMockedStatic = mockStatic(KnHelper.class)) {
             knHelperMockedStatic.when(() -> KnHelper.saveOnCluster(any(), anyString(), anyBoolean())).thenReturn(false);
             boolean result = knSaveInEditorListener.save(document, project);
-            //knHelperMockedStatic.verify(times(1), () -> KnHelper.saveOnCluster(eq(project), eq(yaml), any()));
             assertFalse(result);
         }
     }
 
     @Test
     public void Save_SaveOnClusterIsTrue_True() throws IOException {
-        String yaml = load(RESOURCE_PATH + "service.yaml");
-        Document document = createDocument(yaml);
+        Document document = createDocument();
         try(MockedStatic<KnHelper> knHelperMockedStatic = mockStatic(KnHelper.class)) {
             knHelperMockedStatic.when(() -> KnHelper.saveOnCluster(any(), anyString(), anyBoolean())).thenReturn(true);
             boolean result = knSaveInEditorListener.save(document, project);
-            //knHelperMockedStatic.verify(times(1), () -> KnHelper.saveOnCluster(eq(project), eq(yaml), any()));
             assertTrue(result);
         }
     }
 
     @Test
     public void Save_SaveOnClusterThrows_False() throws IOException {
-        String yaml = load(RESOURCE_PATH + "service.yaml");
-        Document document = createDocument(yaml);
+        Document document = createDocument();
         try(MockedStatic<KnHelper> knHelperMockedStatic = mockStatic(KnHelper.class)) {
             knHelperMockedStatic.when(() -> KnHelper.saveOnCluster(any(), anyString(), anyBoolean())).thenThrow(new IOException("text"));
-            //knHelperMockedStatic.when(() -> Notifications.Bus.notify(any()));
             boolean result = knSaveInEditorListener.save(document, project);
-            //knHelperMockedStatic.verify(times(1), () -> KnHelper.saveOnCluster(eq(project), eq(yaml), any()));
             assertFalse(result);
         }
     }
@@ -158,25 +124,20 @@ public class KnSaveInEditorListenerTest extends BaseTest {
 
     @Test
     public void IsFileToPush_VirtualFileWithMissingKnativeProperty_False() throws IOException {
-        String yaml = load(RESOURCE_PATH + "service.yaml");
-        VirtualFile virtualFile = new LightVirtualFile("test", yaml);
+        VirtualFile virtualFile = createVirtualFile("");
         assertFalse(knSaveInEditorListener.isFileToPush(project, virtualFile));
 
     }
 
     @Test
     public void IsFileToPush_VirtualFileWithInvalidKnativeProperty_False() throws IOException {
-        String yaml = load(RESOURCE_PATH + "service.yaml");
-        VirtualFile virtualFile = new LightVirtualFile("test", yaml);
-        virtualFile.putUserData(KNATIVE, "fake");
+        VirtualFile virtualFile = createVirtualFile("fake");
         assertFalse(knSaveInEditorListener.isFileToPush(project, virtualFile));
     }
 
     @Test
     public void IsFileToPush_VirtualFileIsValid_ParentMethodCalled() throws IOException {
-        String yaml = load(RESOURCE_PATH + "service.yaml");
-        VirtualFile virtualFile = new LightVirtualFile("test", yaml);
-        virtualFile.putUserData(KNATIVE, NOTIFICATION_ID);
+        VirtualFile virtualFile = createVirtualFile(NOTIFICATION_ID);
         FileEditorManager fileEditorManager = mock(FileEditorManager.class);
         try(MockedStatic<FileEditorManager> fileEditorManagerMockedStatic = mockStatic(FileEditorManager.class)) {
             fileEditorManagerMockedStatic.when(() -> FileEditorManager.getInstance(any())).thenReturn(fileEditorManager);
@@ -185,7 +146,17 @@ public class KnSaveInEditorListenerTest extends BaseTest {
         }
     }
 
-    private Document createDocument(String text) {
+    private VirtualFile createVirtualFile(String userData) throws IOException {
+        String yaml = load(RESOURCE_PATH + "service.yaml");
+        VirtualFile virtualFile = new LightVirtualFile("test", yaml);
+        if (!userData.isEmpty()) {
+            virtualFile.putUserData(KNATIVE, userData);
+        }
+        return virtualFile;
+    }
+
+    private Document createDocument() throws IOException {
+        String text = load(RESOURCE_PATH + "service.yaml");
         return new Document() {
             @Override
             public @NotNull String getText() {

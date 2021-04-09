@@ -19,7 +19,7 @@ import static org.junit.Assert.assertNull;
 public class StatusConditionTest {
 
     @Test
-    public void StatusCondition_ReasonAndMessageNull_Object() {
+    public void StatusCondition_ConstructorWithoutReasonAndMessage_Object() {
         StatusCondition statusCondition = new StatusCondition("time", "status", "type");
         assertEquals("time", statusCondition.getLastTransitionTime());
         assertEquals("status", statusCondition.getStatus());
@@ -29,7 +29,7 @@ public class StatusConditionTest {
     }
 
     @Test
-    public void StatusCondition_ValidReasonAndMessage_Object() {
+    public void StatusCondition_ConstructorWithReasonAndMessage_Object() {
         StatusCondition statusCondition = new StatusCondition("time", "status", "type", "reason", "message");
         assertEquals("time", statusCondition.getLastTransitionTime());
         assertEquals("status", statusCondition.getStatus());

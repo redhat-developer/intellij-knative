@@ -12,14 +12,9 @@ package com.redhat.devtools.intellij.knative.kubernetes;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.psi.PsiFile;
-import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
-import com.intellij.testFramework.fixtures.IdeaProjectTestFixture;
-import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
-import com.intellij.testFramework.fixtures.TestFixtureBuilder;
-import com.redhat.devtools.intellij.knative.BaseTest;
+import com.redhat.devtools.intellij.knative.FixtureBaseTest;
 import java.io.IOException;
 import org.jetbrains.yaml.YAMLFileType;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,24 +22,14 @@ import org.junit.Test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class KnativeHighlightInfoFilterTest extends BaseTest {
+public class KnativeHighlightInfoFilterTest extends FixtureBaseTest {
     private static final String RESOURCE_PATH = "kubernetes/";
     private KnativeHighlightInfoFilter knativeHighlightInfoFilter;
-    private CodeInsightTestFixture myFixture;
 
     @Before
     public void setUp() throws Exception {
-        IdeaTestFixtureFactory factory = IdeaTestFixtureFactory.getFixtureFactory();
-        TestFixtureBuilder<IdeaProjectTestFixture> fixtureBuilder = factory.createLightFixtureBuilder();
-        IdeaProjectTestFixture fixture = fixtureBuilder.getFixture();
-        myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture);
-        myFixture.setUp();
+        super.setUp();
         knativeHighlightInfoFilter = new KnativeHighlightInfoFilter();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        myFixture.tearDown();
     }
 
     @Test

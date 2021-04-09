@@ -10,29 +10,13 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.tree;
 
-import com.intellij.openapi.project.Project;
-import com.redhat.devtools.intellij.knative.kn.Kn;
-import java.lang.reflect.Field;
-import org.junit.Before;
+import com.redhat.devtools.intellij.knative.BaseTest;
 import org.junit.Test;
 
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
-public class MessageNodeTest {
-
-    private KnRootNode knRootNode;
-    private KnServingNode knServingNode;
-
-    @Before
-    public void before() {
-        Project project = mock(Project.class);
-        knRootNode = spy(new KnRootNode(project));
-        knServingNode = mock(KnServingNode.class);
-    }
+public class MessageNodeTest extends BaseTest {
 
     @Test
     public void Constructor_ParentIsRoot_MessageNode() {
