@@ -6,14 +6,23 @@
  * and is available at http://www.eclipse.org/legal/epl-v20.html
  *
  * Contributors:
- * Red Hat, Inc. - initial API and implementation
+ * Red Hat, Inc.
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.tree;
 
-import org.jetbrains.annotations.NotNull;
+import com.redhat.devtools.intellij.knative.BaseTest;
+import org.junit.Test;
 
-public class KnServingNode extends ParentableNode<KnRootNode> {
-    protected KnServingNode(@NotNull KnRootNode rootNode, @NotNull KnRootNode parent) {
-        super(rootNode, parent, "Serving");
+
+import static org.junit.Assert.assertEquals;
+
+public class KnServingNodeTest extends BaseTest {
+
+    @Test
+    public void Constructor_KnServingNode() {
+        KnServingNode knServingNode = new KnServingNode(knRootNode, knRootNode);
+        assertEquals("Serving", knServingNode.getName());
+        assertEquals(knRootNode, knServingNode.getRootNode());
+        assertEquals(knRootNode, knServingNode.getParent());
     }
 }

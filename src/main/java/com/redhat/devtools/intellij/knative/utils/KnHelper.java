@@ -129,8 +129,19 @@ public class KnHelper {
                 .build();
     }
 
-    private static String getPluralByKind(String kind) {
-        return kind.toLowerCase() + "s";
+    public static String getPluralByKind(String kind) {
+        kind = kind.toLowerCase();
+        if (kind.endsWith("s")) {
+            return kind + "es";
+        } else if (kind.endsWith("y")) {
+            return getFrontString(kind) + "ies";
+        } else {
+            return kind + "s";
+        }
+    }
+
+    private static String getFrontString(String kind) {
+        return kind.substring(0, kind.length() - 1);
     }
 
     public static boolean isWritable(ParentableNode node) {

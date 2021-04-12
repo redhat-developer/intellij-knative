@@ -23,6 +23,8 @@ import com.redhat.devtools.intellij.knative.tree.KnRootNode;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import java.awt.Component;
+import javax.swing.JComponent;
+import javax.swing.JViewport;
 
 public class TreeHelper {
 
@@ -44,15 +46,19 @@ public class TreeHelper {
         if (content == null) {
             return null;
         }
-        SimpleToolWindowPanel simpleToolWindowPanel = (SimpleToolWindowPanel) content.getComponent();
-        if (simpleToolWindowPanel == null) {
+        JComponent simpleToolWindowPanel = content.getComponent();
+        if (simpleToolWindowPanel == null || !(simpleToolWindowPanel instanceof SimpleToolWindowPanel)) {
             return null;
         }
-        JBScrollPane pane = (JBScrollPane) simpleToolWindowPanel.getContent();
-        if (pane == null) {
+        JComponent pane = ((SimpleToolWindowPanel) simpleToolWindowPanel).getContent();
+        if (pane == null || !(pane instanceof JBScrollPane)) {
             return null;
         }
-        Component view = pane.getViewport().getView();
+        JViewport viewPort = ((JBScrollPane) pane).getViewport();
+        if (viewPort == null) {
+            return null;
+        }
+        Component view = viewPort.getView();
         if (view == null) {
             return null;
         }
@@ -60,9 +66,6 @@ public class TreeHelper {
     }
 
     public static KnTreeStructure getKnTreeStructure(Project project) {
-        if (project == null) {
-            return null;
-        }
         Tree tree = getTree(project);
         if (tree == null) {
             return null;

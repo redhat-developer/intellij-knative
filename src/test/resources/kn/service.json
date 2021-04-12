@@ -1,0 +1,140 @@
+{
+  "kind": "Service",
+  "apiVersion": "serving.knative.dev/v1",
+  "metadata": {
+    "name": "test",
+    "namespace": "default",
+    "uid": "84ac8f85-e0c1-4611-bf67-b598f019a297",
+    "resourceVersion": "1018924",
+    "generation": 5,
+    "creationTimestamp": "2021-04-06T08:36:20Z",
+    "annotations": {
+      "serving.knative.dev/creator": "minikube-user",
+      "serving.knative.dev/lastModifier": "minikube-user"
+    },
+    "managedFields": [
+      {
+        "manager": "controller",
+        "operation": "Update",
+        "apiVersion": "serving.knative.dev/v1",
+        "time": "2021-04-06T08:36:32Z",
+        "fieldsType": "FieldsV1",
+        "fieldsV1": {
+          "f:status": {
+            ".": {},
+            "f:address": {
+              ".": {},
+              "f:url": {}
+            },
+            "f:conditions": {},
+            "f:latestCreatedRevisionName": {},
+            "f:latestReadyRevisionName": {},
+            "f:observedGeneration": {},
+            "f:traffic": {},
+            "f:url": {}
+          }
+        }
+      },
+      {
+        "manager": "okhttp",
+        "operation": "Update",
+        "apiVersion": "serving.knative.dev/v1",
+        "time": "2021-04-06T08:47:33Z",
+        "fieldsType": "FieldsV1",
+        "fieldsV1": {
+          "f:spec": {
+            ".": {},
+            "f:template": {
+              ".": {},
+              "f:spec": {
+                ".": {},
+                "f:containers": {}
+              }
+            },
+            "f:traffic": {}
+          }
+        }
+      }
+    ]
+  },
+  "spec": {
+    "template": {
+      "metadata": {
+        "creationTimestamp": null
+      },
+      "spec": {
+        "containers": [
+          {
+            "name": "first",
+            "image": "brushnet/hello-node:v2",
+            "env": [
+              {
+                "name": "TARGET",
+                "value": "Sample"
+              }
+            ],
+            "resources": {},
+            "readinessProbe": {
+              "tcpSocket": {
+                "port": 0
+              },
+              "successThreshold": 1
+            }
+          }
+        ],
+        "enableServiceLinks": false,
+        "containerConcurrency": 0,
+        "timeoutSeconds": 300
+      }
+    },
+    "traffic": [
+      {
+        "latestRevision": true,
+        "percent": 50
+      },
+      {
+        "revisionName": "test-00001",
+        "latestRevision": false,
+        "percent": 50
+      }
+    ]
+  },
+  "status": {
+    "observedGeneration": 5,
+    "conditions": [
+      {
+        "type": "ConfigurationsReady",
+        "status": "True",
+        "lastTransitionTime": "2021-04-06T08:39:18Z"
+      },
+      {
+        "type": "Ready",
+        "status": "True",
+        "lastTransitionTime": "2021-04-06T09:53:23Z"
+      },
+      {
+        "type": "RoutesReady",
+        "status": "True",
+        "lastTransitionTime": "2021-04-06T09:53:23Z"
+      }
+    ],
+    "latestReadyRevisionName": "test-00002",
+    "latestCreatedRevisionName": "test-00002",
+    "url": "http://test.default.192.168.49.2.nip.io",
+    "address": {
+      "url": "http://test.default.svc.cluster.local"
+    },
+    "traffic": [
+      {
+        "revisionName": "test-00002",
+        "latestRevision": true,
+        "percent": 50
+      },
+      {
+        "revisionName": "test-00001",
+        "latestRevision": false,
+        "percent": 50
+      }
+    ]
+  }
+}

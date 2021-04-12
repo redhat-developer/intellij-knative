@@ -1,0 +1,14 @@
+apiVersion: invalid/api/v1
+kind: service
+metadata:
+  name: "test"
+  namespace: "test"
+spec:
+  template:
+    spec:
+      containers:
+        - image: "image"
+          name: "first"
+          env:
+            - name: TARGET
+              value: "Sample"
