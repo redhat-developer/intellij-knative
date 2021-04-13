@@ -21,8 +21,8 @@ import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -85,11 +85,11 @@ public class KnCli implements Kn {
 
     @Override
     public List<Service> getServicesList() throws IOException {
-        String json = ExecHelper.execute(command, envVars, "service", "list", "-o", "json");
-        if (json.startsWith("No services found.")) {
+        ExecHelper.ExecResult execResult = ExecHelper.executeWithResult(command, envVars, "service", "list", "-o", "json");
+        if (execResult.getStdOut().startsWith("No services found.")) {
             return Collections.emptyList();
         }
-        return getCustomCollection(json, Service.class);
+        return getCustomCollection(execResult.getStdOut(), Service.class);
     }
 
     @Override
@@ -170,9 +170,19 @@ public class KnCli implements Kn {
             } else {
                 client.customResource(crdContext).create(objectAsString);
             }
-        } catch(KubernetesClientException e) {
-                throw new IOException(e.getLocalizedMessage());
+        } catch (KubernetesClientException e) {
+            throw new IOException(e.getLocalizedMessage());
         }
+    }
+
+    @Override
+    public List<Source> getSources() throws IOException {
+        ExecHelper.ExecResult result = ExecHelper.executeWithResult(command, envVars, "source", "list", "-o", "json");
+
+        if (result.getStdOut().startsWith("No sources found.")) {
+            return Collections.emptyList();
+        }
+        return getCustomCollection(result.getStdOut(), Source.class);
     }
 
     private <T> List<T> getCustomCollection(String json, Class<T> customClass) throws IOException {

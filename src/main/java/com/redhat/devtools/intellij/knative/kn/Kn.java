@@ -11,6 +11,7 @@
 package com.redhat.devtools.intellij.knative.kn;
 
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -123,10 +124,18 @@ public interface Kn {
     /**
      * Create a custom resource which is a namespaced object.
      *
-     * @param crdContext the custom resource definition context of the resource kind
+     * @param crdContext     the custom resource definition context of the resource kind
      * @param objectAsString new object as a JSON string
      * @throws IOException if communication errored
      */
     void createCustomResource(CustomResourceDefinitionContext crdContext, String objectAsString) throws IOException;
+
+    /**
+     * Return the list of all Knative Event Sources
+     *
+     * @return list of sources
+     * @throws IOException if communication errored
+     */
+    List<Source> getSources() throws IOException;
 
 }
