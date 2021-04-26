@@ -28,6 +28,7 @@ intellij {
 dependencies {
     compile 'com.redhat.devtools.intellij:intellij-common:1.2.0-SNAPSHOT'
     testCompile 'org.mockito:mockito-inline:3.8.0'
+    compile 'com.squareup.okio:okio:1.15.0'
 }
 
 configurations {
