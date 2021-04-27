@@ -11,7 +11,6 @@
 package com.redhat.devtools.intellij.knative.ui;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.intellij.CommonBundle;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.colors.EditorFontType;
@@ -33,7 +32,6 @@ import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.utils.EditorHelper;
 import com.redhat.devtools.intellij.knative.utils.KnHelper;
-import com.redhat.devtools.intellij.knative.utils.YAMLBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -169,9 +167,9 @@ public class CreateServiceDialog extends DialogWrapper {
             try {
                 JsonNode updated;
                 if (e.getStateChange() == ItemEvent.SELECTED) {
-                    updated = YAMLBuilder.addLabelToResource(yaml, "networking.knative.dev/visibility", "cluster-local");
+                    updated = YAMLHelper.addLabelToResource(yaml, "networking.knative.dev/visibility", "cluster-local");
                 } else {
-                    updated = YAMLBuilder.removeLabelFromResource(yaml, "networking.knative.dev/visibility");
+                    updated = YAMLHelper.removeLabelFromResource(yaml, "networking.knative.dev/visibility");
                 }
                 updateEditor(updated);
             } catch (IOException ex) {
