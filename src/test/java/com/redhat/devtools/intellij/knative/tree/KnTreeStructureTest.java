@@ -15,15 +15,15 @@ import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
 import com.redhat.devtools.intellij.knative.BaseTest;
 import com.redhat.devtools.intellij.knative.kn.Revision;
 import com.redhat.devtools.intellij.knative.kn.Service;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
-
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -94,11 +94,13 @@ public class KnTreeStructureTest extends BaseTest {
     }
 
     @Test
-    public void GetChildElements_ElementIsServingNodeWithNoChildren_EmptyArray() throws IOException {
+    public void GetChildElements_ElementIsServingNodeWithNoChildren_HasMessageNode() throws IOException {
         when(kn.getServicesList()).thenReturn(Collections.emptyList());
         Object[] serviceNodes = knTreeStructure.getChildElements(knServingNode);
 
-        assertTrue(serviceNodes.length == 0);
+        assertEquals(1, serviceNodes.length);
+        assertEquals(serviceNodes[0].getClass(), MessageNode.class);
+        assertEquals("No Services Found", ((MessageNode) serviceNodes[0]).getName());
     }
 
     @Test
@@ -147,9 +149,9 @@ public class KnTreeStructureTest extends BaseTest {
         assertEquals(knServingNode, knTreeStructure.getParentElement(knServiceNode));
     }
 
-    @Test
+    @Test(expected = RuntimeException.class)
     public void GetDescriptor_ElementIsUnknownType_Null() {
-        assertNull(knTreeStructure.createDescriptor(new Object(), null));
+        knTreeStructure.createDescriptor(new Object(), null);
     }
 
     @Test
