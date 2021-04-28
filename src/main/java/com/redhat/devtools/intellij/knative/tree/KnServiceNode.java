@@ -22,7 +22,7 @@ public class KnServiceNode extends ParentableNode<KnServingNode> {
         this.service = service;
     }
 
-    public Service getService(boolean toUpdate) {
-        return service.fun(toUpdate);
+    public Service getService(boolean forceFetchFromCluster) {
+        return service.fun(forceFetchFromCluster);
     }
 }

@@ -129,4 +129,13 @@ public interface Kn {
      */
     void createCustomResource(CustomResourceDefinitionContext crdContext, String objectAsString) throws IOException;
 
+    /**
+     * Tag a service revision
+     *
+     * @param service the service which the revision belongs to
+     * @param revision the revision to tag
+     * @param tag the tag name
+     * @throws IOException if communication errored
+     */
+    void tagRevision(String service, String revision, String tag) throws IOException;
 }
