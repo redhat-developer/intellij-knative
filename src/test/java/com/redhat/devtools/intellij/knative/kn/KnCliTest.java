@@ -311,4 +311,25 @@ public class KnCliTest extends BaseTest {
         }
     }
 
+    @Test
+    public void GetSources_ClusterHasSources_ListOfSources() throws IOException {
+        String serviceInJson = load(RESOURCES_PATH + "sourcesList.json");
+        ExecHelper.ExecResult execResult = new ExecHelper.ExecResult(serviceInJson, null, 0);
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.executeWithResult(anyString(), anyMap(), any())).thenReturn(execResult);
+            List<Source> sources = kn.getSources();
+            assertEquals(1, sources.size());
+            assertEquals("example-source-apiserver0", sources.get(0).getName());
+        }
+    }
+
+    @Test
+    public void GetSources_ClusterHasNoServices_EmptyList() throws IOException {
+        ExecHelper.ExecResult execResult = new ExecHelper.ExecResult("No sources found.", null, 0);
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.executeWithResult(anyString(), anyMap(), any())).thenReturn(execResult);
+            List<Source> sources = kn.getSources();
+            assertEquals(Collections.emptyList(), sources);
+        }
+    }
 }
