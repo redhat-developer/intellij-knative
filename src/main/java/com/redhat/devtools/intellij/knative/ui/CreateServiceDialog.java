@@ -89,7 +89,7 @@ public class CreateServiceDialog extends DialogWrapper {
         try {
             content = EditorHelper.getSnippet("service").replace("$namespace", namespace);
         } catch (IOException e) {
-            logger.warn(e.getLocalizedMessage());
+            logger.warn(e.getLocalizedMessage(), e);
         }
         editor = new PsiAwareTextEditorImpl(project, new LightVirtualFile("service.yaml", content), TextEditorProvider.getInstance());
     }
@@ -173,7 +173,7 @@ public class CreateServiceDialog extends DialogWrapper {
                 }
                 updateEditor(updated);
             } catch (IOException ex) {
-                logger.warn(ex.getLocalizedMessage());
+                logger.warn(ex.getLocalizedMessage(), ex);
             }
         };
     }
@@ -187,7 +187,7 @@ public class CreateServiceDialog extends DialogWrapper {
             }
             updateEditor(node);
         } catch(IOException e) {
-            logger.warn(e.getLocalizedMessage());
+            logger.warn(e.getLocalizedMessage(), e);
         }
     }
 
@@ -196,7 +196,7 @@ public class CreateServiceDialog extends DialogWrapper {
             try {
                 editor.getEditor().getDocument().setText(YAMLHelper.JSONToYAML(node));
             } catch (IOException e) {
-                logger.warn(e.getLocalizedMessage());
+                logger.warn(e.getLocalizedMessage(), e);
             }
         });
     }

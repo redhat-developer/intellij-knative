@@ -40,7 +40,7 @@ public class KnSaveInEditorListener extends SaveInEditorListener {
             Notification notification = new Notification(NOTIFICATION_ID, "Save Successful", kind + " " + name + " has been saved!", NotificationType.INFORMATION);
             Notifications.Bus.notify(notification);
         } catch (IOException e) {
-            logger.warn(e.getLocalizedMessage());
+            logger.warn(e.getLocalizedMessage(), e);
         }
     }
 
