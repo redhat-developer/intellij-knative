@@ -11,14 +11,16 @@
 package com.redhat.devtools.intellij.knative.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Strings;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
-import com.redhat.devtools.intellij.common.utils.DeployModel;
+import com.redhat.devtools.intellij.common.model.GenericResource;
 import com.redhat.devtools.intellij.common.utils.JSONHelper;
+import com.redhat.devtools.intellij.common.utils.StringHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
-import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.tree.KnRevisionNode;
 import com.redhat.devtools.intellij.knative.tree.KnServiceNode;
@@ -70,53 +72,46 @@ public class KnHelper {
     }
 
     private static void save(Kn knCli, String yaml) throws IOException {
-        DeployModel deployModel = buildDeployModel(yaml);
+        GenericResource resourceWithUpdatedFields = generateResourceFromYAML(yaml);
+        CustomResourceDefinitionContext crdContext = getCRDContext(resourceWithUpdatedFields.getApiVersion(), resourceWithUpdatedFields.getKind());
 
-        Map<String, Object> resource = knCli.getCustomResource(deployModel.getName(), deployModel.getCrdContext());
-        if (resource == null) {
-            knCli.createCustomResource(deployModel.getCrdContext(), yaml);
+        Map<String, Object> existingResource = knCli.getCustomResource(resourceWithUpdatedFields.getName(), crdContext);
+        if (existingResource == null) {
+            knCli.createCustomResource(crdContext, yaml);
         } else {
-            JsonNode customResource = JSONHelper.MapToJSON(resource);
-            ((ObjectNode) customResource).set("spec", deployModel.getSpec());
-            knCli.editCustomResource(deployModel.getName(), deployModel.getCrdContext(), customResource.toString());
+            JsonNode resourceUpdated = updateExistingResource(existingResource, resourceWithUpdatedFields);
+            knCli.editCustomResource(resourceWithUpdatedFields.getName(), crdContext, resourceUpdated.toString());
         }
+    }
+
+    private static JsonNode updateExistingResource(Map<String, Object> existingResourceAsMap, GenericResource resourceWithUpdatedFields) throws IOException {
+        JsonNode resource = JSONHelper.MapToJSON(existingResourceAsMap);
+        JsonNode labels = resourceWithUpdatedFields.getMetadata().get("labels");
+        ((ObjectNode) resource.get("metadata")).remove("labels");
+        if (labels != null) {
+            ((ObjectNode) resource.get("metadata")).set("labels", labels);
+        }
+        JsonNode annotations = resourceWithUpdatedFields.getMetadata().get("annotations");
+        ((ObjectNode) resource.get("metadata")).remove("annotations");
+        if (annotations != null) {
+            ((ObjectNode) resource.get("metadata")).set("annotations", annotations);
+        }
+        ((ObjectNode) resource).set("spec", resourceWithUpdatedFields.getSpec());
+        return resource;
     }
 
     private static void saveNew(Kn knCli, String yaml) throws IOException {
-        DeployModel deployModel = buildDeployModel(yaml);
-        knCli.createCustomResource(deployModel.getCrdContext(), yaml);
+        GenericResource resource = generateResourceFromYAML(yaml);
+        CustomResourceDefinitionContext crdContext = getCRDContext(resource.getApiVersion(), resource.getKind());
+        knCli.createCustomResource(crdContext, yaml);
     }
 
-    private static DeployModel buildDeployModel(String yaml) throws IOException {
-        String kind = YAMLHelper.getStringValueFromYAML(yaml, new String[] {"kind"});
-        if (Strings.isNullOrEmpty(kind)) {
-            throw new IOException("Knative configuration has not a valid format. Kind field is not found.");
-        }
-        String name = YAMLHelper.getStringValueFromYAML(yaml, new String[] {"metadata", "name"});
-        String generateName = YAMLHelper.getStringValueFromYAML(yaml, new String[] {"metadata", "generateName"});
-        if (Strings.isNullOrEmpty(name) && Strings.isNullOrEmpty(generateName)) {
-            throw new IOException("Knative " + kind + " has not a valid format. Name field is not valid or found.");
-        }
-        String apiVersion = YAMLHelper.getStringValueFromYAML(yaml, new String[] {"apiVersion"});
-        if (Strings.isNullOrEmpty(apiVersion)) {
-            throw new IOException("Knative " + kind + " has not a valid format. ApiVersion field is not found.");
-        }
-        CustomResourceDefinitionContext crdContext = getCRDContext(apiVersion, getPluralByKind(kind));
-        if (crdContext == null) {
-            throw new IOException("Knative " + kind + " has not a valid format. ApiVersion field contains an invalid value.");
-        }
-        JsonNode spec = YAMLHelper.getValueFromYAML(yaml, new String[] {"spec"});
-        if (spec == null) {
-            throw new IOException("Knative " + kind + " has not a valid format. Spec field is not found.");
-        }
-        return new DeployModel(name, kind, apiVersion, spec, crdContext);
-    }
-
-    private static CustomResourceDefinitionContext getCRDContext(String apiVersion, String plural) {
+    private static CustomResourceDefinitionContext getCRDContext(String apiVersion, String kind) throws IOException {
+        String plural = StringHelper.getPlural(kind);
         if (Strings.isNullOrEmpty(apiVersion) || Strings.isNullOrEmpty(plural)) return null;
         String[] groupVersion = apiVersion.split("/");
         if (groupVersion.length != 2) {
-            return null;
+            throw new IOException("Knative " + kind + " has not a valid format. ApiVersion field contains an invalid value.");
         }
         String group = groupVersion[0];
         String version = groupVersion.length > 1 ? groupVersion[1]: "v1";
@@ -129,22 +124,12 @@ public class KnHelper {
                 .build();
     }
 
-    public static String getPluralByKind(String kind) {
-        kind = kind.toLowerCase();
-        if (kind.endsWith("s")) {
-            return kind + "es";
-        } else if (kind.endsWith("y")) {
-            return getFrontString(kind) + "ies";
-        } else {
-            return kind + "s";
-        }
-    }
-
-    private static String getFrontString(String kind) {
-        return kind.substring(0, kind.length() - 1);
-    }
-
     public static boolean isWritable(ParentableNode node) {
         return node instanceof KnServiceNode;
+    }
+
+    public static GenericResource generateResourceFromYAML(String yaml) throws IOException {
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        return mapper.readValue(yaml, GenericResource.class);
     }
 }
