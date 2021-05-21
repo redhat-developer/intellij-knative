@@ -26,11 +26,8 @@ intellij {
 }
 
 dependencies {
-    compile 'com.redhat.devtools.intellij:intellij-common:1.1.0'
+    compile 'com.redhat.devtools.intellij:intellij-common:1.2.0-SNAPSHOT'
     testCompile 'org.mockito:mockito-inline:3.8.0'
-
-
-
 }
 
 configurations {
