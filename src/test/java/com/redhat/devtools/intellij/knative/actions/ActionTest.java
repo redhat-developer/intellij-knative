@@ -16,6 +16,7 @@ import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.knative.FixtureBaseTest;
 import com.redhat.devtools.intellij.knative.kn.Service;
 import com.redhat.devtools.intellij.knative.kn.ServiceStatus;
+import com.redhat.devtools.intellij.knative.kn.ServiceTraffic;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import org.junit.Before;
@@ -31,6 +32,7 @@ public abstract class ActionTest extends FixtureBaseTest {
     protected TreePath path, path1;
     protected Service service;
     protected ServiceStatus serviceStatus;
+    protected ServiceTraffic serviceTraffic;
     protected Presentation presentation;
     protected TreeAction treeAction;
 
@@ -45,6 +47,7 @@ public abstract class ActionTest extends FixtureBaseTest {
         path1 = mock(TreePath.class);
         service = mock(Service.class);
         serviceStatus = mock(ServiceStatus.class);
+        serviceTraffic = mock(ServiceTraffic.class);
         treeAction = mock(TreeAction.class);
         presentation = new Presentation();
 
