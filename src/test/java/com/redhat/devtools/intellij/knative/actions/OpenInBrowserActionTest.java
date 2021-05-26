@@ -15,13 +15,17 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.ui.Messages;
+import com.redhat.devtools.intellij.common.utils.ExecHelper;
+import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.knative.kn.ServiceStatus;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.function.Supplier;
 import javax.swing.tree.TreePath;
 import org.junit.Test;
 import org.mockito.MockedStatic;
+import org.mockito.stubbing.Answer;
 
 
 import static org.junit.Assert.assertFalse;
@@ -91,9 +95,15 @@ public class OpenInBrowserActionTest extends ActionTest {
         AnAction action = new OpenInBrowserAction();
         AnActionEvent anActionEvent = createOpenInBrowserActionEventForService();
         when(service.getStatus()).thenReturn(null);
-        try(MockedStatic<BrowserUtil> browserUtilMockedStatic = mockStatic(BrowserUtil.class)){
-            action.actionPerformed(anActionEvent);
-            browserUtilMockedStatic.verify(() -> BrowserUtil.browse(anyString()), times(0));
+        try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.submit(any(Runnable.class))).then((Answer) invocation -> {
+                ((Runnable) invocation.getArguments()[0]).run();
+                return null;
+            });
+            try (MockedStatic<BrowserUtil> browserUtilMockedStatic = mockStatic(BrowserUtil.class)) {
+                action.actionPerformed(anActionEvent);
+                browserUtilMockedStatic.verify(() -> BrowserUtil.browse(anyString()), times(0));
+            }
         }
     }
 
@@ -102,9 +112,16 @@ public class OpenInBrowserActionTest extends ActionTest {
         AnAction action = new OpenInBrowserAction();
         AnActionEvent anActionEvent = createOpenInBrowserActionEventForService();
         when(service.getStatus()).thenReturn(serviceStatus);
-        try(MockedStatic<BrowserUtil> browserUtilMockedStatic = mockStatic(BrowserUtil.class)){
-            action.actionPerformed(anActionEvent);
-            browserUtilMockedStatic.verify(() -> BrowserUtil.browse(anyString()), times(1));
+        try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.submit(any(Runnable.class))).then((Answer) invocation -> {
+                ((Runnable) invocation.getArguments()[0]).run();
+                return null;
+            });
+            try (MockedStatic<BrowserUtil> browserUtilMockedStatic = mockStatic(BrowserUtil.class)) {
+                action.actionPerformed(anActionEvent);
+                verify(serviceStatus, times(1)).getUrl();
+                browserUtilMockedStatic.verify(() -> BrowserUtil.browse(anyString()), times(1));
+            }
         }
     }
 
@@ -113,13 +130,21 @@ public class OpenInBrowserActionTest extends ActionTest {
         AnAction action = new OpenInBrowserAction();
         AnActionEvent anActionEvent = createOpenInBrowserActionEventForRevision();
         when(serviceTraffic.getUrl()).thenReturn("");
-        try(MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
-            messagesMockedStatic.when(() -> Messages.showInputDialog(anyString(), anyString(), any())).thenReturn("");
-            try (MockedStatic<BrowserUtil> browserUtilMockedStatic = mockStatic(BrowserUtil.class)) {
-                action.actionPerformed(anActionEvent);
-                browserUtilMockedStatic.verify(() -> BrowserUtil.browse(anyString()), times(0));
+        Messages.InputDialog inputDialog = mock(Messages.InputDialog.class);
+        when(inputDialog.isOK()).thenReturn(false);
+        try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.submit(any(Runnable.class))).then((Answer) invocation -> {
+                ((Runnable) invocation.getArguments()[0]).run();
+                return null;
+            });
+            try(MockedStatic<UIHelper> uiHelperMockedStatic = mockStatic(UIHelper.class)) {
+                uiHelperMockedStatic.when(() -> UIHelper.executeInUI(any(Supplier.class))).thenReturn(inputDialog);
+                try (MockedStatic<BrowserUtil> browserUtilMockedStatic = mockStatic(BrowserUtil.class)) {
+                    action.actionPerformed(anActionEvent);
+                    browserUtilMockedStatic.verify(() -> BrowserUtil.browse(anyString()), times(0));
+                    uiHelperMockedStatic.verify(() -> UIHelper.executeInUI(any(Supplier.class)), times(1));
+                }
             }
-            messagesMockedStatic.verify(() -> Messages.showInputDialog(anyString(), anyString(), any()), times(1));
         }
     }
 
@@ -128,16 +153,24 @@ public class OpenInBrowserActionTest extends ActionTest {
         AnAction action = new OpenInBrowserAction();
         AnActionEvent anActionEvent = createOpenInBrowserActionEventForRevision();
         when(serviceTraffic.getUrl()).thenReturn("").thenReturn("url");
+        Messages.InputDialog inputDialog = mock(Messages.InputDialog.class);
+        when(inputDialog.isOK()).thenReturn(true);
+        when(inputDialog.getInputString()).thenReturn("tag");
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
             treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
-            try (MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
-                messagesMockedStatic.when(() -> Messages.showInputDialog(anyString(), anyString(), any())).thenReturn("tag");
-                try (MockedStatic<BrowserUtil> browserUtilMockedStatic = mockStatic(BrowserUtil.class)) {
-                    action.actionPerformed(anActionEvent);
-                    verify(kn, times(1)).tagRevision(anyString(), anyString(), anyString());
-                    browserUtilMockedStatic.verify(() -> BrowserUtil.browse(anyString()), times(1));
+            try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+                execHelperMockedStatic.when(() -> ExecHelper.submit(any(Runnable.class))).then((Answer) invocation -> {
+                    ((Runnable) invocation.getArguments()[0]).run();
+                    return null;
+                });
+                try (MockedStatic<UIHelper> uiHelperMockedStatic = mockStatic(UIHelper.class)) {
+                    uiHelperMockedStatic.when(() -> UIHelper.executeInUI(any(Supplier.class))).thenReturn(inputDialog);
+                    try (MockedStatic<BrowserUtil> browserUtilMockedStatic = mockStatic(BrowserUtil.class)) {
+                        action.actionPerformed(anActionEvent);
+                        verify(kn, times(1)).tagRevision(anyString(), anyString(), anyString());
+                        browserUtilMockedStatic.verify(() -> BrowserUtil.browse(anyString()), times(1));
+                    }
                 }
-                messagesMockedStatic.verify(() -> Messages.showInputDialog(anyString(), anyString(), any()), times(1));
             }
         }
     }
@@ -148,11 +181,18 @@ public class OpenInBrowserActionTest extends ActionTest {
         AnActionEvent anActionEvent = createOpenInBrowserActionEventForRevision();
         when(serviceTraffic.getUrl()).thenReturn("url");
         try (MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
-            try (MockedStatic<BrowserUtil> browserUtilMockedStatic = mockStatic(BrowserUtil.class)) {
-                action.actionPerformed(anActionEvent);
-                browserUtilMockedStatic.verify(() -> BrowserUtil.browse(anyString()), times(1));
+            try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+                execHelperMockedStatic.when(() -> ExecHelper.submit(any(Runnable.class))).then((Answer) invocation -> {
+                    ((Runnable) invocation.getArguments()[0]).run();
+                    return null;
+                });
+                try (MockedStatic<BrowserUtil> browserUtilMockedStatic = mockStatic(BrowserUtil.class)) {
+                    action.actionPerformed(anActionEvent);
+                    browserUtilMockedStatic.verify(() -> BrowserUtil.browse(anyString()), times(1));
+                }
+                messagesMockedStatic.verify(() -> Messages.showInputDialog(anyString(), anyString(), any()), times(0));
             }
-            messagesMockedStatic.verify(() -> Messages.showInputDialog(anyString(), anyString(), any()), times(0));
+
         }
     }
 
