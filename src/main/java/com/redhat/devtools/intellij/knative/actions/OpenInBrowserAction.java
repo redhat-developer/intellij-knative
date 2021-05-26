@@ -48,7 +48,6 @@ public class OpenInBrowserAction extends KnAction {
         return !Strings.isNullOrEmpty(getURL(getElement(selected), null));
     }
 
-    @Override
     public boolean isEnabled(Object selected) {
         if (selected instanceof KnRevisionNode) {
             Optional<ServiceTraffic> traffic = getServiceTraffic((KnRevisionNode) selected, false);
