@@ -37,7 +37,7 @@ public class KnServiceTest extends BaseTest {
         kn.deleteServices(services
                 .stream()
                 .filter(service -> service.getName().equals(serviceName))
-                .map(service -> service.getName())
+                .map(Service::getName)
                 .collect(Collectors.toList())
         );
         services = kn.getServicesList();
@@ -56,13 +56,12 @@ public class KnServiceTest extends BaseTest {
 
         Service service = kn.getService(serviceName);
         assertEquals(service.getName(), serviceName);
-        assertTrue(service.getStatus().getLatestCreatedRevisionName().contains(serviceName));
 
         // clean up and verify cleaning succeed
         kn.deleteServices(services
                 .stream()
                 .filter(svc -> svc.getName().equals(serviceName))
-                .map(svc -> svc.getName())
+                .map(Service::getName)
                 .collect(Collectors.toList())
         );
         services = kn.getServicesList();
