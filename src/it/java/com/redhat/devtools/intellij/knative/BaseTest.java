@@ -11,6 +11,8 @@
 package com.redhat.devtools.intellij.knative;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.ui.TestDialog;
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
 import com.intellij.testFramework.fixtures.IdeaProjectTestFixture;
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
@@ -27,6 +29,7 @@ public class BaseTest {
 
     private CodeInsightTestFixture myFixture;
     protected Project project;
+    private TestDialog previousTestDialog;
     protected Kn kn;
 
     @Before
@@ -37,11 +40,13 @@ public class BaseTest {
         myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture);
         myFixture.setUp();
         project = myFixture.getProject();
+        previousTestDialog = Messages.setTestDialog(message -> 0);
         kn = KnCliFactory.getInstance().getKn(project).get();
     }
 
     @After
     public void tearDown() throws Exception {
+        Messages.setTestDialog(previousTestDialog);
         myFixture.tearDown();
     }
 
