@@ -11,6 +11,7 @@
 package com.redhat.devtools.intellij.knative.ui;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.base.Strings;
 import com.intellij.CommonBundle;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.colors.EditorFontType;
@@ -58,6 +59,7 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -73,6 +75,8 @@ public class CreateServiceDialog extends DialogWrapper {
     private OnePixelSplitter splitterPanel;
     private JTextArea txtAreaEventLog;
     private Runnable refreshFunction;
+    private JTextField txtValueParam, txtImageParam;
+    private DocumentListener txtNameParamListener, txtImageParamListener;
 
     public CreateServiceDialog(String title, Project project, String namespace, Runnable refreshFunction) {
         super(project, true);
@@ -92,6 +96,31 @@ public class CreateServiceDialog extends DialogWrapper {
             logger.warn(e.getLocalizedMessage(), e);
         }
         editor = new PsiAwareTextEditorImpl(project, new LightVirtualFile("service.yaml", content), TextEditorProvider.getInstance());
+        editor.getEditor().getDocument().addDocumentListener(createEditorListener());
+    }
+
+    private com.intellij.openapi.editor.event.DocumentListener createEditorListener() {
+        return new com.intellij.openapi.editor.event.DocumentListener() {
+            @Override
+            public void documentChanged(com.intellij.openapi.editor.event.DocumentEvent event) {
+                try {
+                    String nameInYAML = YAMLHelper.getStringValueFromYAML(editor.getEditor().getDocument().getText(), new String[] { "metadata", "name" });
+                    if (nameInYAML != null && !txtValueParam.getText().equals(nameInYAML)) {
+                        txtValueParam.getDocument().removeDocumentListener(txtNameParamListener);
+                        txtValueParam.setText(nameInYAML);
+                        txtValueParam.getDocument().addDocumentListener(txtNameParamListener);
+                    }
+                    String imageInYAML = YAMLHelper.getStringValueFromYAML(editor.getEditor().getDocument().getText(), new String[] { "spec", "template", "spec", "containers[0]", "image" });
+                    if (imageInYAML != null && !txtImageParam.getText().equals(imageInYAML)) {
+                        txtImageParam.getDocument().removeDocumentListener(txtImageParamListener);
+                        txtImageParam.setText(imageInYAML);
+                        txtImageParam.getDocument().addDocumentListener(txtImageParamListener);
+                    }
+                } catch (IOException e) {
+                }
+                setSaveButtonVisibility();
+            }
+        };
     }
 
     private void buildStructure() {
@@ -103,6 +132,7 @@ public class CreateServiceDialog extends DialogWrapper {
 
         cancelButton = new JButton(CommonBundle.getCancelButtonText());
         saveButton = new JButton("Create");
+        saveButton.setEnabled(false);
 
         footerPanel = new JPanel(new BorderLayout());
     }
@@ -113,13 +143,17 @@ public class CreateServiceDialog extends DialogWrapper {
         JPanel nameLabel = createLabelInFlowPanel("Name", "Name of service to be created");
         verticalBox.add(nameLabel);
 
-        JTextField txtValueParam = createJTextField("metadata", "name");
+        Pair<JTextField, DocumentListener> txtNamePair = createJTextField("metadata", "name");
+        txtValueParam = txtNamePair.getLeft();
+        txtNameParamListener = txtNamePair.getRight();
         verticalBox.add(txtValueParam);
 
         JPanel imageLabel = createLabelInFlowPanel("Image", "Image to run (e.g knativesamples/helloworld)");
         verticalBox.add(imageLabel);
 
-        JTextField txtImageParam = createJTextField("spec", "template", "spec", "containers[0]", "image");
+        Pair<JTextField, DocumentListener> txtImagePair = createJTextField("spec", "template", "spec", "containers[0]", "image");
+        txtImageParam = txtImagePair.getLeft();
+        txtImageParamListener = txtImagePair.getRight();
         verticalBox.add(txtImageParam);
 
         JCheckBox chkPrivateService = new JBCheckBox();
@@ -136,8 +170,8 @@ public class CreateServiceDialog extends DialogWrapper {
         return scroll;
     }
 
-    private void addListener(String[] fieldPath, JTextField txtValueParam) {
-        txtValueParam.getDocument().addDocumentListener(new DocumentListener() {
+    private DocumentListener createListener(String[] fieldPath, JTextField txtValueParam) {
+        return new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
                 update();
@@ -154,11 +188,28 @@ public class CreateServiceDialog extends DialogWrapper {
             }
 
             public void update() {
-                if (!txtValueParam.getText().isEmpty()) {
-                    updateYamlValueInEditor(fieldPath, txtValueParam.getText());
+                try {
+                    String valueInYAML = YAMLHelper.getStringValueFromYAML(editor.getEditor().getDocument().getText(), fieldPath);
+                    if (valueInYAML != null && !txtValueParam.getText().equals(valueInYAML)) {
+                        updateYamlValueInEditor(fieldPath, txtValueParam.getText());
+                        setSaveButtonVisibility();
+                    }
+                } catch (IOException e) {
                 }
             }
-        });
+        };
+    }
+
+    private void setSaveButtonVisibility() {
+        try {
+            String nameInYAML = YAMLHelper.getStringValueFromYAML(editor.getEditor().getDocument().getText(), new String[] { "metadata", "name" });
+            boolean hasName = !Strings.isNullOrEmpty(nameInYAML) && !nameInYAML.equals("add service name");
+            String imageInYAML = YAMLHelper.getStringValueFromYAML(editor.getEditor().getDocument().getText(), new String[] { "spec", "template", "spec", "containers[0]", "image" });
+            boolean hasImage = !Strings.isNullOrEmpty(imageInYAML) && !imageInYAML.equals("add image url");
+            saveButton.setEnabled(hasName && hasImage);
+        } catch (IOException e) {
+            logger.warn(e.getLocalizedMessage(), e);
+        }
     }
 
     private ItemListener getChkPrivateServiceListener() {
@@ -201,11 +252,11 @@ public class CreateServiceDialog extends DialogWrapper {
         });
     }
 
-    private JTextField createJTextField(String ...fieldToUpdate) {
+    private Pair<JTextField, DocumentListener> createJTextField(String ...fieldToUpdate) {
         JTextField txtField = new JTextField("");
         txtField.setMaximumSize(new Dimension(999999, 33));
-        addListener(fieldToUpdate, txtField);
-        return txtField;
+        DocumentListener listener = createListener(fieldToUpdate, txtField);
+        return Pair.of(txtField, listener);
     }
 
     private JPanel createLabelInFlowPanel(String name, String tooltip) {
