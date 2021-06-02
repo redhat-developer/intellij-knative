@@ -10,13 +10,18 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.knative.FixtureBaseTest;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedStatic;
@@ -30,6 +35,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class KnHelperTest extends FixtureBaseTest {
@@ -85,19 +91,19 @@ public class KnHelperTest extends FixtureBaseTest {
     @Test
     public void SaveOnCluster_InvalidYamlMissingKind_Throw() throws IOException {
         String yaml = load(RESOURCE_PATH + "missingkind_service.yaml");
-        assertIsCorrectErrorWhenInvalidYaml(kn, project, yaml, true, "Knative configuration has not a valid format. Kind field is not found.");
+        assertIsCorrectErrorWhenInvalidYaml(kn, project, yaml, true, "Resource configuration not valid. Resource kind is missing or invalid.");
     }
 
     @Test
     public void SaveOnCluster_InvalidYamlMissingName_Throw() throws IOException {
         String yaml = load(RESOURCE_PATH + "missingname_service.yaml");
-        assertIsCorrectErrorWhenInvalidYaml(kn, project, yaml, true, "Knative service has not a valid format. Name field is not valid or found.");
+        assertIsCorrectErrorWhenInvalidYaml(kn, project, yaml, true, "Resource configuration not valid. Resource name is missing or invalid.");
     }
 
     @Test
     public void SaveOnCluster_InvalidYamlMissingApiVersion_Throw() throws IOException {
         String yaml = load(RESOURCE_PATH + "missingapiversion_service.yaml");
-        assertIsCorrectErrorWhenInvalidYaml(kn, project, yaml, true, "Knative service has not a valid format. ApiVersion field is not found.");
+        assertIsCorrectErrorWhenInvalidYaml(kn, project, yaml, true, "Resource configuration not valid. ApiVersion is missing or invalid.");
     }
 
     @Test
@@ -109,7 +115,7 @@ public class KnHelperTest extends FixtureBaseTest {
     @Test
     public void SaveOnCluster_InvalidYamlMissingSpec_Throw() throws IOException {
         String yaml = load(RESOURCE_PATH + "missingspec_service.yaml");
-        assertIsCorrectErrorWhenInvalidYaml(kn, project, yaml, true, "Knative service has not a valid format. Spec field is not found.");
+        assertIsCorrectErrorWhenInvalidYaml(kn, project, yaml, true, "Resource configuration not valid. Spec field is missing or invalid.");
     }
 
     private void assertIsCorrectErrorWhenInvalidYaml(Kn kn, Project project, String yaml, boolean isCreate, String expectedError) {
@@ -118,7 +124,7 @@ public class KnHelperTest extends FixtureBaseTest {
             try {
                 KnHelper.saveOnCluster(project, yaml, isCreate);
             } catch (IOException e) {
-                assertEquals(expectedError, e.getLocalizedMessage());
+                assertTrue(e.getLocalizedMessage().contains(expectedError));
             }
         }
     }
@@ -131,6 +137,7 @@ public class KnHelperTest extends FixtureBaseTest {
             theMock.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
             try {
                 boolean result = KnHelper.saveOnCluster(project, yaml, true);
+                verify(kn, times(1)).createCustomResource(any(), anyString());
                 assertTrue(result);
             } catch (IOException e) {
             }
@@ -138,18 +145,42 @@ public class KnHelperTest extends FixtureBaseTest {
     }
 
     @Test
-    public void GetPluralByKind_WordEndingWithS_PluralWithES() {
-        assertEquals("buses", KnHelper.getPluralByKind("bus"));
+    public void SaveOnCluster_IsCreateIsFalseButResourceIsNew_CreateMethodCalled() throws IOException {
+        String yaml = load(RESOURCE_PATH + "service.yaml");
+        doAnswer((a) -> true).when(kn).createCustomResource(any(CustomResourceDefinitionContext.class), anyString());
+        when(kn.getCustomResource(anyString(), any())).thenReturn(null);
+        try (MockedStatic<TreeHelper> theMock = mockStatic(TreeHelper.class)) {
+            try(MockedStatic<UIHelper> uiHelperMockedStatic = mockStatic(UIHelper.class)) {
+                uiHelperMockedStatic.when(() -> UIHelper.executeInUI(any(Supplier.class))).thenReturn(Messages.OK);
+                theMock.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+                try {
+                    KnHelper.saveOnCluster(project, yaml, false);
+                    verify(kn, times(1)).createCustomResource(any(), anyString());
+                } catch (IOException e) {
+                }
+            }
+        }
     }
 
     @Test
-    public void GetPluralByKind_WordEndingWithY_PluralWithIES() {
-        assertEquals("cities", KnHelper.getPluralByKind("city"));
-    }
-
-    @Test
-    public void GetPluralByKind_WordNotEndingWithSorY_PluralWithS() {
-        assertEquals("services", KnHelper.getPluralByKind("service"));
+    public void SaveOnCluster_IsCreateIsFalseAndResourceAlreadyExists_UpdateMethodCalled() throws IOException {
+        ObjectMapper YAML_MAPPER = new ObjectMapper(new com.fasterxml.jackson.dataformat.yaml.YAMLFactory());
+        String yaml = load(RESOURCE_PATH + "service.yaml");
+        doAnswer((a) -> true).when(kn).createCustomResource(any(CustomResourceDefinitionContext.class), anyString());
+        Map<String, Object> resourceAsMap = new HashMap<>();
+        resourceAsMap.put("metadata", YAML_MAPPER.createObjectNode());
+        when(kn.getCustomResource(anyString(), any())).thenReturn(resourceAsMap);
+        try (MockedStatic<TreeHelper> theMock = mockStatic(TreeHelper.class)) {
+            try(MockedStatic<UIHelper> uiHelperMockedStatic = mockStatic(UIHelper.class)) {
+                uiHelperMockedStatic.when(() -> UIHelper.executeInUI(any(Supplier.class))).thenReturn(Messages.OK);
+                theMock.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+                try {
+                    KnHelper.saveOnCluster(project, yaml, false);
+                    verify(kn, times(1)).editCustomResource(anyString(), any(), anyString());
+                } catch (IOException e) {
+                }
+            }
+        }
     }
 
     @Test

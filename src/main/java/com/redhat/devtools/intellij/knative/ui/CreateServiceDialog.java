@@ -23,6 +23,7 @@ import com.intellij.openapi.util.SystemInfo;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.OnePixelSplitter;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTabbedPane;
 import com.intellij.ui.mac.TouchbarDataKeys;
@@ -37,6 +38,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,6 +48,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -85,7 +89,7 @@ public class CreateServiceDialog extends DialogWrapper {
         try {
             content = EditorHelper.getSnippet("service").replace("$namespace", namespace);
         } catch (IOException e) {
-            logger.warn(e.getLocalizedMessage());
+            logger.warn(e.getLocalizedMessage(), e);
         }
         editor = new PsiAwareTextEditorImpl(project, new LightVirtualFile("service.yaml", content), TextEditorProvider.getInstance());
     }
@@ -118,6 +122,12 @@ public class CreateServiceDialog extends DialogWrapper {
         JTextField txtImageParam = createJTextField("spec", "template", "spec", "containers[0]", "image");
         verticalBox.add(txtImageParam);
 
+        JCheckBox chkPrivateService = new JBCheckBox();
+        chkPrivateService.setText("Make service available only on the cluster-local network.");
+        chkPrivateService.addItemListener(getChkPrivateServiceListener());
+        chkPrivateService.setBorder(new EmptyBorder(10, 0, 0, 0));
+        verticalBox.add(createComponentInFlowPanel(chkPrivateService));
+
         verticalBox.add(new JPanel(new BorderLayout())); // hack to push components to the top
 
         JBScrollPane scroll = new JBScrollPane(verticalBox);
@@ -145,30 +155,50 @@ public class CreateServiceDialog extends DialogWrapper {
 
             public void update() {
                 if (!txtValueParam.getText().isEmpty()) {
-                    updateYamlInEditor(fieldPath, txtValueParam.getText());
+                    updateYamlValueInEditor(fieldPath, txtValueParam.getText());
                 }
             }
         });
     }
 
-    private void updateYamlInEditor(String[] fieldPath, String value) {
+    private ItemListener getChkPrivateServiceListener() {
+        return e -> {
+            String yaml = editor.getEditor().getDocument().getText();
+            try {
+                JsonNode updated;
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    updated = YAMLHelper.addLabelToResource(yaml, "networking.knative.dev/visibility", "cluster-local");
+                } else {
+                    updated = YAMLHelper.removeLabelFromResource(yaml, "networking.knative.dev/visibility");
+                }
+                updateEditor(updated);
+            } catch (IOException ex) {
+                logger.warn(ex.getLocalizedMessage(), ex);
+            }
+        };
+    }
+
+    private void updateYamlValueInEditor(String[] fieldPath, String value) {
         String yaml = editor.getEditor().getDocument().getText();
         try {
             JsonNode node = YAMLHelper.editValueInYAML(yaml, fieldPath, value);
             if (node == null) {
                 return;
             }
-            ApplicationManager.getApplication().runWriteAction(() -> {
-                try {
-                    editor.getEditor().getDocument().setText(YAMLHelper.JSONToYAML(node));
-                } catch (IOException e) {
-                    logger.warn(e.getLocalizedMessage());
-                }
-            });
+            updateEditor(node);
         } catch(IOException e) {
-            logger.warn(e.getLocalizedMessage());
+            logger.warn(e.getLocalizedMessage(), e);
         }
+    }
 
+    private void updateEditor(JsonNode node) {
+        ApplicationManager.getApplication().runWriteAction(() -> {
+            try {
+                editor.getEditor().getDocument().setText(YAMLHelper.JSONToYAML(node));
+            } catch (IOException e) {
+                logger.warn(e.getLocalizedMessage(), e);
+            }
+        });
     }
 
     private JTextField createJTextField(String ...fieldToUpdate) {
@@ -179,11 +209,15 @@ public class CreateServiceDialog extends DialogWrapper {
     }
 
     private JPanel createLabelInFlowPanel(String name, String tooltip) {
-        JPanel flowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel label = new JLabel(name);
         label.getFont().deriveFont(Font.BOLD);
         addTooltip(label, tooltip);
-        flowPanel.add(label);
+        return createComponentInFlowPanel(label);
+    }
+
+    private JPanel createComponentInFlowPanel(JComponent component) {
+        JPanel flowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        flowPanel.add(component);
         return flowPanel;
     }
 

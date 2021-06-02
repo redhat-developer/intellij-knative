@@ -192,4 +192,9 @@ public class KnCli implements Kn {
         JavaType customClassCollection = JSON_MAPPER.getTypeFactory().constructCollectionType(List.class, customClass);
         return JSON_MAPPER.readValue(JSON_MAPPER.readTree(json).get("items").toString(), customClassCollection);
     }
+
+    @Override
+    public void tagRevision(String service, String revision, String tag) throws IOException {
+        ExecHelper.execute(command, envVars, "service", "update", service, "--tag", revision + "=" + tag);
+    }
 }
