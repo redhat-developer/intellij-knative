@@ -15,6 +15,7 @@ import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.ide.util.treeView.PresentableNodeDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
+import com.intellij.ui.SimpleTextAttributes;
 import com.redhat.devtools.intellij.knative.kn.BaseSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,21 +37,17 @@ public class KnSinkDescriptor extends PresentableNodeDescriptor<KnSinkNode> {
 
     @Override
     protected void update(@NotNull PresentationData presentation) {
-        presentation.setPresentableText(node.getName());
-        presentation.setIcon(getIcon(node.getSource()));
+        if (node.getName() == null) {
+            presentation.clear();
+            presentation.addText("Sink Not Found", SimpleTextAttributes.ERROR_ATTRIBUTES);
+        } else {
+            presentation.setPresentableText(node.getName());
+            presentation.setIcon(getIcon(node.getSource()));
+        }
+
     }
 
     private Icon getIcon(BaseSource source) {
-//        if(source instanceof APIServerSource) {
-//            return SERVICE_ICON;
-//        }
-//        if(source instanceof PingSource) {
-//
-//        }
-//        if(source instanceof BindingSource) {
-//            return
-//        }
-
         return SERVICE_ICON;
     }
 
