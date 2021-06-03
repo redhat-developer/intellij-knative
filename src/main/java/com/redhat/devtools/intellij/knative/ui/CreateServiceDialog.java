@@ -82,6 +82,9 @@ public class CreateServiceDialog extends DialogWrapper {
     private JTextField txtValueParam, txtImageParam;
     private DocumentListener txtNameParamListener, txtImageParamListener;
 
+    private final static String DEFAULT_NAME_IN_SNIPPET = "add service name";
+    private final static String DEFAULT_FIRST_IMAGE_IN_SNIPPET = "add image url";
+
     public CreateServiceDialog(String title, Project project, String namespace, Runnable refreshFunction) {
         super(project, true);
         this.project = project;
@@ -109,13 +112,17 @@ public class CreateServiceDialog extends DialogWrapper {
             public void documentChanged(com.intellij.openapi.editor.event.DocumentEvent event) {
                 try {
                     String nameInYAML = YAMLHelper.getStringValueFromYAML(editor.getEditor().getDocument().getText(), YAML_NAME_PATH);
-                    if (nameInYAML != null && !txtValueParam.getText().equals(nameInYAML)) {
+                    if (nameInYAML != null
+                            && !txtValueParam.getText().equals(nameInYAML)
+                            && !nameInYAML.equals(DEFAULT_NAME_IN_SNIPPET)) {
                         txtValueParam.getDocument().removeDocumentListener(txtNameParamListener);
                         txtValueParam.setText(nameInYAML);
                         txtValueParam.getDocument().addDocumentListener(txtNameParamListener);
                     }
                     String imageInYAML = YAMLHelper.getStringValueFromYAML(editor.getEditor().getDocument().getText(), YAML_FIRST_IMAGE_PATH);
-                    if (imageInYAML != null && !txtImageParam.getText().equals(imageInYAML)) {
+                    if (imageInYAML != null
+                            && !txtImageParam.getText().equals(imageInYAML)
+                            && !imageInYAML.equals(DEFAULT_FIRST_IMAGE_IN_SNIPPET)) {
                         txtImageParam.getDocument().removeDocumentListener(txtImageParamListener);
                         txtImageParam.setText(imageInYAML);
                         txtImageParam.getDocument().addDocumentListener(txtImageParamListener);
@@ -207,9 +214,9 @@ public class CreateServiceDialog extends DialogWrapper {
     private void setSaveButtonVisibility() {
         try {
             String nameInYAML = YAMLHelper.getStringValueFromYAML(editor.getEditor().getDocument().getText(), YAML_NAME_PATH);
-            boolean hasName = !Strings.isNullOrEmpty(nameInYAML) && !nameInYAML.equals("add service name");
+            boolean hasName = !Strings.isNullOrEmpty(nameInYAML) && !nameInYAML.equals(DEFAULT_NAME_IN_SNIPPET);
             String imageInYAML = YAMLHelper.getStringValueFromYAML(editor.getEditor().getDocument().getText(), YAML_FIRST_IMAGE_PATH);
-            boolean hasImage = !Strings.isNullOrEmpty(imageInYAML) && !imageInYAML.equals("add image url");
+            boolean hasImage = !Strings.isNullOrEmpty(imageInYAML) && !imageInYAML.equals(DEFAULT_FIRST_IMAGE_IN_SNIPPET);
             saveButton.setEnabled(hasName && hasImage);
         } catch (IOException e) {
             logger.warn(e.getLocalizedMessage(), e);
@@ -260,6 +267,7 @@ public class CreateServiceDialog extends DialogWrapper {
         JTextField txtField = new JTextField("");
         txtField.setMaximumSize(new Dimension(999999, 33));
         DocumentListener listener = createListener(fieldToUpdate, txtField);
+        txtField.getDocument().addDocumentListener(listener);
         return Pair.of(txtField, listener);
     }
 
