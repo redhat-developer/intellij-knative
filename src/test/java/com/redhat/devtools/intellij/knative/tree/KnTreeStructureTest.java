@@ -101,9 +101,7 @@ public class KnTreeStructureTest extends BaseTest {
         when(kn.getServicesList()).thenReturn(Collections.emptyList());
         Object[] serviceNodes = knTreeStructure.getChildElements(knServingNode);
 
-        assertEquals(1, serviceNodes.length);
-        assertEquals(serviceNodes[0].getClass(), MessageNode.class);
-        assertEquals("No Services Found", ((MessageNode) serviceNodes[0]).getName());
+        assertEquals(0, serviceNodes.length);
     }
 
     @Test

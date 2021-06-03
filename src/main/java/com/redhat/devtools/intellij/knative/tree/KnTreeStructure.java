@@ -174,9 +174,6 @@ public class KnTreeStructure extends AbstractTreeStructure implements MutableMod
         } catch (IOException e) {
             services.add(new MessageNode<>(element.getRootNode(), element, "Failed to load services"));
         }
-        if (services.isEmpty()) {
-            services.add(new MessageNode<>(element.getRootNode(), element, "No Services Found"));
-        }
         return services.toArray();
     }
 
