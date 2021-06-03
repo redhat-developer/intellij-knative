@@ -1,0 +1,14 @@
+apiVersion: sources.knative.dev/v1
+kind: PingSource
+metadata:
+  name: <pingsource>
+  namespace: "$namespace"
+spec:
+  schedule: "*/1 * * * *"
+  contentType: "text/plain"
+  dataBase64: "ZGF0YQ=="
+  sink:
+    ref:
+      apiVersion: v1
+      kind: Service
+      name: <sink>
