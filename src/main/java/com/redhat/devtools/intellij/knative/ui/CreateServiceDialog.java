@@ -65,6 +65,10 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+import static com.redhat.devtools.intellij.knative.Constants.YAML_FIRST_IMAGE_PATH;
+import static com.redhat.devtools.intellij.knative.Constants.YAML_NAME_PATH;
+
 public class CreateServiceDialog extends DialogWrapper {
     private final Logger logger = LoggerFactory.getLogger(CreateServiceDialog.class);
     private JBTabbedPane contentPanel;
@@ -104,13 +108,13 @@ public class CreateServiceDialog extends DialogWrapper {
             @Override
             public void documentChanged(com.intellij.openapi.editor.event.DocumentEvent event) {
                 try {
-                    String nameInYAML = YAMLHelper.getStringValueFromYAML(editor.getEditor().getDocument().getText(), new String[] { "metadata", "name" });
+                    String nameInYAML = YAMLHelper.getStringValueFromYAML(editor.getEditor().getDocument().getText(), YAML_NAME_PATH);
                     if (nameInYAML != null && !txtValueParam.getText().equals(nameInYAML)) {
                         txtValueParam.getDocument().removeDocumentListener(txtNameParamListener);
                         txtValueParam.setText(nameInYAML);
                         txtValueParam.getDocument().addDocumentListener(txtNameParamListener);
                     }
-                    String imageInYAML = YAMLHelper.getStringValueFromYAML(editor.getEditor().getDocument().getText(), new String[] { "spec", "template", "spec", "containers[0]", "image" });
+                    String imageInYAML = YAMLHelper.getStringValueFromYAML(editor.getEditor().getDocument().getText(), YAML_FIRST_IMAGE_PATH);
                     if (imageInYAML != null && !txtImageParam.getText().equals(imageInYAML)) {
                         txtImageParam.getDocument().removeDocumentListener(txtImageParamListener);
                         txtImageParam.setText(imageInYAML);
@@ -143,7 +147,7 @@ public class CreateServiceDialog extends DialogWrapper {
         JPanel nameLabel = createLabelInFlowPanel("Name", "Name of service to be created");
         verticalBox.add(nameLabel);
 
-        Pair<JTextField, DocumentListener> txtNamePair = createJTextField("metadata", "name");
+        Pair<JTextField, DocumentListener> txtNamePair = createJTextField(YAML_NAME_PATH);
         txtValueParam = txtNamePair.getLeft();
         txtNameParamListener = txtNamePair.getRight();
         verticalBox.add(txtValueParam);
@@ -151,7 +155,7 @@ public class CreateServiceDialog extends DialogWrapper {
         JPanel imageLabel = createLabelInFlowPanel("Image", "Image to run (e.g knativesamples/helloworld)");
         verticalBox.add(imageLabel);
 
-        Pair<JTextField, DocumentListener> txtImagePair = createJTextField("spec", "template", "spec", "containers[0]", "image");
+        Pair<JTextField, DocumentListener> txtImagePair = createJTextField(YAML_FIRST_IMAGE_PATH);
         txtImageParam = txtImagePair.getLeft();
         txtImageParamListener = txtImagePair.getRight();
         verticalBox.add(txtImageParam);
@@ -202,9 +206,9 @@ public class CreateServiceDialog extends DialogWrapper {
 
     private void setSaveButtonVisibility() {
         try {
-            String nameInYAML = YAMLHelper.getStringValueFromYAML(editor.getEditor().getDocument().getText(), new String[] { "metadata", "name" });
+            String nameInYAML = YAMLHelper.getStringValueFromYAML(editor.getEditor().getDocument().getText(), YAML_NAME_PATH);
             boolean hasName = !Strings.isNullOrEmpty(nameInYAML) && !nameInYAML.equals("add service name");
-            String imageInYAML = YAMLHelper.getStringValueFromYAML(editor.getEditor().getDocument().getText(), new String[] { "spec", "template", "spec", "containers[0]", "image" });
+            String imageInYAML = YAMLHelper.getStringValueFromYAML(editor.getEditor().getDocument().getText(), YAML_FIRST_IMAGE_PATH);
             boolean hasImage = !Strings.isNullOrEmpty(imageInYAML) && !imageInYAML.equals("add image url");
             saveButton.setEnabled(hasName && hasImage);
         } catch (IOException e) {
