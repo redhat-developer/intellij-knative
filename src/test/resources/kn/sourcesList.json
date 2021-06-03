@@ -1,0 +1,117 @@
+{
+  "apiVersion": "client.knative.dev/v1alpha1",
+  "items": [
+    {
+      "apiVersion": "sources.knative.dev/v1alpha1",
+      "kind": "ApiServerSource",
+      "metadata": {
+        "annotations": {
+          "sources.knative.dev/creator": "kubeadmin",
+          "sources.knative.dev/lastModifier": "kubeadmin"
+        },
+        "creationTimestamp": "2021-04-28T08:23:35Z",
+        "generation": 1,
+        "managedFields": [
+          {
+            "apiVersion": "sources.knative.dev/v1",
+            "fieldsType": "FieldsV1",
+            "fieldsV1": {
+              "f:status": {
+                "f:conditions": {},
+                "f:observedGeneration": {}
+              }
+            },
+            "manager": "controller",
+            "operation": "Update",
+            "time": "2021-04-28T08:23:35Z"
+          },
+          {
+            "apiVersion": "sources.knative.dev/v1alpha2",
+            "fieldsType": "FieldsV1",
+            "fieldsV1": {
+              "f:spec": {
+                ".": {},
+                "f:mode": {},
+                "f:resources": {},
+                "f:serviceAccountName": {},
+                "f:sink": {
+                  ".": {},
+                  "f:ref": {
+                    ".": {},
+                    "f:apiVersion": {},
+                    "f:kind": {},
+                    "f:name": {},
+                    "f:namespace": {}
+                  }
+                }
+              },
+              "f:status": {}
+            },
+            "manager": "kn",
+            "operation": "Update",
+            "time": "2021-04-28T08:23:35Z"
+          }
+        ],
+        "name": "example-source-apiserver0",
+        "namespace": "default",
+        "resourceVersion": "3305426",
+        "selfLink": "/apis/sources.knative.dev/v1alpha1/namespaces/default/apiserversources/example-source-apiserver0",
+        "uid": "8a8771b5-c097-4049-a436-26687dc56200"
+      },
+      "spec": {
+        "mode": "Ref",
+        "resources": [
+          {
+            "apiVersion": "v1",
+            "controller": false,
+            "controllerSelector": {
+              "apiVersion": "",
+              "kind": "",
+              "name": "",
+              "uid": ""
+            },
+            "kind": "Event",
+            "labelSelector": {}
+          }
+        ],
+        "serviceAccountName": "default",
+        "sink": {
+          "ref": {
+            "apiVersion": "serving.knative.dev/v1",
+            "kind": "Service",
+            "name": "aaa",
+            "namespace": "default"
+          }
+        }
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2021-04-28T08:23:35Z",
+            "status": "Unknown",
+            "type": "Deployed"
+          },
+          {
+            "lastTransitionTime": "2021-04-28T08:23:35Z",
+            "reason": "NotFound",
+            "status": "False",
+            "type": "Ready"
+          },
+          {
+            "lastTransitionTime": "2021-04-28T08:23:35Z",
+            "reason": "NotFound",
+            "status": "False",
+            "type": "SinkProvided"
+          },
+          {
+            "lastTransitionTime": "2021-04-28T08:23:35Z",
+            "status": "Unknown",
+            "type": "SufficientPermissions"
+          }
+        ],
+        "observedGeneration": 1
+      }
+    }
+  ],
+  "kind": "SourceList"
+}

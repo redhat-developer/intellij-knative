@@ -13,17 +13,19 @@ package com.redhat.devtools.intellij.knative.tree;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
 import com.redhat.devtools.intellij.knative.BaseTest;
+import com.redhat.devtools.intellij.knative.kn.PingSource;
 import com.redhat.devtools.intellij.knative.kn.Revision;
 import com.redhat.devtools.intellij.knative.kn.Service;
+import com.redhat.devtools.intellij.knative.kn.Source;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
-
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -49,6 +51,7 @@ public class KnTreeStructureTest extends BaseTest {
         when(knServingNode.getRootNode()).thenReturn(knRootNode);
         when(knServiceNode.getRootNode()).thenReturn(knRootNode);
         when(knServiceNode.getParent()).thenReturn(knServingNode);
+        when(knEventingSourcesNode.getRootNode()).thenReturn(knRootNode);
     }
 
     @Test
@@ -94,11 +97,11 @@ public class KnTreeStructureTest extends BaseTest {
     }
 
     @Test
-    public void GetChildElements_ElementIsServingNodeWithNoChildren_EmptyArray() throws IOException {
+    public void GetChildElements_ElementIsServingNodeWithNoChildren_HasMessageNode() throws IOException {
         when(kn.getServicesList()).thenReturn(Collections.emptyList());
         Object[] serviceNodes = knTreeStructure.getChildElements(knServingNode);
 
-        assertTrue(serviceNodes.length == 0);
+        assertEquals(0, serviceNodes.length);
     }
 
     @Test
@@ -138,6 +141,57 @@ public class KnTreeStructureTest extends BaseTest {
     }
 
     @Test
+    public void GetChildElements_ElementIsKnEventingNode_ContainsAllEventingNodes() throws IOException {
+        Object[] eventingNodes = knTreeStructure.getChildElements(knEventingNode);
+        assertEquals(5, eventingNodes.length);
+    }
+
+    @Test
+    public void GetChildElements_ElementIsEventingSourcesNodeWithNoChildren_EmptyArray() throws IOException {
+        when(kn.getSources()).thenReturn(Collections.emptyList());
+        Object[] eventingSources = knTreeStructure.getChildElements(knEventingSourcesNode);
+
+        assertEquals(0, eventingSources.length);
+    }
+
+    @Test
+    public void GetChildElements_ElementIsEventingSourcesNodeWithChildren_ArrayOfSources() throws IOException {
+        Source source1 = mock(Source.class);
+        Source source2 = mock(Source.class);
+        Source source3 = mock(Source.class);
+        List<Source> sources = new ArrayList<>(Arrays.asList(source1, source2, source3));
+
+        when(kn.getSources()).thenReturn(sources);
+
+        Object[] revisionNodes = knTreeStructure.getChildElements(knEventingSourcesNode);
+
+        assertEquals(3, revisionNodes.length);
+    }
+
+    @Test
+    public void GetChildElements_ElementIsSourceNodeNodeWithNoChildren_EmptyArray() throws IOException {
+        Source source = mock(Source.class);
+        when(knSourceNode.getSource()).thenReturn(source);
+        when(source.getSinkSource()).thenReturn(null);
+
+        Object[] eventingSources = knTreeStructure.getChildElements(knSourceNode);
+
+        assertEquals(0, eventingSources.length);
+    }
+
+    @Test
+    public void GetChildElements_ElementIsKnSourceNodeWithChildren_HasSource() throws IOException {
+        Source source = mock(Source.class);
+        PingSource pingSource = mock(PingSource.class);
+        when(knSourceNode.getSource()).thenReturn(source);
+        when(source.getSinkSource()).thenReturn(pingSource);
+
+        Object[] eventingSources = knTreeStructure.getChildElements(knSourceNode);
+
+        assertEquals(1, eventingSources.length);
+    }
+
+    @Test
     public void GetParentElement_UnknownNode_Null() {
         assertNull(knTreeStructure.getParentElement(knRootNode));
     }
@@ -147,9 +201,9 @@ public class KnTreeStructureTest extends BaseTest {
         assertEquals(knServingNode, knTreeStructure.getParentElement(knServiceNode));
     }
 
-    @Test
+    @Test(expected = RuntimeException.class)
     public void GetDescriptor_ElementIsUnknownType_Null() {
-        assertNull(knTreeStructure.createDescriptor(new Object(), null));
+        knTreeStructure.createDescriptor(new Object(), null);
     }
 
     @Test
@@ -176,6 +230,42 @@ public class KnTreeStructureTest extends BaseTest {
     public void GetDescriptor_ElementIsKnRevisionNode_KnRevisionDescriptor() {
         assertNodeDescriptor(knRevisionNode, KnRevisionDescriptor.class);
     }
+
+    @Test
+    public void GetDescriptor_ElementIsKnEventingBrokerNode_LabelAndIconDescriptor() {
+        assertNodeDescriptor(knEventingBrokerNode, LabelAndIconDescriptor.class);
+    }
+
+    @Test
+    public void GetDescriptor_ElementIsKnEventingChannelsNode_LabelAndIconDescriptor() {
+        assertNodeDescriptor(knEventingChannelsNode, LabelAndIconDescriptor.class);
+    }
+
+    @Test
+    public void GetDescriptor_ElementIsKnEventingSourcesNode_LabelAndIconDescriptor() {
+        assertNodeDescriptor(knEventingSourcesNode, LabelAndIconDescriptor.class);
+    }
+
+    @Test
+    public void GetDescriptor_ElementIsKnEventingSubscriptionsNode_LabelAndIconDescriptor() {
+        assertNodeDescriptor(knEventingSubscriptionsNode, LabelAndIconDescriptor.class);
+    }
+
+    @Test
+    public void GetDescriptor_ElementIsKnEventingTriggersNode_LabelAndIconDescriptor() {
+        assertNodeDescriptor(knEventingTriggersNode, LabelAndIconDescriptor.class);
+    }
+
+    @Test
+    public void GetDescriptor_ElementIsKnSourceNode_LabelAndIconDescriptor() {
+        assertNodeDescriptor(knSourceNode, LabelAndIconDescriptor.class);
+    }
+
+    @Test
+    public void GetDescriptor_ElementIsKnSinkNode_KnSinkDescriptor() {
+        assertNodeDescriptor(knSinkNode, KnSinkDescriptor.class);
+    }
+
 
     private void assertNodeDescriptor(Object element, Class nodeDescriptorType) {
         NodeDescriptor nodeDescriptor = knTreeStructure.createDescriptor(element, null);

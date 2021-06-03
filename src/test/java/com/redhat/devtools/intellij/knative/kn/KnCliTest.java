@@ -15,6 +15,10 @@ import com.redhat.devtools.intellij.knative.BaseTest;
 import io.fabric8.kubernetes.api.model.RootPaths;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.MockedStatic;
+
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
@@ -22,10 +26,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.MockedStatic;
-
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -74,7 +74,7 @@ public class KnCliTest extends BaseTest {
         when(rootPaths.getPaths()).thenThrow(new KubernetesClientException("error"));
         try {
             kn.isKnativeServingAware();
-        } catch(IOException e) {
+        } catch (IOException e) {
             assertEquals("io.fabric8.kubernetes.client.KubernetesClientException: error", e.getLocalizedMessage());
         }
     }
@@ -98,7 +98,7 @@ public class KnCliTest extends BaseTest {
         when(rootPaths.getPaths()).thenThrow(new KubernetesClientException("error"));
         try {
             kn.isKnativeEventingAware();
-        } catch(IOException e) {
+        } catch (IOException e) {
             assertEquals("io.fabric8.kubernetes.client.KubernetesClientException: error", e.getLocalizedMessage());
         }
     }
@@ -136,8 +136,9 @@ public class KnCliTest extends BaseTest {
 
     @Test
     public void GetServicesList_ClusterHasNoServices_EmptyList() throws IOException {
-        try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            execHelperMockedStatic.when(() -> ExecHelper.execute(anyString(), anyMap(), any())).thenReturn("No services found.");
+        ExecHelper.ExecResult execResult = new ExecHelper.ExecResult("No services found.", null, 0);
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.executeWithResult(anyString(), anyMap(), any())).thenReturn(execResult);
             assertEquals(Collections.emptyList(), kn.getServicesList());
         }
     }
@@ -145,18 +146,19 @@ public class KnCliTest extends BaseTest {
     @Test
     public void GetServicesList_ClusterHasServices_ListOfServices() throws IOException {
         String servicesListInJson = load(RESOURCES_PATH + "serviceslist.json");
-        try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            execHelperMockedStatic.when(() -> ExecHelper.execute(anyString(), anyMap(), any())).thenReturn(servicesListInJson);
+        ExecHelper.ExecResult execResult = new ExecHelper.ExecResult(servicesListInJson, null, 0);
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.executeWithResult(anyString(), anyMap(), any())).thenReturn(execResult);
             List<Service> serviceList = kn.getServicesList();
-            assertTrue(serviceList.size() == 1);
+            assertEquals(1, serviceList.size());
             assertEquals("test", serviceList.get(0).getName());
         }
     }
 
     @Test
     public void GetServicesList_ClientFails_Throws() {
-        try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            execHelperMockedStatic.when(() -> ExecHelper.execute(anyString(), anyMap(), any())).thenThrow(new IOException("error"));
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.executeWithResult(anyString(), anyMap(), any())).thenThrow(new IOException("error"));
             kn.getServicesList();
         } catch (IOException e) {
             assertEquals("error", e.getLocalizedMessage());
@@ -165,7 +167,7 @@ public class KnCliTest extends BaseTest {
 
     @Test
     public void GetRevisionsForService_ServiceHasNoRevisions_EmptyList() throws IOException {
-        try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             execHelperMockedStatic.when(() -> ExecHelper.execute(anyString(), anyMap(), any())).thenReturn("No revisions found.");
             assertEquals(Collections.emptyList(), kn.getRevisionsForService("test"));
         }
@@ -174,7 +176,7 @@ public class KnCliTest extends BaseTest {
     @Test
     public void GetRevisionsForService_ServiceHasRevisions_ListOfRevisions() throws IOException {
         String servicesListInJson = load(RESOURCES_PATH + "revisionsList.json");
-        try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             execHelperMockedStatic.when(() -> ExecHelper.execute(anyString(), anyMap(), any())).thenReturn(servicesListInJson);
             List<Revision> revisionList = kn.getRevisionsForService("test");
             assertTrue(revisionList.size() == 2);
@@ -185,7 +187,7 @@ public class KnCliTest extends BaseTest {
 
     @Test
     public void GetRevisionsForService_ClientFails_Throws() {
-        try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             execHelperMockedStatic.when(() -> ExecHelper.execute(anyString(), anyMap(), any())).thenThrow(new IOException("error"));
             kn.getRevisionsForService("test");
         } catch (IOException e) {
@@ -196,7 +198,7 @@ public class KnCliTest extends BaseTest {
     @Test
     public void GetService_NameIsValid_Service() throws IOException {
         String serviceInJson = load(RESOURCES_PATH + "service.json");
-        try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             execHelperMockedStatic.when(() -> ExecHelper.execute(anyString(), anyMap(), any())).thenReturn(serviceInJson);
             Service service = kn.getService("test");
             assertEquals("test", service.getName());
@@ -205,7 +207,7 @@ public class KnCliTest extends BaseTest {
 
     @Test
     public void GetService_ClientFails_Throws() {
-        try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             execHelperMockedStatic.when(() -> ExecHelper.execute(anyString(), anyMap(), any())).thenThrow(new IOException("error"));
             kn.getService("test");
         } catch (IOException e) {
@@ -216,7 +218,7 @@ public class KnCliTest extends BaseTest {
     @Test
     public void GetServiceYAML_NameIsValid_ServiceYAML() throws IOException {
         String serviceInYaml = load(RESOURCES_PATH + "service.yaml");
-        try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             execHelperMockedStatic.when(() -> ExecHelper.execute(anyString(), anyMap(), any())).thenReturn(serviceInYaml);
             assertEquals(serviceInYaml, kn.getServiceYAML("test"));
         }
@@ -224,7 +226,7 @@ public class KnCliTest extends BaseTest {
 
     @Test
     public void GetServiceYAML_ClientFails_Throws() {
-        try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             execHelperMockedStatic.when(() -> ExecHelper.execute(anyString(), anyMap(), any())).thenThrow(new IOException("error"));
             kn.getServiceYAML("test");
         } catch (IOException e) {
@@ -235,7 +237,7 @@ public class KnCliTest extends BaseTest {
     @Test
     public void GetRevisionYAML_NameIsValid_RevisionYAML() throws IOException {
         String revisionInYaml = load(RESOURCES_PATH + "revision.yaml");
-        try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             execHelperMockedStatic.when(() -> ExecHelper.execute(anyString(), anyMap(), any())).thenReturn(revisionInYaml);
             assertEquals(revisionInYaml, kn.getRevisionYAML("test"));
         }
@@ -243,7 +245,7 @@ public class KnCliTest extends BaseTest {
 
     @Test
     public void GetRevisionYAML_ClientFails_Throws() {
-        try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             execHelperMockedStatic.when(() -> ExecHelper.execute(anyString(), anyMap(), any())).thenThrow(new IOException("error"));
             kn.getRevisionYAML("test");
         } catch (IOException e) {
@@ -253,7 +255,7 @@ public class KnCliTest extends BaseTest {
 
     @Test
     public void DeleteServices_OneServiceToBeDeleted_DeletionIsCalled() throws IOException {
-        try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.deleteServices(Arrays.asList("one"));
             execHelperMockedStatic.verify(() ->
                     ExecHelper.execute(anyString(), anyMap(), eq("service"), eq("delete"), eq("one"), eq("-n"), eq("default")));
@@ -262,7 +264,7 @@ public class KnCliTest extends BaseTest {
 
     @Test
     public void DeleteServices_MultipleServicesToBeDeleted_DeletionIsCalled() throws IOException {
-        try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.deleteServices(Arrays.asList("one", "two", "three"));
             execHelperMockedStatic.verify(() ->
                     ExecHelper.execute(anyString(), anyMap(), eq("service"), eq("delete"), eq("one"),
@@ -272,7 +274,7 @@ public class KnCliTest extends BaseTest {
 
     @Test
     public void DeleteServices_ClientFails_Throws() {
-        try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             execHelperMockedStatic.when(() -> ExecHelper.execute(anyString(), anyMap(), any())).thenThrow(new IOException("error"));
             kn.deleteServices(Collections.emptyList());
         } catch (IOException e) {
@@ -282,7 +284,7 @@ public class KnCliTest extends BaseTest {
 
     @Test
     public void DeleteRevisions_OneRevisionToBeDeleted_DeletionIsCalled() throws IOException {
-        try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.deleteRevisions(Arrays.asList("one"));
             execHelperMockedStatic.verify(() ->
                     ExecHelper.execute(anyString(), anyMap(), eq("revision"), eq("delete"), eq("one"), eq("-n"), eq("default")));
@@ -291,7 +293,7 @@ public class KnCliTest extends BaseTest {
 
     @Test
     public void DeleteRevisions_MultipleRevisionsToBeDeleted_DeletionIsCalled() throws IOException {
-        try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.deleteRevisions(Arrays.asList("one", "two", "three"));
             execHelperMockedStatic.verify(() ->
                     ExecHelper.execute(anyString(), anyMap(), eq("revision"), eq("delete"), eq("one"),
@@ -301,7 +303,7 @@ public class KnCliTest extends BaseTest {
 
     @Test
     public void DeleteRevisions_ClientFails_Throws() {
-        try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             execHelperMockedStatic.when(() -> ExecHelper.execute(anyString(), anyMap(), any())).thenThrow(new IOException("error"));
             kn.deleteRevisions(Collections.emptyList());
         } catch (IOException e) {
@@ -309,4 +311,25 @@ public class KnCliTest extends BaseTest {
         }
     }
 
+    @Test
+    public void GetSources_ClusterHasSources_ListOfSources() throws IOException {
+        String serviceInJson = load(RESOURCES_PATH + "sourcesList.json");
+        ExecHelper.ExecResult execResult = new ExecHelper.ExecResult(serviceInJson, null, 0);
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.executeWithResult(anyString(), anyMap(), any())).thenReturn(execResult);
+            List<Source> sources = kn.getSources();
+            assertEquals(1, sources.size());
+            assertEquals("example-source-apiserver0", sources.get(0).getName());
+        }
+    }
+
+    @Test
+    public void GetSources_ClusterHasNoServices_EmptyList() throws IOException {
+        ExecHelper.ExecResult execResult = new ExecHelper.ExecResult("No sources found.", null, 0);
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.executeWithResult(anyString(), anyMap(), any())).thenReturn(execResult);
+            List<Source> sources = kn.getSources();
+            assertEquals(Collections.emptyList(), sources);
+        }
+    }
 }

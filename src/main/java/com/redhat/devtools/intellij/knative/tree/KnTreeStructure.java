@@ -28,28 +28,32 @@ import com.redhat.devtools.intellij.knative.kn.Service;
 import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.NamedContext;
 import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
-import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.codec.binary.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.Icon;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class KnTreeStructure extends AbstractTreeStructure implements MutableModel<Object>, ConfigWatcher.Listener {
+    private static Logger logger = LoggerFactory.getLogger(KnTreeStructure.class);
 
     private static final Icon CLUSTER_ICON = IconLoader.findIcon("/images/knative-logo.svg", KnTreeStructure.class);
     private static final Icon SERVICE_ICON = IconLoader.findIcon("/images/service.svg");
     private static final Icon REVISION_ICON = IconLoader.findIcon("/images/revision.svg");
+    private static final Icon SOURCE_ICON = IconLoader.findIcon("/images/source-generic.svg");
 
     private final Project project;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
+    private final KnRootNode root;
     private Config config;
-    private KnRootNode root;
     private final MutableModel<Object> mutableModelSupport = new MutableModelSupport<>();
 
     public KnTreeStructure(Project project) {
@@ -106,18 +110,58 @@ public class KnTreeStructure extends AbstractTreeStructure implements MutableMod
             if (element instanceof KnServiceNode) {
                 return getRevisionNodes((KnServiceNode) element);
             }
+
+            if (element instanceof KnEventingNode) {
+                return getEventingNodes((KnEventingNode) element);
+            }
+
+            if (element instanceof KnEventingSourcesNode) {
+                return getEventingSources((KnEventingSourcesNode) element);
+            }
+
+            if (element instanceof KnSourceNode) {
+                return getSinkForSource((KnSourceNode) element);
+            }
         }
 
         return new Object[0];
+    }
+
+    private Object[] getSinkForSource(KnSourceNode element) {
+        if (element.getSource().getSinkSource() != null) {
+            return new Object[]{new KnSinkNode(root, element, element.getSource().getSinkSource())};
+        }
+        return new Object[0];
+    }
+
+    private Object[] getEventingNodes(KnEventingNode parent) {
+        return new Object[]{
+                new KnEventingBrokerNode(root, parent),
+                new KnEventingChannelsNode(root, parent),
+                new KnEventingSourcesNode(root, parent),
+                new KnEventingSubscriptionsNode(root, parent),
+                new KnEventingTriggersNode(root, parent)
+        };
+    }
+
+    private Object[] getEventingSources(KnEventingSourcesNode element) {
+        List<Object> sources = new ArrayList<>();
+        try {
+            Kn kn = element.getRootNode().getKn();
+            kn.getSources().forEach(it -> sources.add(new KnSourceNode(element.getRootNode(), element, it)));
+        } catch (IOException e) {
+            sources.add(new MessageNode<>(element.getRootNode(), element, "Failed to load sources"));
+        }
+        return sources.toArray();
     }
 
     private Object[] getRevisionNodes(KnServiceNode element) {
         List<Object> revisions = new ArrayList<>();
         try {
             Kn kn = element.getRootNode().getKn();
-            kn.getRevisionsForService(element.getName()).stream().forEach(it -> revisions.add(new KnRevisionNode(element.getRootNode(), element, it)));
+            kn.getRevisionsForService(element.getName()).forEach(it -> revisions.add(new KnRevisionNode(element.getRootNode(), element, it)));
         } catch (IOException e) {
-            revisions.add(new MessageNode(element.getRootNode(), element, "Failed to load revisions"));
+            revisions.add(new MessageNode<>(element.getRootNode(), element, "Failed to load revisions"));
         }
         return revisions.toArray();
     }
@@ -128,7 +172,7 @@ public class KnTreeStructure extends AbstractTreeStructure implements MutableMod
             Kn kn = element.getRootNode().getKn();
             kn.getServicesList().stream().forEach(it -> services.add(new KnServiceNode(element.getRootNode(), element, getService(kn, it))));
         } catch (IOException e) {
-            services.add(new MessageNode(element.getRootNode(), element, "Failed to load services"));
+            services.add(new MessageNode<>(element.getRootNode(), element, "Failed to load services"));
         }
         return services.toArray();
     }
@@ -163,6 +207,10 @@ public class KnTreeStructure extends AbstractTreeStructure implements MutableMod
             return new LabelAndIconDescriptor<>(project, element, kn != null ? kn.getNamespace() : "Loading", CLUSTER_ICON, parentDescriptor);
         }
 
+        if (element instanceof MessageNode) {
+            return new LabelAndIconDescriptor<>(project, element, ((MessageNode<?>) element).getName(), AllIcons.Nodes.EmptyNode, parentDescriptor);
+        }
+
         if (element instanceof KnServingNode) {
             return new LabelAndIconDescriptor<>(project, element, ((KnServingNode) element).getName(), AllIcons.Nodes.Package, parentDescriptor);
         }
@@ -177,7 +225,41 @@ public class KnTreeStructure extends AbstractTreeStructure implements MutableMod
         if (element instanceof KnRevisionNode) {
             return new KnRevisionDescriptor(project, (KnRevisionNode) element, REVISION_ICON, parentDescriptor);
         }
-        return null;
+
+        if (element instanceof KnEventingBrokerNode) {
+            return new LabelAndIconDescriptor<>(project, element, ((KnEventingBrokerNode) element).getName(), AllIcons.Nodes.Package, parentDescriptor);
+        }
+
+        if (element instanceof KnEventingChannelsNode) {
+            return new LabelAndIconDescriptor<>(project, element, ((KnEventingChannelsNode) element).getName(), AllIcons.Nodes.Package, parentDescriptor);
+        }
+        if (element instanceof KnEventingSourcesNode) {
+            return new LabelAndIconDescriptor<>(project, element, ((KnEventingSourcesNode) element).getName(), AllIcons.Nodes.Package, parentDescriptor);
+        }
+
+        if (element instanceof KnEventingSubscriptionsNode) {
+            return new LabelAndIconDescriptor<>(project, element, ((KnEventingSubscriptionsNode) element).getName(), AllIcons.Nodes.Package, parentDescriptor);
+        }
+
+        if (element instanceof KnEventingTriggersNode) {
+            return new LabelAndIconDescriptor<>(project, element, ((KnEventingTriggersNode) element).getName(), AllIcons.Nodes.Package, parentDescriptor);
+        }
+
+        if (element instanceof KnSourceNode) {
+            return new LabelAndIconDescriptor<>(project, element, ((KnSourceNode) element).getName(), SOURCE_ICON, parentDescriptor);
+        }
+
+        if (element instanceof KnSinkNode) {
+            return new KnSinkDescriptor(project, (KnSinkNode) element, parentDescriptor);
+        }
+
+
+        //if we can present node we try to do that
+        if (element instanceof ParentableNode) {
+            logger.warn("There are no descriptor for " + element.getClass().getName() + ", using default.");
+            return new LabelAndIconDescriptor<>(project, element, ((ParentableNode<?>) element).getName(), AllIcons.Nodes.ErrorIntroduction, parentDescriptor);
+        }
+        throw new RuntimeException("Can't find NodeDescriptor for " + element.getClass().getName());
     }
 
     @Override
