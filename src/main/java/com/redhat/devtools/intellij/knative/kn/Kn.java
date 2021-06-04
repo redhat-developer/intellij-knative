@@ -68,6 +68,13 @@ public interface Kn {
     Service getService(String name) throws IOException;
 
     /**
+     * Return the list of all service accounts in current namespace
+     *
+     * @return list of service accounts
+     */
+    List<String> getServiceAccounts();
+
+    /**
      * Get the Service component as YAML
      *
      * @param name name of service

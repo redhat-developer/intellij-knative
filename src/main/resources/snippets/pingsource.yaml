@@ -4,9 +4,9 @@ metadata:
   name: <pingsource>
   namespace: "$namespace"
 spec:
-  schedule: "*/1 * * * *"
-  contentType: "text/plain"
-  dataBase64: "ZGF0YQ=="
+  schedule: <schedule>
+  contentType: "application/json"
+  data: <data>
   sink:
     ref:
       apiVersion: v1

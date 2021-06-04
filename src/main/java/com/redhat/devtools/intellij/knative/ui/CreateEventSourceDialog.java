@@ -20,6 +20,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Divider;
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.JBColor;
@@ -27,6 +28,7 @@ import com.intellij.ui.OnePixelSplitter;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTabbedPane;
+import com.intellij.ui.components.panels.VerticalBox;
 import com.intellij.ui.mac.TouchbarDataKeys;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
@@ -57,12 +59,18 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.NumberFormatter;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,21 +85,22 @@ public class CreateEventSourceDialog extends DialogWrapper {
     private PsiAwareTextEditorImpl editor;
     private JTextArea txtAreaEventLog;
     private OnePixelSplitter splitterPanel;
+    private Box sourceTypeBox;
     private Runnable refreshFunction;
 
-    public CreateEventSourceDialog(Project project, String namespace, Runnable refreshFunction, List<String> services) {
+    public CreateEventSourceDialog(Project project, String namespace, Runnable refreshFunction, List<String> services, List<String> serviceAccounts) {
         super(project, true);
         this.project = project;
         this.refreshFunction = refreshFunction;
         setTitle("Create Event Source");
-        initSourceTypesCombo(namespace);
-        buildStructure(namespace, services);
+        initSourceTypesCombo(namespace, services, serviceAccounts);
+        buildStructure(namespace, services, serviceAccounts);
         init();
     }
 
-    private void buildStructure(String namespace, List<String> services) {
+    private void buildStructure(String namespace, List<String> services, List<String> serviceAccounts) {
         contentPanel= new JBTabbedPane();
-        contentPanel.addTab("Basic", null, createBasicTabPanel(services), "Basic");
+        contentPanel.addTab("Basic", null, createBasicTabPanel(services, serviceAccounts), "Basic");
         contentPanel.addTab("Editor", null, createEditorPanel(namespace), "Editor");
 
         createLogPanel();
@@ -102,26 +111,16 @@ public class CreateEventSourceDialog extends DialogWrapper {
         footerPanel = new JPanel(new BorderLayout());
     }
 
-    private JScrollPane createBasicTabPanel(List<String> services) {
+    private JScrollPane createBasicTabPanel(List<String> services, List<String> serviceAccounts) {
         Box verticalBox = Box.createVerticalBox();
 
         JPanel sourceTypeLabel = createLabelInFlowPanel("Type", "Type of the event source to be created");
         verticalBox.add(sourceTypeLabel);
         verticalBox.add(cmbSourceTypes[0]);
 
-        JPanel nameSourceLabel = createLabelInFlowPanel("Name", "Name of the event source to be created");
-        verticalBox.add(nameSourceLabel);
-
-        JTextField txtValueParam = createJTextField("metadata", "name");
-        verticalBox.add(txtValueParam);
-
-        JPanel sinkLabel = createLabelInFlowPanel("Sink", "Name of the service to be used as sink");
-        verticalBox.add(sinkLabel);
-
-        JComboBox cmbServicesAsSink = new ComboBox();
-        services.forEach(service -> cmbServicesAsSink.addItem(service));
-        cmbServicesAsSink.setSelectedIndex(-1);
-        verticalBox.add(cmbServicesAsSink);
+        sourceTypeBox = Box.createVerticalBox();
+        updateSourceTypeBox(cmbSourceTypes[0].getSelectedItem().toString(), services, serviceAccounts);
+        verticalBox.add(sourceTypeBox);
 
         verticalBox.add(new JPanel(new BorderLayout())); // hack to push components to the top
 
@@ -129,6 +128,165 @@ public class CreateEventSourceDialog extends DialogWrapper {
         scroll.setBorder(new EmptyBorder(0,0,0,0));
 
         return scroll;
+    }
+
+    private void updateSourceTypeBox(String sourceType, List<String> services, List<String> serviceAccounts) {
+        sourceTypeBox.removeAll();
+
+        switch (sourceType) {
+            case "ApiSource": {
+                updateSourceTypeBoxAsApiSource(services, serviceAccounts);
+                break;
+            }
+            case "PingSource": {
+                updateSourceTypeBoxAsPingSource(services);
+                break;
+            }
+        }
+
+        sourceTypeBox.revalidate();
+        sourceTypeBox.repaint();
+
+
+    }
+
+    private void updateSourceTypeBoxAsPingSource(List<String> services) {
+        JPanel nameSourceLabel = createLabelInFlowPanel("Name", "Name of the event source to be created");
+        sourceTypeBox.add(nameSourceLabel);
+
+        JTextField txtValueParam = createJTextField("metadata", "name");
+        sourceTypeBox.add(txtValueParam);
+
+        JPanel scheduleLabel = createLabelInFlowPanel("Schedule", "Schedule how often the PingSource should send an event");
+        sourceTypeBox.add(scheduleLabel);
+
+        JComboBox cmbScheduleTimeUnits = new ComboBox();
+        cmbScheduleTimeUnits.addItem("minutes");
+        cmbScheduleTimeUnits.addItem("hours");
+        cmbScheduleTimeUnits.addItem("days");
+
+        JSpinner spinnerSchedule = new JSpinner(new SpinnerNumberModel(0, 0, Integer.MAX_VALUE,1));
+        spinnerSchedule.setName("spinnerSchedule");
+        spinnerSchedule.setEditor(new JSpinner.NumberEditor(spinnerSchedule, "#"));
+        JTextField spinnerTextFieldSchedule = ((JSpinner.NumberEditor)spinnerSchedule.getEditor()).getTextField();
+        spinnerTextFieldSchedule.addPropertyChangeListener(evt -> {
+            String value = spinnerTextFieldSchedule.getText();
+            String timeUnit = cmbScheduleTimeUnits.getSelectedItem().toString();
+            String timeInCronTabFormat = convertTimeToCronTabFormat(value, timeUnit);
+            updateYamlValueInEditor(new String[]{"spec", "schedule"}, timeInCronTabFormat);
+        });
+        ((NumberFormatter)((JFormattedTextField) spinnerTextFieldSchedule).getFormatter()).setAllowsInvalid(false);
+
+        JPanel panel = new JPanel(new BorderLayout());
+        //panel.setBorder(new EmptyBorder(7, 0, 0, 0));
+
+
+        cmbScheduleTimeUnits.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                String value = spinnerTextFieldSchedule.getText();
+                if (!value.equals("0")) {
+                    String timeUnit = e.getItem().toString();
+                    String timeInCronTabFormat = convertTimeToCronTabFormat(value, timeUnit);
+                    updateYamlValueInEditor(new String[]{"spec", "contentType"}, timeInCronTabFormat);
+                }
+            }
+        });
+
+        panel.add(spinnerSchedule, BorderLayout.CENTER);
+        panel.add(cmbScheduleTimeUnits, BorderLayout.LINE_END);
+
+        sourceTypeBox.add(panel);
+
+        JPanel messageLabel = createLabelInFlowPanel("Message", "Message contained by the event sent");
+        sourceTypeBox.add(messageLabel);
+
+        JTextField txtMessageData = createJTextField("spec", "data");
+
+        JComboBox cmbMessageTypes = new ComboBox();
+        cmbMessageTypes.addItem("application/json");
+        cmbMessageTypes.addItem("text/plain");
+        cmbMessageTypes.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                String contentType = e.getItem().toString();
+                updateYamlValueInEditor(new String[] { "spec", "contentType" }, contentType);
+            }
+        });
+
+
+
+        JPanel messagePanel = new JPanel(new BorderLayout());
+        //panel.setBorder(new EmptyBorder(7, 0, 0, 0));
+
+        messagePanel.add(cmbMessageTypes, BorderLayout.LINE_START);
+        messagePanel.add(txtMessageData, BorderLayout.CENTER);
+        sourceTypeBox.add(messagePanel);
+
+        JPanel sinkLabel = createLabelInFlowPanel("Sink", "Name of the service to be used as sink");
+        sourceTypeBox.add(sinkLabel);
+
+        JComboBox cmbServicesAsSink = new ComboBox();
+        services.forEach(service -> cmbServicesAsSink.addItem(service));
+        cmbServicesAsSink.setSelectedIndex(-1);
+        cmbServicesAsSink.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                String service = e.getItem().toString();
+                updateYamlValueInEditor(new String[] { "spec", "sink", "ref", "name" }, service);
+            }
+        });
+        sourceTypeBox.add(cmbServicesAsSink);
+    }
+
+    private String convertTimeToCronTabFormat(String value, String unit) {
+        switch(unit) {
+            case "minutes": {
+                return "*/" + value + " * * * *";
+            }
+            case "hours": {
+                return "* */" + value + " * * *";
+            }
+            case "days": {
+                return "* * */" + value + " * *";
+            }
+            default: {
+                return "";
+            }
+        }
+    }
+
+    private void updateSourceTypeBoxAsApiSource(List<String> services, List<String> serviceAccounts) {
+        JPanel nameSourceLabel = createLabelInFlowPanel("Name", "Name of the event source to be created");
+        sourceTypeBox.add(nameSourceLabel);
+
+        JTextField txtValueParam = createJTextField("metadata", "name");
+        sourceTypeBox.add(txtValueParam);
+
+        JPanel serviceAccountLabel = createLabelInFlowPanel("Service Account", "Name of the service account to be used");
+        sourceTypeBox.add(serviceAccountLabel);
+
+        JComboBox cmbServiceAccount = new ComboBox();
+        serviceAccounts.forEach(sa -> cmbServiceAccount.addItem(sa));
+        cmbServiceAccount.setSelectedIndex(-1);
+        cmbServiceAccount.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                String sa = e.getItem().toString();
+                updateYamlValueInEditor(new String[] { "spec", "serviceAccountName" }, sa);
+            }
+        });
+        sourceTypeBox.add(cmbServiceAccount);
+
+        JPanel sinkLabel = createLabelInFlowPanel("Sink", "Name of the service to be used as sink");
+        sourceTypeBox.add(sinkLabel);
+
+        JComboBox cmbServicesAsSink = new ComboBox();
+        services.forEach(service -> cmbServicesAsSink.addItem(service));
+        cmbServicesAsSink.setSelectedIndex(-1);
+        cmbServicesAsSink.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                String service = e.getItem().toString();
+                updateYamlValueInEditor(new String[] { "spec", "sink", "ref", "name" }, service);
+            }
+        });
+        sourceTypeBox.add(cmbServicesAsSink);
     }
 
     private JScrollPane createEditorPanel(String namespace) {
@@ -140,7 +298,7 @@ public class CreateEventSourceDialog extends DialogWrapper {
 
         String content = "";
         try {
-            content = EditorHelper.getSnippet("service").replace("$namespace", namespace);
+            content = EditorHelper.getSnippet("apiserversource").replace("$namespace", namespace);
         } catch (IOException e) {
             logger.warn(e.getLocalizedMessage(), e);
         }
@@ -186,16 +344,41 @@ public class CreateEventSourceDialog extends DialogWrapper {
     private JTextField createJTextField(String ...fieldToUpdate) {
         JTextField txtField = new JTextField("");
         txtField.setMaximumSize(new Dimension(999999, 33));
-        // addListener(fieldToUpdate, txtField);
+        addListenerToTextField(fieldToUpdate, txtField);
         return txtField;
     }
 
-    private void initSourceTypesCombo(String namespace) {
+    private void addListenerToTextField(String[] fieldPath, JTextField txtValueParam) {
+        txtValueParam.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                update();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                update();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                update();
+            }
+
+            public void update() {
+                if (!txtValueParam.getText().isEmpty()) {
+                    updateYamlValueInEditor(fieldPath, txtValueParam.getText());
+                }
+            }
+        });
+    }
+
+    private void initSourceTypesCombo(String namespace, List<String> services, List<String> serviceAccounts) {
         ComboBox cmbInBasicTab = createSourceTypesCombo("basic");
         ComboBox cmbInEditorTab = createSourceTypesCombo("editor");
         this.cmbSourceTypes = new ComboBox[] { cmbInBasicTab, cmbInEditorTab };
-        addListenerSourceTypes(cmbInBasicTab, namespace);
-        addListenerSourceTypes(cmbInEditorTab, namespace);
+        addListenerSourceTypes(cmbInBasicTab, namespace, services, serviceAccounts);
+        addListenerSourceTypes(cmbInEditorTab, namespace, services, serviceAccounts);
     }
 
     private ComboBox createSourceTypesCombo(String name) {
@@ -207,12 +390,13 @@ public class CreateEventSourceDialog extends DialogWrapper {
         return cmbSourceTypes;
     }
 
-    private void addListenerSourceTypes(ComboBox comboBox, String namespace) {
+    private void addListenerSourceTypes(ComboBox comboBox, String namespace, List<String> services, List<String> serviceAccounts) {
         comboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 String sourceType = e.getItem().toString();
                 syncSecondSourceTypesCombo((ComboBox)e.getSource(), sourceType);
                 showSnippetInEditor(sourceType, namespace);
+                updateSourceTypeBox(sourceType, services, serviceAccounts);
             }
         });
     }
@@ -258,6 +442,28 @@ public class CreateEventSourceDialog extends DialogWrapper {
         ApplicationManager.getApplication().runWriteAction(() -> {
             editor.getEditor().getDocument().setText(content);
         });
+    }
+
+    private void updateEditor(JsonNode node) {
+        try {
+            updateEditor(YAMLHelper.JSONToYAML(node));
+        } catch (IOException e) {
+            logger.warn(e.getLocalizedMessage(), e);
+        }
+
+    }
+
+    private void updateYamlValueInEditor(String[] fieldPath, String value) {
+        String yaml = editor.getEditor().getDocument().getText();
+        try {
+            JsonNode node = YAMLHelper.editValueInYAML(yaml, fieldPath, value);
+            if (node == null) {
+                return;
+            }
+            updateEditor(node);
+        } catch(IOException e) {
+            logger.warn(e.getLocalizedMessage(), e);
+        }
     }
 
     @Nullable

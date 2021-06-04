@@ -40,7 +40,8 @@ public class CreateEventSourceAction extends KnAction {
                         anActionEvent.getProject(),
                         namespace,
                         () -> TreeHelper.getKnTreeStructure(getEventProject(anActionEvent)).fireModified(getElement(selected)),
-                        getServices(knCli));
+                        getServices(knCli),
+                        knCli.getServiceAccounts());
                 createDialog.setModal(false);
                 createDialog.show();
             });
