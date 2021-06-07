@@ -194,6 +194,7 @@ public class CreateEventSourceDialog extends DialogWrapper {
 
         panel.add(spinnerSchedule, BorderLayout.CENTER);
         panel.add(cmbScheduleTimeUnits, BorderLayout.LINE_END);
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, cmbScheduleTimeUnits.getHeight()));
 
         sourceTypeBox.add(panel);
 
@@ -215,6 +216,7 @@ public class CreateEventSourceDialog extends DialogWrapper {
 
 
         JPanel messagePanel = new JPanel(new BorderLayout());
+        messagePanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, cmbMessageTypes.getHeight()));
         //panel.setBorder(new EmptyBorder(7, 0, 0, 0));
 
         messagePanel.add(cmbMessageTypes, BorderLayout.LINE_START);
@@ -376,6 +378,7 @@ public class CreateEventSourceDialog extends DialogWrapper {
     private void initSourceTypesCombo(String namespace, List<String> services, List<String> serviceAccounts) {
         ComboBox cmbInBasicTab = createSourceTypesCombo("basic");
         ComboBox cmbInEditorTab = createSourceTypesCombo("editor");
+        cmbInEditorTab.addItem("CustomSource");
         this.cmbSourceTypes = new ComboBox[] { cmbInBasicTab, cmbInEditorTab };
         addListenerSourceTypes(cmbInBasicTab, namespace, services, serviceAccounts);
         addListenerSourceTypes(cmbInEditorTab, namespace, services, serviceAccounts);
@@ -385,7 +388,6 @@ public class CreateEventSourceDialog extends DialogWrapper {
         ComboBox cmbSourceTypes = new ComboBox();
         cmbSourceTypes.addItem("ApiSource");
         cmbSourceTypes.addItem("PingSource");
-        cmbSourceTypes.addItem("SinkBinding");
         cmbSourceTypes.setName(name);
         return cmbSourceTypes;
     }
@@ -394,7 +396,7 @@ public class CreateEventSourceDialog extends DialogWrapper {
         comboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 String sourceType = e.getItem().toString();
-                syncSecondSourceTypesCombo((ComboBox)e.getSource(), sourceType);
+                syncSecondSourceTypesCombo((ComboBox) e.getSource(), sourceType);
                 showSnippetInEditor(sourceType, namespace);
                 updateSourceTypeBox(sourceType, services, serviceAccounts);
             }
@@ -405,9 +407,23 @@ public class CreateEventSourceDialog extends DialogWrapper {
         Arrays.stream(cmbSourceTypes).filter(cmb -> !cmb.getName().equals(comboBox.getName())).forEach(cmb -> {
             ItemListener[] listeners = cmb.getItemListeners();
             Arrays.stream(listeners).forEach(listener -> cmb.removeItemListener(listener));
-            cmb.setSelectedItem(newValue);
+            if (hasItem(cmb, newValue)) {
+                cmb.setSelectedItem(newValue);
+            } else {
+                cmb.setSelectedIndex(-1);
+            }
             Arrays.stream(listeners).forEach(listener -> cmb.addItemListener(listener));
         });
+    }
+
+    private  boolean hasItem(JComboBox comboBox, String value) {
+        int size = comboBox.getItemCount();
+        for (int i = 0; i < size; i++) {
+            if (comboBox.getItemAt(i).toString().equals(value)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void showSnippetInEditor(String sourceType, String namespace) {
@@ -425,9 +441,9 @@ public class CreateEventSourceDialog extends DialogWrapper {
                 } catch (IOException e) { }
                 break;
             }
-            case "SinkBinding": {
+            case "CustomSource": {
                 try {
-                    content = EditorHelper.getSnippet("sinkbinding");
+                    content = EditorHelper.getSnippet("customsource").replace("$namespace", namespace);
                 } catch (IOException e) { }
                 break;
             }
