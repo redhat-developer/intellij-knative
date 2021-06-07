@@ -14,6 +14,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.knative.kn.Kn;
+import com.redhat.devtools.intellij.knative.tree.KnEventingSourcesNode;
 import com.redhat.devtools.intellij.knative.tree.KnServingNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import com.redhat.devtools.intellij.knative.ui.CreateEventSourceDialog;
@@ -27,7 +28,7 @@ import javax.swing.tree.TreePath;
 
 public class CreateEventSourceAction extends KnAction {
     public CreateEventSourceAction() {
-        super(KnServingNode.class);
+        super(KnEventingSourcesNode.class);
     }
 
     @Override

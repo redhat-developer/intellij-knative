@@ -20,6 +20,12 @@ public class Constants {
 
     public static final String NOTIFICATION_ID = "Knative";
 
+    public static final String[] YAML_API_VERSION_PATH = new String[] { "apiVersion" };
+    public static final String[] YAML_KIND_PATH = new String[] { "kind" };
     public static final String[] YAML_NAME_PATH = new String[] { "metadata", "name" };
     public static final String[] YAML_FIRST_IMAGE_PATH = new String[] { "spec", "template", "spec", "containers[0]", "image" };
+    public static final String[] YAML_PING_SOURCE_CONTENT_TYPE = new String[] { "spec", "contentType" };
+    public static final String[] YAML_PING_SOURCE_DATA = new String[] { "spec", "data" };
+    public static final String[] YAML_API_SOURCE_SERVICE_ACCOUNT = new String[] { "spec", "serviceAccountName" };
+    public static final String[] YAML_SOURCE_SINK = new String[] { "spec", "sink", "ref", "name" };
 }

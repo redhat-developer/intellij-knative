@@ -69,16 +69,8 @@ import org.slf4j.LoggerFactory;
 import static com.redhat.devtools.intellij.knative.Constants.YAML_FIRST_IMAGE_PATH;
 import static com.redhat.devtools.intellij.knative.Constants.YAML_NAME_PATH;
 
-public class CreateServiceDialog extends DialogWrapper {
+public class CreateServiceDialog extends CreateDialog {
     private final Logger logger = LoggerFactory.getLogger(CreateServiceDialog.class);
-    private JBTabbedPane contentPanel;
-    private JPanel footerPanel, logPanel;
-    private Project project;
-    private JButton cancelButton, saveButton;
-    private PsiAwareTextEditorImpl editor;
-    private OnePixelSplitter splitterPanel;
-    private JTextArea txtAreaEventLog;
-    private Runnable refreshFunction;
     private JTextField txtValueParam, txtImageParam;
     private DocumentListener txtNameParamListener, txtImageParamListener;
 
@@ -86,24 +78,56 @@ public class CreateServiceDialog extends DialogWrapper {
     private final static String DEFAULT_FIRST_IMAGE_IN_SNIPPET = "add image url";
 
     public CreateServiceDialog(String title, Project project, String namespace, Runnable refreshFunction) {
-        super(project, true);
-        this.project = project;
-        this.refreshFunction = refreshFunction;
-        setTitle(title);
-        initEditor(namespace);
-        buildStructure();
+        super(project, true, title, namespace, refreshFunction);
         init();
     }
 
-    private void initEditor(String namespace) {
+    protected JScrollPane createBasicTabPanel() {
+        Box verticalBox = Box.createVerticalBox();
+
+        JPanel nameLabel = createLabelInFlowPanel("Name", "Name of service to be created");
+        verticalBox.add(nameLabel);
+
+        Pair<JTextField, DocumentListener> txtNamePair = createJTextField("name", YAML_NAME_PATH);
+        txtValueParam = txtNamePair.getLeft();
+        txtNameParamListener = txtNamePair.getRight();
+        verticalBox.add(txtValueParam);
+
+        JPanel imageLabel = createLabelInFlowPanel("Image", "Image to run (e.g knativesamples/helloworld)");
+        verticalBox.add(imageLabel);
+
+        Pair<JTextField, DocumentListener> txtImagePair = createJTextField("image", YAML_FIRST_IMAGE_PATH);
+        txtImageParam = txtImagePair.getLeft();
+        txtImageParamListener = txtImagePair.getRight();
+        verticalBox.add(txtImageParam);
+
+        JCheckBox chkPrivateService = new JBCheckBox();
+        chkPrivateService.setText("Make service available only on the cluster-local network.");
+        chkPrivateService.addItemListener(getChkPrivateServiceListener());
+        chkPrivateService.setBorder(new EmptyBorder(10, 0, 0, 0));
+        verticalBox.add(createComponentInFlowPanel(chkPrivateService));
+
+        verticalBox.add(new JPanel(new BorderLayout())); // hack to push components to the top
+
+        JBScrollPane scroll = new JBScrollPane(verticalBox);
+        scroll.setBorder(new EmptyBorder(0,0,0,0));
+
+        return scroll;
+    }
+
+    protected JScrollPane createEditorPanel() {
+        initEditor();
+        return  new JBScrollPane(editor.getComponent());
+    }
+
+    private void initEditor() {
         String content = "";
         try {
             content = EditorHelper.getSnippet("service").replace("$namespace", namespace);
         } catch (IOException e) {
             logger.warn(e.getLocalizedMessage(), e);
         }
-        editor = new PsiAwareTextEditorImpl(project, new LightVirtualFile("service.yaml", content), TextEditorProvider.getInstance());
-        editor.getEditor().getDocument().addDocumentListener(createEditorListener());
+        initEditor("service.yaml", content, createEditorListener());
     }
 
     private com.intellij.openapi.editor.event.DocumentListener createEditorListener() {
@@ -134,84 +158,7 @@ public class CreateServiceDialog extends DialogWrapper {
         };
     }
 
-    private void buildStructure() {
-        contentPanel= new JBTabbedPane();
-        contentPanel.addTab("Basic", null, createBasicTabPanel(), "Basic");
-        contentPanel.addTab("Editor", null, editor.getComponent(), "Editor");
-
-        createLogPanel();
-
-        cancelButton = new JButton(CommonBundle.getCancelButtonText());
-        saveButton = new JButton("Create");
-        saveButton.setEnabled(false);
-
-        footerPanel = new JPanel(new BorderLayout());
-    }
-
-    private JScrollPane createBasicTabPanel() {
-        Box verticalBox = Box.createVerticalBox();
-
-        JPanel nameLabel = createLabelInFlowPanel("Name", "Name of service to be created");
-        verticalBox.add(nameLabel);
-
-        Pair<JTextField, DocumentListener> txtNamePair = createJTextField(YAML_NAME_PATH);
-        txtValueParam = txtNamePair.getLeft();
-        txtNameParamListener = txtNamePair.getRight();
-        verticalBox.add(txtValueParam);
-
-        JPanel imageLabel = createLabelInFlowPanel("Image", "Image to run (e.g knativesamples/helloworld)");
-        verticalBox.add(imageLabel);
-
-        Pair<JTextField, DocumentListener> txtImagePair = createJTextField(YAML_FIRST_IMAGE_PATH);
-        txtImageParam = txtImagePair.getLeft();
-        txtImageParamListener = txtImagePair.getRight();
-        verticalBox.add(txtImageParam);
-
-        JCheckBox chkPrivateService = new JBCheckBox();
-        chkPrivateService.setText("Make service available only on the cluster-local network.");
-        chkPrivateService.addItemListener(getChkPrivateServiceListener());
-        chkPrivateService.setBorder(new EmptyBorder(10, 0, 0, 0));
-        verticalBox.add(createComponentInFlowPanel(chkPrivateService));
-
-        verticalBox.add(new JPanel(new BorderLayout())); // hack to push components to the top
-
-        JBScrollPane scroll = new JBScrollPane(verticalBox);
-        scroll.setBorder(new EmptyBorder(0,0,0,0));
-
-        return scroll;
-    }
-
-    private DocumentListener createListener(String[] fieldPath, JTextField txtValueParam) {
-        return new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                update();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                update();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                update();
-            }
-
-            public void update() {
-                try {
-                    String valueInYAML = YAMLHelper.getStringValueFromYAML(editor.getEditor().getDocument().getText(), fieldPath);
-                    if (valueInYAML != null && !txtValueParam.getText().equals(valueInYAML)) {
-                        updateYamlValueInEditor(fieldPath, txtValueParam.getText());
-                        setSaveButtonVisibility();
-                    }
-                } catch (IOException e) {
-                }
-            }
-        };
-    }
-
-    private void setSaveButtonVisibility() {
+    protected void setSaveButtonVisibility() {
         try {
             String nameInYAML = YAMLHelper.getStringValueFromYAML(editor.getEditor().getDocument().getText(), YAML_NAME_PATH);
             boolean hasName = !Strings.isNullOrEmpty(nameInYAML) && !nameInYAML.equals(DEFAULT_NAME_IN_SNIPPET);
@@ -240,161 +187,9 @@ public class CreateServiceDialog extends DialogWrapper {
         };
     }
 
-    private void updateYamlValueInEditor(String[] fieldPath, String value) {
-        String yaml = editor.getEditor().getDocument().getText();
-        try {
-            JsonNode node = YAMLHelper.editValueInYAML(yaml, fieldPath, value);
-            if (node == null) {
-                return;
-            }
-            updateEditor(node);
-        } catch(IOException e) {
-            logger.warn(e.getLocalizedMessage(), e);
-        }
-    }
-
-    private void updateEditor(JsonNode node) {
-        ApplicationManager.getApplication().runWriteAction(() -> {
-            try {
-                editor.getEditor().getDocument().setText(YAMLHelper.JSONToYAML(node));
-            } catch (IOException e) {
-                logger.warn(e.getLocalizedMessage(), e);
-            }
-        });
-    }
-
-    private Pair<JTextField, DocumentListener> createJTextField(String ...fieldToUpdate) {
-        JTextField txtField = new JTextField("");
-        txtField.setMaximumSize(new Dimension(999999, 33));
-        DocumentListener listener = createListener(fieldToUpdate, txtField);
-        txtField.getDocument().addDocumentListener(listener);
-        return Pair.of(txtField, listener);
-    }
-
-    private JPanel createLabelInFlowPanel(String name, String tooltip) {
-        JLabel label = new JLabel(name);
-        label.getFont().deriveFont(Font.BOLD);
-        addTooltip(label, tooltip);
-        return createComponentInFlowPanel(label);
-    }
-
-    private JPanel createComponentInFlowPanel(JComponent component) {
-        JPanel flowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        flowPanel.add(component);
-        return flowPanel;
-    }
-
-    private void addTooltip(@NotNull JComponent component, String textToDisplay) {
-        if (!textToDisplay.isEmpty()) {
-            component.setToolTipText(textToDisplay);
-        }
-    }
-
-    @Override
-    protected @Nullable JComponent createCenterPanel() {
-        final JPanel panel = new JPanel(new BorderLayout());
-        panel.setPreferredSize(new Dimension(600, 350));
-        splitterPanel = new OnePixelSplitter(true, 1.00F) {
-            protected Divider createDivider() {
-                Divider divider = super.createDivider();
-                divider.setBackground(JBColor.namedColor("Plugins.SearchField.borderColor", new JBColor(0xC5C5C5, 0x515151)));
-                return divider;
-            }
-        };
-        splitterPanel.setFirstComponent(contentPanel);
-        splitterPanel.setSecondComponent(logPanel);
-        panel.add(splitterPanel, BorderLayout.CENTER);
-        return panel;
-    }
-
-    private JPanel createLogPanel() {
-        logPanel = new JPanel(new BorderLayout());
-        logPanel.add(new JLabel("Event Log"), BorderLayout.NORTH);
-
-        txtAreaEventLog = new JTextArea();
-        txtAreaEventLog.setLineWrap(true);
-        txtAreaEventLog.setWrapStyleWord(true);
-        txtAreaEventLog.setForeground(JBColor.RED);
-        txtAreaEventLog.setFont(editor.getEditor().getColorsScheme().getFont(EditorFontType.CONSOLE_PLAIN));
-        txtAreaEventLog.setEditable(false);
-        logPanel.add(new JBScrollPane(txtAreaEventLog), BorderLayout.CENTER);
-        logPanel.setVisible(false);
-        return logPanel;
-    }
-
-    @Override
-    protected JComponent createSouthPanel() {
-        footerPanel.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
-
-        JPanel buttonPanel = new JPanel();
-
-        if (SystemInfo.isMac) {
-            footerPanel.add(buttonPanel, BorderLayout.EAST);
-            buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
-
-            int index = 0;
-            JPanel leftPanel = new JPanel();
-            leftPanel.add(cancelButton);
-            TouchbarDataKeys.putDialogButtonDescriptor(cancelButton, index++);
-            footerPanel.add(leftPanel, BorderLayout.WEST);
-
-            buttonPanel.add(Box.createHorizontalStrut(5));
-            buttonPanel.add(saveButton);
-            TouchbarDataKeys.putDialogButtonDescriptor(saveButton, index++).setMainGroup(true).setDefault(true);
-        }
-        else {
-            footerPanel.add(buttonPanel, BorderLayout.CENTER);
-            GroupLayout layout = new GroupLayout(buttonPanel);
-            buttonPanel.setLayout(layout);
-            layout.setAutoCreateGaps(true);
-
-            final GroupLayout.SequentialGroup hGroup = layout.createSequentialGroup();
-            final GroupLayout.ParallelGroup vGroup = layout.createParallelGroup();
-            final Collection<Component> buttons = new ArrayList<>(5);
-
-            add(hGroup, vGroup, null, Box.createHorizontalGlue());
-            add(hGroup, vGroup, buttons, saveButton, cancelButton);
-
-            layout.setHorizontalGroup(hGroup);
-            layout.setVerticalGroup(vGroup);
-            layout.linkSize(buttons.toArray(new Component[0]));
-        }
-
-        saveButton.addActionListener(e -> {
-            ExecHelper.submit(() -> {
-                try {
-                    KnHelper.saveOnCluster(this.project, editor.getEditor().getDocument().getText(), true);
-                    UIHelper.executeInUI(refreshFunction);
-                    UIHelper.executeInUI(() -> super.doOKAction());
-                } catch (IOException | KubernetesClientException ex) {
-                    UIHelper.executeInUI(() -> displayError(ex.getLocalizedMessage()));
-                }
-            });
-        });
-
-        cancelButton.addActionListener(e -> doCancelAction());
-
-        return footerPanel;
-    }
-
-    private void displayError(String error) {
-        logPanel.setVisible(true);
-        txtAreaEventLog.setEditable(true);
-        txtAreaEventLog.setText(error);
-        txtAreaEventLog.setEditable(false);
-        if (splitterPanel.getProportion() > 0.70F) {
-            splitterPanel.setProportion(0.70F);
-        }
-    }
-
-    private void add(final GroupLayout.Group hGroup,
-                     final GroupLayout.Group vGroup,
-                     @Nullable final Collection<? super Component> collection,
-                     final Component... components) {
-        for (Component component : components) {
-            hGroup.addComponent(component);
-            vGroup.addComponent(component);
-            if (collection != null) collection.add(component);
-        }
+    protected void create() throws IOException, KubernetesClientException {
+        KnHelper.saveOnCluster(this.project, editor.getEditor().getDocument().getText(), true);
+        UIHelper.executeInUI(refreshFunction);
+        UIHelper.executeInUI(() -> super.doOKAction());
     }
 }
