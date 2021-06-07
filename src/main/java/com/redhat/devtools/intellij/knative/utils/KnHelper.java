@@ -100,7 +100,7 @@ public class KnHelper {
         return resource;
     }
 
-    private static void saveNew(Kn knCli, String yaml) throws IOException {
+    public static void saveNew(Kn knCli, String yaml) throws IOException {
         GenericResource resource = generateResourceFromYAML(yaml);
         CustomResourceDefinitionContext crdContext = getCRDContext(resource.getApiVersion(), resource.getKind());
         knCli.createCustomResource(crdContext, yaml);
