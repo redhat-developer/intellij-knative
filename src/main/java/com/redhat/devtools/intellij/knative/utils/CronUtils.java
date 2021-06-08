@@ -38,6 +38,9 @@ public class CronUtils {
     }
 
     public static Pair<String, String> convertCronTabFormatInTimeAndUnitPair(String value) {
+        if (value == null) {
+            return Pair.create("", "");
+        }
         String time = "";
         String unit = "";
         Pattern pattern = Pattern.compile("\\*\\/(\\d)");

@@ -82,4 +82,11 @@ public class CronUtilsTest {
         assertEquals("", timeUnitPair.getFirst());
         assertEquals("", timeUnitPair.getSecond());
     }
+
+    @Test
+    public void ConvertCronTabFormatInTimeAndUnitPair_ValueIsNull_PairWithBothEmptyString() {
+        Pair<String, String> timeUnitPair = CronUtils.convertCronTabFormatInTimeAndUnitPair(null);
+        assertEquals("", timeUnitPair.getFirst());
+        assertEquals("", timeUnitPair.getSecond());
+    }
 }
