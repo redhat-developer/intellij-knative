@@ -12,13 +12,15 @@ package com.redhat.devtools.intellij.knative.kn;
 
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.BaseTest;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.RootPaths;
+import io.fabric8.kubernetes.api.model.ServiceAccount;
+import io.fabric8.kubernetes.api.model.ServiceAccountList;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.MockedStatic;
-
+import io.fabric8.kubernetes.client.dsl.MixedOperation;
+import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
+import io.fabric8.kubernetes.client.dsl.Resource;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
@@ -26,6 +28,10 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.MockedStatic;
+
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -163,6 +169,41 @@ public class KnCliTest extends BaseTest {
         } catch (IOException e) {
             assertEquals("error", e.getLocalizedMessage());
         }
+    }
+
+    @Test
+    public void GetServiceAccounts_ClusterHasNoServiceAccounts_EmptyList() {
+        MixedOperation<ServiceAccount, ServiceAccountList, Resource<ServiceAccount>> mosa = mock(MixedOperation.class);
+        NonNamespaceOperation nonNamespaceOperation = mock(NonNamespaceOperation.class);
+        ServiceAccountList list = mock(ServiceAccountList.class);
+        when(kubernetesClient.serviceAccounts()).thenReturn(mosa);
+        when(mosa.inNamespace(anyString())).thenReturn(nonNamespaceOperation);
+        when(nonNamespaceOperation.list()).thenReturn(list);
+        when(list.getItems()).thenReturn(Collections.emptyList());
+        assertTrue(kn.getServiceAccounts().isEmpty());
+    }
+
+    @Test
+    public void GetServiceAccounts_ClusterHasServiceAccounts_List() {
+        MixedOperation<ServiceAccount, ServiceAccountList, Resource<ServiceAccount>> mosa = mock(MixedOperation.class);
+        NonNamespaceOperation nonNamespaceOperation = mock(NonNamespaceOperation.class);
+        ServiceAccountList list = mock(ServiceAccountList.class);
+        ServiceAccount sa1 = mock(ServiceAccount.class);
+        ObjectMeta om1 = mock(ObjectMeta.class);
+        ServiceAccount sa2 = mock(ServiceAccount.class);
+        ObjectMeta om2 = mock(ObjectMeta.class);
+        when(sa1.getMetadata()).thenReturn(om1);
+        when(om1.getName()).thenReturn("sa1");
+        when(sa2.getMetadata()).thenReturn(om2);
+        when(om2.getName()).thenReturn("sa2");
+        when(kubernetesClient.serviceAccounts()).thenReturn(mosa);
+        when(mosa.inNamespace(anyString())).thenReturn(nonNamespaceOperation);
+        when(nonNamespaceOperation.list()).thenReturn(list);
+        when(list.getItems()).thenReturn(Arrays.asList(sa1, sa2));
+        List<String> result = kn.getServiceAccounts();
+        assertTrue(result.size() == 2);
+        assertEquals("sa1", result.get(0));
+        assertEquals("sa2", result.get(1));
     }
 
     @Test

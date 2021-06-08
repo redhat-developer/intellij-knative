@@ -12,15 +12,12 @@ package com.redhat.devtools.intellij.knative.ui;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
+import com.intellij.openapi.util.Pair;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBScrollPane;
-import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.model.CreateDialogModel;
 import com.redhat.devtools.intellij.knative.utils.EditorHelper;
-import com.redhat.devtools.intellij.knative.utils.KnHelper;
-import io.fabric8.kubernetes.client.KubernetesClientException;
-import java.awt.BorderLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.IOException;
@@ -31,7 +28,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentListener;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,16 +55,16 @@ public class CreateServiceDialog extends CreateDialog {
         verticalBox.add(nameLabel);
 
         Pair<JTextField, DocumentListener> txtNamePair = createJTextField("name", YAML_NAME_PATH);
-        txtValueParam = txtNamePair.getLeft();
-        txtNameParamListener = txtNamePair.getRight();
+        txtValueParam = txtNamePair.getFirst();
+        txtNameParamListener = txtNamePair.getSecond();
         verticalBox.add(txtValueParam);
 
         JPanel imageLabel = createLabelInFlowPanel("Image", "Image to run (e.g knativesamples/helloworld)");
         verticalBox.add(imageLabel);
 
         Pair<JTextField, DocumentListener> txtImagePair = createJTextField("image", YAML_FIRST_IMAGE_PATH);
-        txtImageParam = txtImagePair.getLeft();
-        txtImageParamListener = txtImagePair.getRight();
+        txtImageParam = txtImagePair.getFirst();
+        txtImageParamListener = txtImagePair.getSecond();
         verticalBox.add(txtImageParam);
 
         JCheckBox chkPrivateService = new JBCheckBox();

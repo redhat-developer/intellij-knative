@@ -11,7 +11,7 @@
 package com.redhat.devtools.intellij.knative.ui;
 
 import com.google.common.base.Strings;
-import com.intellij.openapi.ui.ComboBox;
+import com.intellij.openapi.util.Pair;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.model.CreateDialogModel;
 import com.redhat.devtools.intellij.knative.utils.CronUtils;
@@ -38,7 +38,6 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.NumberFormatter;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,19 +136,19 @@ public class CreateEventSourceDialog extends CreateDialog {
         JTextField spinnerTextFieldSchedule = ((JSpinner.NumberEditor)spinnerSchedule.getEditor()).getTextField();
         spinnerTextFieldSchedule.setName("spinnerSchedule");
         PropertyChangeListener spinnerListener = evt -> {
-            String value = spinnerTextFieldSchedule.getText();
+            int value = Integer.parseInt(spinnerTextFieldSchedule.getText());
             String timeUnit = cmbScheduleTimeUnits.getSelectedItem().toString();
             String timeInCronTabFormat = CronUtils.convertTimeToCronTabFormat(value, timeUnit);
             updateYamlValueInEditor(new String[]{"spec", "schedule"}, timeInCronTabFormat);
         };
         spinnerTextFieldSchedule.addPropertyChangeListener(spinnerListener);
         ((NumberFormatter)((JFormattedTextField) spinnerTextFieldSchedule).getFormatter()).setAllowsInvalid(false);
-        activeComponents.add(Pair.of(spinnerTextFieldSchedule, spinnerListener));
+        activeComponents.add(Pair.create(spinnerTextFieldSchedule, spinnerListener));
 
         ItemListener timeUnitsListener = e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
-                String value = spinnerTextFieldSchedule.getText();
-                if (!value.equals("0")) {
+                int value = Integer.parseInt(spinnerTextFieldSchedule.getText());
+                if (value > 0) {
                     String timeUnit = e.getItem().toString();
                     String timeInCronTabFormat = CronUtils.convertTimeToCronTabFormat(value, timeUnit);
                     updateYamlValueInEditor(new String[]{"spec", "schedule"}, timeInCronTabFormat);
@@ -157,7 +156,7 @@ public class CreateEventSourceDialog extends CreateDialog {
             }
         };
         cmbScheduleTimeUnits.addItemListener(timeUnitsListener);
-        activeComponents.add(Pair.of(cmbScheduleTimeUnits, timeUnitsListener));
+        activeComponents.add(Pair.create(cmbScheduleTimeUnits, timeUnitsListener));
 
         JPanel panel = createPanelWithBorderLayout(null, spinnerSchedule, cmbScheduleTimeUnits, cmbScheduleTimeUnits.getHeight());
         sourceTypeBox.add(panel); // add panel containing spinner (number value) and combo to specify scheduling (eg. 1 minute, 2 hours, ..)
@@ -166,7 +165,7 @@ public class CreateEventSourceDialog extends CreateDialog {
         sourceTypeBox.add(messageLabel); // add label for message
 
         Pair<JTextField, DocumentListener> dataTextFieldAndListener = createJTextField("data", "spec", "data");
-        activeComponents.add(Pair.of(dataTextFieldAndListener.getLeft(), dataTextFieldAndListener.getRight()));
+        activeComponents.add(Pair.create(dataTextFieldAndListener.getFirst(), dataTextFieldAndListener.getSecond()));
 
         ItemListener messageTypesListener = e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -175,8 +174,8 @@ public class CreateEventSourceDialog extends CreateDialog {
             }
         };
         JComboBox cmbMessageTypes = createComboBox("messageType", Arrays.asList("application/json", "text/plain"), 0, messageTypesListener);
-        activeComponents.add(Pair.of(cmbMessageTypes, messageTypesListener));
-        JPanel messagePanel = createPanelWithBorderLayout(cmbMessageTypes, dataTextFieldAndListener.getLeft(), null, cmbMessageTypes.getHeight());
+        activeComponents.add(Pair.create(cmbMessageTypes, messageTypesListener));
+        JPanel messagePanel = createPanelWithBorderLayout(cmbMessageTypes, dataTextFieldAndListener.getFirst(), null, cmbMessageTypes.getHeight());
         sourceTypeBox.add(messagePanel); // add panel containing combo and textfield to specify the message and its type (e.g "text/plain" - message)
 
         addSinkLabelAndCombo(); // add label and combo to define a sink
@@ -198,7 +197,7 @@ public class CreateEventSourceDialog extends CreateDialog {
             }
         };
         JComboBox cmbServiceAccount = createComboBox("serviceAccount", model.getServiceAccounts(), -1, saListener);
-        activeComponents.add(Pair.of(cmbServiceAccount, saListener));
+        activeComponents.add(Pair.create(cmbServiceAccount, saListener));
         sourceTypeBox.add(cmbServiceAccount); // add combo to pick serviceAccount to use
 
         addSinkLabelAndCombo(); // add label and combo to define a sink
@@ -212,8 +211,8 @@ public class CreateEventSourceDialog extends CreateDialog {
         sourceTypeBox.add(nameSourceLabel);
 
         Pair<JTextField, DocumentListener> nameTextFieldAndListener = createJTextField("name", "metadata", "name");
-        activeComponents.add(Pair.of(nameTextFieldAndListener.getLeft(), nameTextFieldAndListener.getRight()));
-        sourceTypeBox.add(nameTextFieldAndListener.getLeft());
+        activeComponents.add(Pair.create(nameTextFieldAndListener.getFirst(), nameTextFieldAndListener.getSecond()));
+        sourceTypeBox.add(nameTextFieldAndListener.getFirst());
     }
 
     /**
@@ -230,7 +229,7 @@ public class CreateEventSourceDialog extends CreateDialog {
             }
         };
         JComboBox cmbServicesAsSink = createComboBox("sink", model.getServices(), -1, sinkListener);
-        activeComponents.add(Pair.of(cmbServicesAsSink, sinkListener));
+        activeComponents.add(Pair.create(cmbServicesAsSink, sinkListener));
         sourceTypeBox.add(cmbServicesAsSink);
     }
 
@@ -325,8 +324,8 @@ public class CreateEventSourceDialog extends CreateDialog {
     private void updateTimeBasicTabFields() throws IOException {
         String cronTabInYAML = YAMLHelper.getStringValueFromYAML(editor.getEditor().getDocument().getText(), YAML_PING_SOURCE_SCHEDULE);
         Pair<String, String> timeAndUnitPair = CronUtils.convertCronTabFormatInTimeAndUnitPair(cronTabInYAML);
-        updateBasicTabTextField(timeAndUnitPair.getLeft(),"spinnerSchedule", "0");
-        updateBasicTabComboBox(timeAndUnitPair.getRight(), "timeUnit", "");
+        updateBasicTabTextField(timeAndUnitPair.getFirst(),"spinnerSchedule", "0");
+        updateBasicTabComboBox(timeAndUnitPair.getSecond(), "timeUnit", "");
     }
 
     /**
@@ -372,13 +371,13 @@ public class CreateEventSourceDialog extends CreateDialog {
      * @param defaultValue default value
      */
     private void updateBasicTabTextField(String dataInYAML, String textFieldName, String defaultValue) {
-        Optional<Pair<Component, EventListener>> dataTextBoxAndListener = activeComponents.stream().filter(pair -> pair.getLeft().getName().equals(textFieldName)).findFirst();
+        Optional<Pair<Component, EventListener>> dataTextBoxAndListener = activeComponents.stream().filter(pair -> pair.getFirst().getName().equals(textFieldName)).findFirst();
         if (dataInYAML != null
                 && !dataInYAML.equals(defaultValue)
                 && dataTextBoxAndListener.isPresent()
-                && !((JTextField)dataTextBoxAndListener.get().getLeft()).getText().equals(dataInYAML)) {
-            JTextField textField = ((JTextField)dataTextBoxAndListener.get().getLeft());
-            EventListener listener = dataTextBoxAndListener.get().getRight();
+                && !((JTextField)dataTextBoxAndListener.get().getFirst()).getText().equals(dataInYAML)) {
+            JTextField textField = ((JTextField)dataTextBoxAndListener.get().getFirst());
+            EventListener listener = dataTextBoxAndListener.get().getSecond();
             if (listener instanceof DocumentListener) {
                 textField.getDocument().removeDocumentListener((DocumentListener) listener);
                 textField.setText(dataInYAML);
@@ -435,20 +434,20 @@ public class CreateEventSourceDialog extends CreateDialog {
      * @param defaultValue default value
      */
     private void updateBasicTabComboBox(String dataInYAML, String comboName, String defaultValue) {
-        Optional<Pair<Component, EventListener>> dataComboAndListener = activeComponents.stream().filter(pair -> pair.getLeft().getName().equals(comboName)).findFirst();
+        Optional<Pair<Component, EventListener>> dataComboAndListener = activeComponents.stream().filter(pair -> pair.getFirst().getName().equals(comboName)).findFirst();
         if (dataInYAML != null
                 && !dataInYAML.equals(defaultValue)
                 && dataComboAndListener.isPresent()
-                && (((JComboBox)dataComboAndListener.get().getLeft()).getSelectedIndex() == -1
-                || !((JComboBox)dataComboAndListener.get().getLeft()).getSelectedItem().toString().equals(dataInYAML)
+                && (((JComboBox)dataComboAndListener.get().getFirst()).getSelectedIndex() == -1
+                || !((JComboBox)dataComboAndListener.get().getFirst()).getSelectedItem().toString().equals(dataInYAML)
         )) {
-            JComboBox comboBox = ((JComboBox)dataComboAndListener.get().getLeft());
-            comboBox.removeItemListener((ItemListener) dataComboAndListener.get().getRight());
+            JComboBox comboBox = ((JComboBox)dataComboAndListener.get().getFirst());
+            comboBox.removeItemListener((ItemListener) dataComboAndListener.get().getSecond());
             comboBox.setSelectedItem(dataInYAML);
             if (comboBox.getSelectedIndex() != -1 && !comboBox.getSelectedItem().toString().equals(dataInYAML)) {
                 comboBox.setSelectedIndex(-1);
             }
-            comboBox.addItemListener((ItemListener) dataComboAndListener.get().getRight());
+            comboBox.addItemListener((ItemListener) dataComboAndListener.get().getSecond());
         }
     }
 
@@ -489,9 +488,9 @@ public class CreateEventSourceDialog extends CreateDialog {
      */
     private boolean canCreateApiSource() throws IOException {
         return canCreateSource(Arrays.asList(
-                Pair.of(YAML_NAME_PATH, DEFAULT_PING_SOURCE_NAME_IN_SNIPPET),
-                Pair.of(YAML_API_SOURCE_SERVICE_ACCOUNT, DEFAULT_SERVICE_ACCOUNT_IN_SNIPPET),
-                Pair.of(YAML_SOURCE_SINK, DEFAULT_SINK_IN_SNIPPET)
+                Pair.create(YAML_NAME_PATH, DEFAULT_PING_SOURCE_NAME_IN_SNIPPET),
+                Pair.create(YAML_API_SOURCE_SERVICE_ACCOUNT, DEFAULT_SERVICE_ACCOUNT_IN_SNIPPET),
+                Pair.create(YAML_SOURCE_SINK, DEFAULT_SINK_IN_SNIPPET)
         ));
     }
 
@@ -502,9 +501,9 @@ public class CreateEventSourceDialog extends CreateDialog {
      */
     private boolean canCreatePingSource() throws IOException {
         return canCreateSource(Arrays.asList(
-                Pair.of(YAML_NAME_PATH, DEFAULT_PING_SOURCE_NAME_IN_SNIPPET),
-                Pair.of(YAML_PING_SOURCE_DATA, DEFAULT_DATA_IN_SNIPPET),
-                Pair.of(YAML_SOURCE_SINK, DEFAULT_SINK_IN_SNIPPET)
+                Pair.create(YAML_NAME_PATH, DEFAULT_PING_SOURCE_NAME_IN_SNIPPET),
+                Pair.create(YAML_PING_SOURCE_DATA, DEFAULT_DATA_IN_SNIPPET),
+                Pair.create(YAML_SOURCE_SINK, DEFAULT_SINK_IN_SNIPPET)
         ));
     }
 
@@ -515,10 +514,10 @@ public class CreateEventSourceDialog extends CreateDialog {
      */
     private boolean canCreateCustomSource() throws IOException {
         return canCreateSource(Arrays.asList(
-                Pair.of(YAML_API_VERSION_PATH, DEFAULT_CUSTOM_SOURCE_APIVERSION_IN_SNIPPET),
-                Pair.of(YAML_KIND_PATH, DEFAULT_CUSTOM_SOURCE_KIND_IN_SNIPPET),
-                Pair.of(YAML_NAME_PATH, DEFAULT_CUSTOM_SOURCE_NAME_IN_SNIPPET),
-                Pair.of(YAML_SOURCE_SINK, DEFAULT_SINK_IN_SNIPPET)
+                Pair.create(YAML_API_VERSION_PATH, DEFAULT_CUSTOM_SOURCE_APIVERSION_IN_SNIPPET),
+                Pair.create(YAML_KIND_PATH, DEFAULT_CUSTOM_SOURCE_KIND_IN_SNIPPET),
+                Pair.create(YAML_NAME_PATH, DEFAULT_CUSTOM_SOURCE_NAME_IN_SNIPPET),
+                Pair.create(YAML_SOURCE_SINK, DEFAULT_SINK_IN_SNIPPET)
                 ));
     }
 
@@ -530,8 +529,8 @@ public class CreateEventSourceDialog extends CreateDialog {
      */
     private boolean canCreateSource(List<Pair<String[], String>> yamlPathsAndDefaultValues) throws IOException {
         for(Pair<String[], String> yamlPathAndDefaultValue: yamlPathsAndDefaultValues) {
-            String valueInYAML = YAMLHelper.getStringValueFromYAML(editor.getEditor().getDocument().getText(), yamlPathAndDefaultValue.getLeft());
-            if (Strings.isNullOrEmpty(valueInYAML) || valueInYAML.equals(yamlPathAndDefaultValue.getRight())) {
+            String valueInYAML = YAMLHelper.getStringValueFromYAML(editor.getEditor().getDocument().getText(), yamlPathAndDefaultValue.getFirst());
+            if (Strings.isNullOrEmpty(valueInYAML) || valueInYAML.equals(yamlPathAndDefaultValue.getSecond())) {
                 return false;
             }
         }

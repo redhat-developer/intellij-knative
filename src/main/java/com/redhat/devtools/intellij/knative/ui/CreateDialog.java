@@ -19,6 +19,7 @@ import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Divider;
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.JBColor;
@@ -57,7 +58,6 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -244,7 +244,7 @@ public abstract class CreateDialog extends DialogWrapper {
         txtField.setMaximumSize(new Dimension(999999, 33));
         DocumentListener listener = getTextFieldListener(fieldToUpdate, txtField);
         txtField.getDocument().addDocumentListener(listener);
-        return Pair.of(txtField, listener);
+        return Pair.create(txtField, listener);
     }
 
     protected JLabel createLabel(String name, String tooltip) {

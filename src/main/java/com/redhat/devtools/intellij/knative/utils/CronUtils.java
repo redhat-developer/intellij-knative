@@ -10,9 +10,9 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.utils;
 
+import com.intellij.openapi.util.Pair;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.lang3.tuple.Pair;
 
 
 import static com.redhat.devtools.intellij.knative.Constants.DAYS;
@@ -20,7 +20,7 @@ import static com.redhat.devtools.intellij.knative.Constants.HOURS;
 import static com.redhat.devtools.intellij.knative.Constants.MINUTES;
 
 public class CronUtils {
-    public static String convertTimeToCronTabFormat(String value, String unit) {
+    public static String convertTimeToCronTabFormat(int value, String unit) {
         switch(unit) {
             case MINUTES: {
                 return "*/" + value + " * * * *";
@@ -54,6 +54,6 @@ public class CronUtils {
             unit = DAYS;
         }
 
-        return Pair.of(time, unit);
+        return Pair.create(time, unit);
     }
 }
