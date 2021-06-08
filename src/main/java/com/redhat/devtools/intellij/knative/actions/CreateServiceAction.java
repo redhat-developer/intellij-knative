@@ -12,6 +12,7 @@ package com.redhat.devtools.intellij.knative.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.redhat.devtools.intellij.knative.kn.Kn;
+import com.redhat.devtools.intellij.knative.model.CreateDialogModel;
 import com.redhat.devtools.intellij.knative.tree.KnServingNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import com.redhat.devtools.intellij.knative.ui.CreateServiceDialog;
@@ -27,11 +28,11 @@ public class CreateServiceAction extends KnAction {
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Kn knCli) {
         ParentableNode node = getElement(selected);
         String namespace = node.getRootNode().getKn().getNamespace();
-        CreateServiceDialog createDialog = new CreateServiceDialog(
+        CreateDialogModel model = new CreateDialogModel(anActionEvent.getProject(),
                 "Create New Service",
-                anActionEvent.getProject(),
                 namespace,
                 () -> TreeHelper.getKnTreeStructure(getEventProject(anActionEvent)).fireModified(getElement(selected)));
+        CreateServiceDialog createDialog = new CreateServiceDialog(model);
         createDialog.setModal(false);
         createDialog.show();
     }

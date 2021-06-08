@@ -12,56 +12,26 @@ package com.redhat.devtools.intellij.knative.ui;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
-import com.intellij.CommonBundle;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.editor.colors.EditorFontType;
-import com.intellij.openapi.fileEditor.impl.text.PsiAwareTextEditorImpl;
-import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.DialogWrapper;
-import com.intellij.openapi.ui.Divider;
-import com.intellij.openapi.util.SystemInfo;
-import com.intellij.testFramework.LightVirtualFile;
-import com.intellij.ui.JBColor;
-import com.intellij.ui.OnePixelSplitter;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBScrollPane;
-import com.intellij.ui.components.JBTabbedPane;
-import com.intellij.ui.mac.TouchbarDataKeys;
-import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
+import com.redhat.devtools.intellij.knative.model.CreateDialogModel;
 import com.redhat.devtools.intellij.knative.utils.EditorHelper;
 import com.redhat.devtools.intellij.knative.utils.KnHelper;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.GroupLayout;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import org.apache.commons.lang3.tuple.Pair;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,8 +47,8 @@ public class CreateServiceDialog extends CreateDialog {
     private final static String DEFAULT_NAME_IN_SNIPPET = "add service name";
     private final static String DEFAULT_FIRST_IMAGE_IN_SNIPPET = "add image url";
 
-    public CreateServiceDialog(String title, Project project, String namespace, Runnable refreshFunction) {
-        super(project, true, title, namespace, refreshFunction);
+    public CreateServiceDialog(CreateDialogModel model) {
+        super(model);
         init();
     }
 
@@ -123,7 +93,7 @@ public class CreateServiceDialog extends CreateDialog {
     private void initEditor() {
         String content = "";
         try {
-            content = EditorHelper.getSnippet("service").replace("$namespace", namespace);
+            content = EditorHelper.getSnippet("service").replace("$namespace", model.getNamespace());
         } catch (IOException e) {
             logger.warn(e.getLocalizedMessage(), e);
         }
@@ -188,8 +158,8 @@ public class CreateServiceDialog extends CreateDialog {
     }
 
     protected void create() throws IOException, KubernetesClientException {
-        KnHelper.saveOnCluster(this.project, editor.getEditor().getDocument().getText(), true);
-        UIHelper.executeInUI(refreshFunction);
+        KnHelper.saveOnCluster(model.getProject(), editor.getEditor().getDocument().getText(), true);
+        UIHelper.executeInUI(model.getRefreshFunction());
         UIHelper.executeInUI(() -> super.doOKAction());
     }
 }

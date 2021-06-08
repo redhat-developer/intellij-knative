@@ -11,11 +11,11 @@
 package com.redhat.devtools.intellij.knative.ui;
 
 import com.google.common.base.Strings;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBScrollPane;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
+import com.redhat.devtools.intellij.knative.model.CreateDialogModel;
 import com.redhat.devtools.intellij.knative.utils.EditorHelper;
 import com.redhat.devtools.intellij.knative.utils.KnHelper;
 import io.fabric8.kubernetes.client.KubernetesClientException;
@@ -40,7 +40,6 @@ import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.NumberFormatter;
 import org.apache.commons.lang3.tuple.Pair;
@@ -61,7 +60,6 @@ public class CreateEventSourceDialog extends CreateDialog {
     private JComboBox[] cmbSourceTypes;
     private Box sourceTypeBox;
     private List<Pair<Component, EventListener>> activeComponents;
-    private List<String> services, serviceAccounts;
 
     private static final String DEFAULT_API_SOURCE_NAME_IN_SNIPPET = "<apiserversource>";
     private static final String DEFAULT_PING_SOURCE_NAME_IN_SNIPPET = "<pingsource>";
@@ -73,10 +71,8 @@ public class CreateEventSourceDialog extends CreateDialog {
     private static final String DEFAULT_CUSTOM_SOURCE_KIND_IN_SNIPPET = "<source-kind>";
     private static final String DEFAULT_CUSTOM_SOURCE_NAME_IN_SNIPPET = "<customsource>";
 
-    public CreateEventSourceDialog(Project project, String namespace, Runnable refreshFunction, List<String> services, List<String> serviceAccounts) {
-        super(project, true, "Create Event Source", namespace, refreshFunction);
-        this.services = services;
-        this.serviceAccounts = serviceAccounts;
+    public CreateEventSourceDialog(CreateDialogModel model) {
+        super(model);
         this.activeComponents = new ArrayList<>();
         initSourceTypesCombo();
         init();
@@ -208,7 +204,7 @@ public class CreateEventSourceDialog extends CreateDialog {
                 updateYamlValueInEditor(new String[] { "spec", "serviceAccountName" }, sa);
             }
         };
-        JComboBox cmbServiceAccount = createComboBox("serviceAccount", serviceAccounts, -1, saListener);
+        JComboBox cmbServiceAccount = createComboBox("serviceAccount", model.getServiceAccounts(), -1, saListener);
         activeComponents.add(Pair.of(cmbServiceAccount, saListener));
         sourceTypeBox.add(cmbServiceAccount);
 
@@ -234,7 +230,7 @@ public class CreateEventSourceDialog extends CreateDialog {
                 updateYamlValueInEditor(new String[] { "spec", "sink", "ref", "name" }, service);
             }
         };
-        JComboBox cmbServicesAsSink = createComboBox("sink", services, -1, sinkListener);
+        JComboBox cmbServicesAsSink = createComboBox("sink", model.getServices(), -1, sinkListener);
         activeComponents.add(Pair.of(cmbServicesAsSink, sinkListener));
         sourceTypeBox.add(cmbServicesAsSink);
     }
@@ -250,7 +246,7 @@ public class CreateEventSourceDialog extends CreateDialog {
 
         String content = "";
         try {
-            content = EditorHelper.getSnippet("apiserversource").replace("$namespace", namespace);
+            content = EditorHelper.getSnippet("apiserversource").replace("$namespace", model.getNamespace());
         } catch (IOException e) {
             logger.warn(e.getLocalizedMessage(), e);
         }
@@ -445,7 +441,7 @@ public class CreateEventSourceDialog extends CreateDialog {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 String sourceType = e.getItem().toString();
                 syncSecondSourceTypesCombo((ComboBox) e.getSource(), sourceType);
-                showSnippetInEditor(sourceType, namespace);
+                showSnippetInEditor(sourceType, model.getNamespace());
                 updateSourceTypeBox(sourceType);
             }
         });
@@ -503,8 +499,8 @@ public class CreateEventSourceDialog extends CreateDialog {
     }
 
     protected void create() throws IOException, KubernetesClientException {
-        KnHelper.saveOnCluster(this.project, editor.getEditor().getDocument().getText(), true);
-        UIHelper.executeInUI(refreshFunction);
+        KnHelper.saveOnCluster(model.getProject(), editor.getEditor().getDocument().getText(), true);
+        UIHelper.executeInUI(model.getRefreshFunction());
         UIHelper.executeInUI(() -> super.doOKAction());
     }
 }

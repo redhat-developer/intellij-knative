@@ -16,7 +16,6 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.colors.EditorFontType;
 import com.intellij.openapi.fileEditor.impl.text.PsiAwareTextEditorImpl;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Divider;
@@ -30,6 +29,7 @@ import com.intellij.ui.mac.TouchbarDataKeys;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
+import com.redhat.devtools.intellij.knative.model.CreateDialogModel;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -63,9 +63,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class CreateDialog extends DialogWrapper {
     private final Logger logger = LoggerFactory.getLogger(CreateDialog.class);
-    protected Project project;
-    protected Runnable refreshFunction;
-    protected String namespace;
+    protected CreateDialogModel model;
     protected JBTabbedPane contentPanel;
     protected JPanel footerPanel, logPanel;
     protected JButton cancelButton, saveButton;
@@ -73,12 +71,10 @@ public abstract class CreateDialog extends DialogWrapper {
     protected PsiAwareTextEditorImpl editor;
     protected OnePixelSplitter splitterPanel;
 
-    protected CreateDialog(@Nullable Project project, boolean canBeParent, String title, String namespace, Runnable refreshFunction) {
-        super(project, canBeParent);
-        this.project = project;
-        this.refreshFunction = refreshFunction;
-        this.namespace = namespace;
-        setTitle(title);
+    protected CreateDialog(CreateDialogModel model) {
+        super(model.getProject(), true);
+        this.model = model;
+        setTitle(model.getTitle());
     }
 
     protected void init() {
@@ -207,7 +203,7 @@ public abstract class CreateDialog extends DialogWrapper {
     }
 
     protected void initEditor(String filename, String content, com.intellij.openapi.editor.event.DocumentListener listener) {
-        editor = new PsiAwareTextEditorImpl(project, new LightVirtualFile(filename, content), TextEditorProvider.getInstance());
+        editor = new PsiAwareTextEditorImpl(model.getProject(), new LightVirtualFile(filename, content), TextEditorProvider.getInstance());
         editor.getEditor().getDocument().addDocumentListener(listener);
     }
 

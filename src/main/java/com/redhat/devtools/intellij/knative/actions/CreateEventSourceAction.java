@@ -14,6 +14,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.knative.kn.Kn;
+import com.redhat.devtools.intellij.knative.model.CreateDialogModel;
 import com.redhat.devtools.intellij.knative.tree.KnEventingSourcesNode;
 import com.redhat.devtools.intellij.knative.tree.KnServingNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
@@ -35,14 +36,15 @@ public class CreateEventSourceAction extends KnAction {
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Kn knCli) {
         ParentableNode node = getElement(selected);
         String namespace = node.getRootNode().getKn().getNamespace();
+        CreateDialogModel model = new CreateDialogModel(anActionEvent.getProject(),
+                "New Event Source",
+                namespace,
+                () -> TreeHelper.getKnTreeStructure(getEventProject(anActionEvent)).fireModified(getElement(selected)),
+                getServices(knCli),
+                knCli.getServiceAccounts());
         ExecHelper.submit(() -> {
             UIHelper.executeInUI(() -> {
-                CreateEventSourceDialog createDialog = new CreateEventSourceDialog(
-                        anActionEvent.getProject(),
-                        namespace,
-                        () -> TreeHelper.getKnTreeStructure(getEventProject(anActionEvent)).fireModified(getElement(selected)),
-                        getServices(knCli),
-                        knCli.getServiceAccounts());
+                CreateEventSourceDialog createDialog = new CreateEventSourceDialog(model);
                 createDialog.setModal(false);
                 createDialog.show();
             });
