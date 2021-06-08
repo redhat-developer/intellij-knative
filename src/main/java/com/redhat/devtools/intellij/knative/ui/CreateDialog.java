@@ -30,6 +30,7 @@ import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.model.CreateDialogModel;
+import com.redhat.devtools.intellij.knative.utils.KnHelper;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -53,6 +54,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import org.apache.commons.lang3.tuple.Pair;
@@ -85,7 +87,7 @@ public abstract class CreateDialog extends DialogWrapper {
     private void buildStructure() {
         contentPanel= new JBTabbedPane();
         contentPanel.addTab("Basic", null, createBasicTabPanel(), "Basic");
-        contentPanel.addTab("Editor", null, createEditorPanel(), "Editor");
+        contentPanel.addTab("Editor", null, createEditorTabPanel(), "Editor");
 
         createLogPanel();
 
@@ -169,7 +171,9 @@ public abstract class CreateDialog extends DialogWrapper {
         saveButton.addActionListener(e -> {
             ExecHelper.submit(() -> {
                 try {
-                    create();
+                    KnHelper.saveOnCluster(model.getProject(), editor.getEditor().getDocument().getText(), true);
+                    UIHelper.executeInUI(model.getRefreshFunction());
+                    UIHelper.executeInUI(() -> super.doOKAction());
                 } catch (IOException | KubernetesClientException ex) {
                     UIHelper.executeInUI(() -> displayError(ex.getLocalizedMessage()));
                 }
@@ -325,8 +329,16 @@ public abstract class CreateDialog extends DialogWrapper {
         };
     }
 
+    protected JScrollPane fitBoxInScrollPane(Box verticalBox) {
+        verticalBox.add(new JPanel(new BorderLayout())); // hack to push components to the top
+
+        JBScrollPane scroll = new JBScrollPane(verticalBox);
+        scroll.setBorder(new EmptyBorder(0,0,0,0));
+
+        return scroll;
+    }
+
     protected abstract JScrollPane createBasicTabPanel();
-    protected abstract JScrollPane createEditorPanel();
-    protected abstract void create() throws IOException, KubernetesClientException;
+    protected abstract JScrollPane createEditorTabPanel();
     protected abstract void setSaveButtonVisibility();
 }

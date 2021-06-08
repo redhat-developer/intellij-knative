@@ -77,15 +77,10 @@ public class CreateServiceDialog extends CreateDialog {
         chkPrivateService.setBorder(new EmptyBorder(10, 0, 0, 0));
         verticalBox.add(createComponentInFlowPanel(chkPrivateService));
 
-        verticalBox.add(new JPanel(new BorderLayout())); // hack to push components to the top
-
-        JBScrollPane scroll = new JBScrollPane(verticalBox);
-        scroll.setBorder(new EmptyBorder(0,0,0,0));
-
-        return scroll;
+        return fitBoxInScrollPane(verticalBox);
     }
 
-    protected JScrollPane createEditorPanel() {
+    protected JScrollPane createEditorTabPanel() {
         initEditor();
         return  new JBScrollPane(editor.getComponent());
     }
@@ -155,11 +150,5 @@ public class CreateServiceDialog extends CreateDialog {
                 logger.warn(ex.getLocalizedMessage(), ex);
             }
         };
-    }
-
-    protected void create() throws IOException, KubernetesClientException {
-        KnHelper.saveOnCluster(model.getProject(), editor.getEditor().getDocument().getText(), true);
-        UIHelper.executeInUI(model.getRefreshFunction());
-        UIHelper.executeInUI(() -> super.doOKAction());
     }
 }
