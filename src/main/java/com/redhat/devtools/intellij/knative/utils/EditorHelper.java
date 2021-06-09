@@ -44,11 +44,14 @@ public class EditorHelper {
     private static Logger logger = LoggerFactory.getLogger(EditorHelper.class);
 
     public static void openKnComponentInEditor(TreePath path) {
-        ParentableNode node = StructureTreeAction.getElement(path.getLastPathComponent());
-        openKnComponentInEditor(node);
+        Object node = StructureTreeAction.getElement(path.getLastPathComponent());
+        if(node instanceof ParentableNode){
+            openKnComponentInEditor((ParentableNode<?>) node);
+        }
+        // else silently ignore non parentable nodes
     }
 
-    public static void openKnComponentInEditor(ParentableNode node) {
+    public static void openKnComponentInEditor(ParentableNode<?> node) {
         if (node == null) return;
 
         try {
