@@ -48,7 +48,6 @@ public class EditorHelper {
         if(node instanceof ParentableNode){
             openKnComponentInEditor((ParentableNode<?>) node);
         }
-        // else silently ignore non parentable nodes
     }
 
     public static void openKnComponentInEditor(ParentableNode<?> node) {
