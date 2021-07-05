@@ -57,6 +57,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import org.apache.commons.lang3.tuple.Pair;
@@ -93,6 +95,11 @@ public class CreateServiceDialog extends DialogWrapper {
         initEditor(namespace);
         buildStructure();
         init();
+    }
+
+    @Override
+    public @Nullable JComponent getPreferredFocusedComponent() {
+        return txtValueParam;
     }
 
     private void initEditor(String namespace) {
@@ -138,6 +145,13 @@ public class CreateServiceDialog extends DialogWrapper {
         contentPanel= new JBTabbedPane();
         contentPanel.addTab("Basic", null, createBasicTabPanel(), "Basic");
         contentPanel.addTab("Editor", null, editor.getComponent(), "Editor");
+        contentPanel.addChangeListener(e -> {
+            if (((JBTabbedPane)e.getSource()).getSelectedIndex() == 0) {
+                txtValueParam.requestFocusInWindow();
+            } else {
+                editor.getEditor().getContentComponent().requestFocusInWindow();
+            }
+        });
 
         createLogPanel();
 
