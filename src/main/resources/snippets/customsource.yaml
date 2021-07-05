@@ -1,0 +1,11 @@
+apiVersion: <source-apiversion>
+kind: <source-kind>
+metadata:
+  name: <customsource>
+  namespace: "$namespace"
+spec:
+  sink:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: <sink>

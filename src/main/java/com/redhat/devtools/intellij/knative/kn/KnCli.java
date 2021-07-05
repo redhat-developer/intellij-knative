@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 public class KnCli implements Kn {
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper(new JsonFactory());
@@ -106,6 +107,11 @@ public class KnCli implements Kn {
         String json = ExecHelper.execute(command, envVars, "service", "describe", name, "-o", "json", "-n", getNamespace());
         JavaType customClassCollection = JSON_MAPPER.getTypeFactory().constructType(Service.class);
         return JSON_MAPPER.readValue(json, customClassCollection);
+    }
+
+    @Override
+    public List<String> getServiceAccounts() {
+        return client.serviceAccounts().inNamespace(getNamespace()).list().getItems().stream().map(serviceAccount -> serviceAccount.getMetadata().getName()).collect(Collectors.toList());
     }
 
     @Override

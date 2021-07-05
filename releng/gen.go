@@ -7,6 +7,8 @@ import (
 	"knative.dev/serving/pkg/apis/serving/v1"
 	knative "knative.dev/pkg/apis"
 	k8sv1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	sourcesv1 "knative.dev/eventing/pkg/apis/sources/v1"
+	sourcesv1beta2 "knative.dev/eventing/pkg/apis/sources/v1beta2"
 	"os"
 	"encoding/json"
 	"reflect"
@@ -55,6 +57,7 @@ func dump(v interface{}, apiVersion string, kind string) {
 func main() {
 	os.Create("index.properties")
 	os.Mkdir("serving.knative.dev", os.ModePerm)
+	os.Mkdir("sources.knative.dev", os.ModePerm)
 
 	dump(&v1.Service{}, "serving.knative.dev/v1", "Service")
 	dump(&v1.ServiceList{}, "serving.knative.dev/v1", "ServiceList")
@@ -64,4 +67,8 @@ func main() {
 	dump(&v1.ConfigurationList{}, "serving.knative.dev/v1", "ConfigurationList")
 	dump(&v1.Route{}, "serving.knative.dev/v1", "Route")
 	dump(&v1.RouteList{}, "serving.knative.dev/v1", "RouteList")
+	dump(&sourcesv1beta2.PingSource{}, "sources.knative.dev/v1beta2", "PingSource")
+	dump(&sourcesv1beta2.PingSourceList{}, "sources.knative.dev/v1beta2", "PingSourceList")
+    dump(&sourcesv1.ApiServerSource{}, "sources.knative.dev/v1", "ApiServerSource")
+    dump(&sourcesv1.ApiServerSourceList{}, "sources.knative.dev/v1", "ApiServerSourceList")
 }
