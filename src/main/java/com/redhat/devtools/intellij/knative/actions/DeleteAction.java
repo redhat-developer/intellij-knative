@@ -17,6 +17,7 @@ import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.tree.KnRevisionNode;
 import com.redhat.devtools.intellij.knative.tree.KnServiceNode;
+import com.redhat.devtools.intellij.knative.tree.KnSourceNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import com.redhat.devtools.intellij.knative.ui.DeleteDialog;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
@@ -32,7 +33,7 @@ import javax.swing.tree.TreePath;
 
 public class DeleteAction extends KnAction {
     public DeleteAction() {
-        super(true, KnServiceNode.class, KnRevisionNode.class);
+        super(true, KnServiceNode.class, KnRevisionNode.class, KnSourceNode.class);
     }
 
     @Override
@@ -67,11 +68,12 @@ public class DeleteAction extends KnAction {
         for(Class type: resourcesByClass.keySet()) {
             try {
                 deleteResources(type, resourcesByClass, kncli);
-                TreeHelper.refresh(project, (ParentableNode) resourcesByClass.get(type).get(0).getParent());
             } catch (IOException e) {
                 UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Error"));
             }
+            TreeHelper.refresh(project, (ParentableNode) resourcesByClass.get(type).get(0).getParent());
         }
+
     }
 
     private Map<Class, List<ParentableNode>> groupResourcesByClass(ParentableNode[] elements) {
@@ -88,6 +90,8 @@ public class DeleteAction extends KnAction {
             kncli.deleteServices(resources);
         } else if (type.equals(KnRevisionNode.class)) {
             kncli.deleteRevisions(resources);
+        } else if (type.equals(KnSourceNode.class)) {
+            kncli.deleteEventSources(resourcesByClass.get(type).stream().map(x -> ((KnSourceNode)x).getSource()).collect(Collectors.toList()));
         }
     }
 }

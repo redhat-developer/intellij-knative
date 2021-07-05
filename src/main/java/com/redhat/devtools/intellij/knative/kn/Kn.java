@@ -102,6 +102,14 @@ public interface Kn {
     void deleteRevisions(List<String> revisions) throws IOException;
 
     /**
+     * Delete a list of event sources
+     *
+     * @param sources the list of event sources to delete
+     * @throws IOException if communication errored
+     */
+    void deleteEventSources(List<Source> sources) throws IOException;
+
+    /**
      * Get a custom resource from the cluster which is namespaced.
      *
      * @param name name of custom resource

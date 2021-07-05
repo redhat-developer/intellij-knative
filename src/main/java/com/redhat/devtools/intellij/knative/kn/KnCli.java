@@ -15,8 +15,12 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.NetworkUtils;
+import com.redhat.devtools.intellij.common.utils.UIHelper;
+import com.redhat.devtools.intellij.knative.tree.ParentableNode;
+import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -29,9 +33,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 public class KnCli implements Kn {
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper(new JsonFactory());
@@ -128,8 +134,57 @@ public class KnCli implements Kn {
         ExecHelper.execute(command, envVars, getDeleteArgs("revision", revisions));
     }
 
-    private String[] getDeleteArgs(String kind, List<String> resourcesToDelete) {
-        List<String> args = new ArrayList<>(Arrays.asList(kind, "delete"));
+    @Override
+    public void deleteEventSources(List<Source> sources) throws IOException {
+        Map<String, List<Source>> sourcesByKind = groupSourcesByClass(sources);
+        List<String> failingDelete = new ArrayList<>();
+        for(String kind: sourcesByKind.keySet()) {
+            switch (kind) {
+                case "ApiServerSource":
+                    deleteEventSources(sourcesByKind.get(kind), "apiserver");
+                    break;
+                case "SinkBinding":
+                    deleteEventSources(sourcesByKind.get(kind), "binding");
+                    break;
+                case "PingSource":
+                    deleteEventSources(sourcesByKind.get(kind), "ping");
+                    break;
+                default:
+                    failingDelete.addAll(sourcesByKind.get(kind).stream().map(x -> x.getName()).collect(Collectors.toList()));
+            }
+        }
+        if (!failingDelete.isEmpty()) {
+            String notDeletedSources = failingDelete.stream().collect(Collectors.joining("\n"));
+            throw new IOException("Unable to recognize some Event Sources types. The following sources have not been deleted:\n " + notDeletedSources);
+        }
+    }
+
+    private void deleteEventSources(List<Source> sources, String... options) throws IOException {
+        List<String> sourcesNames = getSourcesNamesList(sources);
+        for (String source: sourcesNames) {
+            //kn delete still doesn't support multiple deletion for sources
+            ExecHelper.execute(command, envVars, getDeleteArgs("sources", Arrays.asList(source), options));
+        }
+    }
+
+    private Map<String, List<Source>> groupSourcesByClass(List<Source> sources) {
+        Map<String, List<Source>> sourcesByClass = new HashMap<>();
+        sources.forEach(element ->
+                sourcesByClass.computeIfAbsent(element.getKind(), value -> new ArrayList<>())
+                        .add(element));
+        return sourcesByClass;
+    }
+
+    private List<String> getSourcesNamesList(List<Source> sources) {
+        return sources.stream().map(s -> s.getName()).collect(Collectors.toList());
+    }
+
+    private String[] getDeleteArgs(String kind, List<String> resourcesToDelete, String... options) {
+        List<String> args = new ArrayList<>(Arrays.asList(kind));
+        if (options != null && options.length > 0) {
+            args.addAll(Arrays.asList(options));
+        }
+        args.add("delete");
         args.addAll(resourcesToDelete);
         args.addAll(Arrays.asList("-n", getNamespace()));
         return args.toArray(new String[0]);

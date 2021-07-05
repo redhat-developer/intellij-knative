@@ -11,8 +11,11 @@
 package com.redhat.devtools.intellij.knative;
 
 import com.intellij.openapi.project.Project;
+import com.redhat.devtools.intellij.knative.kn.BaseSource;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.kn.KnCli;
+import com.redhat.devtools.intellij.knative.kn.PingSource;
+import com.redhat.devtools.intellij.knative.kn.Source;
 import com.redhat.devtools.intellij.knative.tree.KnEventingBrokerNode;
 import com.redhat.devtools.intellij.knative.tree.KnEventingChannelsNode;
 import com.redhat.devtools.intellij.knative.tree.KnEventingNode;
@@ -53,6 +56,7 @@ public class BaseTest {
     protected KnEventingTriggersNode knEventingTriggersNode;
     protected KnSourceNode knSourceNode;
     protected KnSinkNode knSinkNode;
+    protected BaseSource pingSource;
 
     @Before
     public void setUp() throws Exception {
@@ -72,6 +76,7 @@ public class BaseTest {
         knEventingTriggersNode = mock(KnEventingTriggersNode.class);
         knSourceNode = mock(KnSourceNode.class);
         knSinkNode = mock((KnSinkNode.class));
+        pingSource = mock(PingSource.class);
     }
 
     protected String load(String name) throws IOException {
