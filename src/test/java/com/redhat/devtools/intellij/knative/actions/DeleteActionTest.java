@@ -23,24 +23,30 @@ public class DeleteActionTest extends ActionTest {
 
     @Test
     public void ExecuteDelete_OneKnServiceNodeSelected_DeleteOneService() throws IOException {
-        executeDeleteAction(new ParentableNode[] {knServiceNode}, 1, 0);
+        executeDeleteAction(new ParentableNode[] {knServiceNode}, 1, 0, 0);
     }
 
     @Test
     public void ExecuteDelete_OneKnRevisionNodeSelected_DeleteOneRevision() throws IOException {
-        executeDeleteAction(new ParentableNode[] {knRevisionNode}, 0 ,1);
+        executeDeleteAction(new ParentableNode[] {knRevisionNode}, 0 ,1, 0);
+    }
+
+    @Test
+    public void ExecuteDelete_OneKnEventSourceNodeSelected_DeleteOneRevision() throws IOException {
+        executeDeleteAction(new ParentableNode[] {knSourceNode}, 0 ,0, 1);
     }
 
     @Test
     public void ExecuteDelete_TwoDifferentKnNodeSelected_CalledTwoDelete() throws IOException {
-        executeDeleteAction(new ParentableNode[] {knServiceNode, knRevisionNode}, 1, 1);
+        executeDeleteAction(new ParentableNode[] {knServiceNode, knRevisionNode}, 1, 1, 0);
     }
 
-    private void executeDeleteAction(ParentableNode[] fakeSelectedNodesToBeDeleted, int timesDeleteServices, int timesDeleteRevisions) throws IOException {
+    private void executeDeleteAction(ParentableNode[] fakeSelectedNodesToBeDeleted, int timesDeleteServices, int timesDeleteRevisions, int timesDeleteSources) throws IOException {
         DeleteAction action = new DeleteAction();
         action.executeDelete(project, kn, fakeSelectedNodesToBeDeleted);
         verify(kn, times(timesDeleteServices)).deleteServices(any());
         verify(kn, times(timesDeleteRevisions)).deleteRevisions(any());
+        verify(kn, times(timesDeleteSources)).deleteEventSources(any());
 
 
     }

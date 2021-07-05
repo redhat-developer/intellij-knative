@@ -136,17 +136,21 @@ public class KnCli implements Kn {
 
     @Override
     public void deleteEventSources(List<Source> sources) throws IOException {
-        Map<Class, List<Source>> sourcesByClass = groupSourcesByClass(sources);
+        Map<String, List<Source>> sourcesByKind = groupSourcesByClass(sources);
         List<String> failingDelete = new ArrayList<>();
-        for(Class type: sourcesByClass.keySet()) {
-            if (type.equals(PingSource.class)) {
-                deleteEventSources(sourcesByClass.get(type), "ping");
-            } else if (type.equals(APIServerSource.class)) {
-                deleteEventSources(sourcesByClass.get(type), "apiserver");
-            } else if (type.equals(BindingSource.class)) {
-                deleteEventSources(sourcesByClass.get(type), "binding");
-            } else {
-                failingDelete.addAll(sourcesByClass.get(type).stream().map(x -> x.getName()).collect(Collectors.toList()));
+        for(String kind: sourcesByKind.keySet()) {
+            switch (kind) {
+                case "ApiServerSource":
+                    deleteEventSources(sourcesByKind.get(kind), "apiserver");
+                    break;
+                case "SinkBinding":
+                    deleteEventSources(sourcesByKind.get(kind), "binding");
+                    break;
+                case "PingSource":
+                    deleteEventSources(sourcesByKind.get(kind), "ping");
+                    break;
+                default:
+                    failingDelete.addAll(sourcesByKind.get(kind).stream().map(x -> x.getName()).collect(Collectors.toList()));
             }
         }
         if (!failingDelete.isEmpty()) {
@@ -163,10 +167,10 @@ public class KnCli implements Kn {
         }
     }
 
-    private Map<Class, List<Source>> groupSourcesByClass(List<Source> sources) {
-        Map<Class, List<Source>> sourcesByClass = new HashMap<>();
+    private Map<String, List<Source>> groupSourcesByClass(List<Source> sources) {
+        Map<String, List<Source>> sourcesByClass = new HashMap<>();
         sources.forEach(element ->
-                sourcesByClass.computeIfAbsent(element.getSinkSource().getClass(), value -> new ArrayList<>())
+                sourcesByClass.computeIfAbsent(element.getKind(), value -> new ArrayList<>())
                         .add(element));
         return sourcesByClass;
     }
