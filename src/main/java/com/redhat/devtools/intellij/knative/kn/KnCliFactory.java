@@ -31,7 +31,12 @@ public class KnCliFactory {
 
     public CompletableFuture<Kn> getKn(Project project) {
         if (future == null) {
-            future = DownloadHelper.getInstance().downloadIfRequiredAsync("kn", KnCliFactory.class.getResource("/kn.json")).thenApply(command -> new KnCli(project, command));
+            CompletableFuture<String> knCompletableFuture = DownloadHelper.getInstance()
+                    .downloadIfRequiredAsync("kn", KnCliFactory.class.getResource("/kn.json"));
+            CompletableFuture<String> funcCompletableFuture = DownloadHelper.getInstance()
+                    .downloadIfRequiredAsync("func", KnCliFactory.class.getResource("/func.json"));
+            future = knCompletableFuture.thenCompose(knCommand ->
+                    funcCompletableFuture.thenApply(funcCommand -> new KnCli(project, knCommand, funcCommand)));
         }
         return future;
     }

@@ -19,9 +19,17 @@ import java.util.concurrent.CompletableFuture;
 public class KnRootNode {
     private final Project project;
     private Kn kn;
+    private static KnRootNode instance;
 
-    public KnRootNode(Project project) {
+    private KnRootNode(Project project) {
         this.project = project;
+    }
+
+    public static KnRootNode getInstance(Project project) {
+        if (instance == null) {
+            instance = new KnRootNode(project);
+        }
+        return instance;
     }
 
     public CompletableFuture<Kn> initializeKn() {

@@ -10,24 +10,36 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.tree;
 
+import com.google.common.base.Strings;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.util.treeView.AbstractTreeStructure;
 import com.intellij.ide.util.treeView.NodeDescriptor;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.util.IconLoader;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.ArrayUtil;
-import com.intellij.util.Function;
 import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
 import com.redhat.devtools.intellij.common.tree.MutableModel;
 import com.redhat.devtools.intellij.common.tree.MutableModelSupport;
 import com.redhat.devtools.intellij.common.utils.ConfigHelper;
 import com.redhat.devtools.intellij.common.utils.ConfigWatcher;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
+import com.redhat.devtools.intellij.common.utils.YAMLHelper;
+import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.kn.Service;
 import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.NamedContext;
 import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.util.Optional;
 import org.apache.commons.codec.binary.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -42,23 +54,18 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class KnTreeStructure extends AbstractTreeStructure implements MutableModel<Object>, ConfigWatcher.Listener {
+public class KnTreeStructure extends AbstractKnTreeStructure implements ConfigWatcher.Listener {
     private static Logger logger = LoggerFactory.getLogger(KnTreeStructure.class);
 
-    private static final Icon CLUSTER_ICON = IconLoader.findIcon("/images/knative-logo.svg", KnTreeStructure.class);
     private static final Icon SERVICE_ICON = IconLoader.findIcon("/images/service.svg");
     private static final Icon REVISION_ICON = IconLoader.findIcon("/images/revision.svg");
     private static final Icon SOURCE_ICON = IconLoader.findIcon("/images/source-generic.svg");
 
-    private final Project project;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
-    private final KnRootNode root;
     private Config config;
-    private final MutableModel<Object> mutableModelSupport = new MutableModelSupport<>();
 
     public KnTreeStructure(Project project) {
-        this.project = project;
-        this.root = new KnRootNode(project);
+        super(project);
         this.config = loadConfig();
         initConfigWatcher();
     }
@@ -85,21 +92,17 @@ public class KnTreeStructure extends AbstractTreeStructure implements MutableMod
         if (kn != null) {
             if (element instanceof KnRootNode) {
                 Object[] result = new Object[0];
-                try {
-                    if (kn.isKnativeServingAware()) {
-                        result = ArrayUtil.append(result, new KnServingNode(root, root));
-                    }
-                } catch (IOException e) {
-                    // ignore
+                boolean hasKnativeServing = hasKnativeServing(kn);
+                boolean hasKnativeEventing = hasKnativeEventing(kn);
+                if (hasKnativeServing) {
+                    result = ArrayUtil.append(result, new KnServingNode(root, root));
                 }
-                try {
-                    if (kn.isKnativeEventingAware()) {
-                        result = ArrayUtil.append(result, new KnEventingNode(root, root));
-                    }
-                } catch (IOException e) {
-                    // ignore
+                if (hasKnativeEventing) {
+                    result = ArrayUtil.append(result, new KnEventingNode(root, root));
                 }
-
+                if (hasKnativeEventing && hasKnativeServing) {
+                    result = ArrayUtil.append(result, new KnFunctionsNode(root, root));
+                }
                 return result;
             }
 
@@ -122,9 +125,24 @@ public class KnTreeStructure extends AbstractTreeStructure implements MutableMod
             if (element instanceof KnSourceNode) {
                 return getSinkForSource((KnSourceNode) element);
             }
+
+            if (element instanceof KnFunctionsNode) {
+                return getFunctionNodes((KnFunctionsNode) element);
+            }
         }
 
         return new Object[0];
+    }
+
+    private Object[] getFunctionNodes(KnFunctionsNode parent) {
+        List<Object> functions = new ArrayList<>();
+        try {
+            Kn kn = parent.getRootNode().getKn();
+            kn.getFunctions().forEach(it -> functions.add(new KnFunctionNode(parent.getRootNode(), parent, it)));
+        } catch (IOException e) {
+            functions.add(new MessageNode<>(parent.getRootNode(), parent, "Failed to load revisions"));
+        }
+        return functions.toArray();
     }
 
     private Object[] getSinkForSource(KnSourceNode element) {
@@ -177,7 +195,7 @@ public class KnTreeStructure extends AbstractTreeStructure implements MutableMod
         return services.toArray();
     }
 
-    private Function<Boolean, Service> getService(Kn kn, Service service) {
+    private com.intellij.util.Function<Boolean, Service> getService(Kn kn, Service service) {
         AtomicReference<Service> serviceObj = new AtomicReference<>(service);
         return (toUpdate) -> {
             if (!toUpdate) {
@@ -217,6 +235,9 @@ public class KnTreeStructure extends AbstractTreeStructure implements MutableMod
         if (element instanceof KnEventingNode) {
             return new LabelAndIconDescriptor<>(project, element, ((KnEventingNode) element).getName(), AllIcons.Nodes.Package, parentDescriptor);
         }
+        if (element instanceof KnFunctionsNode) {
+            return new LabelAndIconDescriptor<>(project, element, ((KnFunctionsNode) element).getName(), AllIcons.Nodes.Package, parentDescriptor);
+        }
 
         if (element instanceof KnServiceNode) {
             return new KnServiceDescriptor(project, (KnServiceNode) element, SERVICE_ICON, parentDescriptor);
@@ -253,6 +274,9 @@ public class KnTreeStructure extends AbstractTreeStructure implements MutableMod
             return new KnSinkDescriptor(project, (KnSinkNode) element, parentDescriptor);
         }
 
+        if (element instanceof KnFunctionNode) {
+            return new KnFunctionDescriptor(project, (KnFunctionNode) element, parentDescriptor);
+        }
 
         //if we can present node we try to do that
         if (element instanceof ParentableNode) {
@@ -260,41 +284,6 @@ public class KnTreeStructure extends AbstractTreeStructure implements MutableMod
             return new LabelAndIconDescriptor<>(project, element, ((ParentableNode<?>) element).getName(), AllIcons.Nodes.ErrorIntroduction, parentDescriptor);
         }
         throw new RuntimeException("Can't find NodeDescriptor for " + element.getClass().getName());
-    }
-
-    @Override
-    public void commit() {
-
-    }
-
-    @Override
-    public boolean hasSomethingToCommit() {
-        return false;
-    }
-
-    @Override
-    public void fireAdded(Object element) {
-        mutableModelSupport.fireAdded(element);
-    }
-
-    @Override
-    public void fireModified(Object element) {
-        mutableModelSupport.fireModified(element);
-    }
-
-    @Override
-    public void fireRemoved(Object element) {
-        mutableModelSupport.fireRemoved(element);
-    }
-
-    @Override
-    public void addListener(Listener<Object> listener) {
-        mutableModelSupport.addListener(listener);
-    }
-
-    @Override
-    public void removeListener(Listener<Object> listener) {
-        mutableModelSupport.removeListener(listener);
     }
 
     @Override

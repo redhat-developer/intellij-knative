@@ -30,7 +30,7 @@ public class KnRootTest extends BaseTest {
 
     @Test
     public void Constructor_KnRootNode() {
-        knRootNode = new KnRootNode(project);
+        knRootNode = KnRootNode.getInstance(project);
         assertNull(knRootNode.getKn());
         assertEquals(project, knRootNode.getProject());
 

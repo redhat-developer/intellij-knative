@@ -15,7 +15,6 @@ import com.intellij.ui.components.JBScrollPane;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
 import java.util.Arrays;
 import javax.swing.Box;
 import javax.swing.JComponent;

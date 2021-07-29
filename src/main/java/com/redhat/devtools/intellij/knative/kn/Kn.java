@@ -10,6 +10,8 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.kn;
 
+import com.intellij.openapi.project.Project;
+import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 
 import java.io.IOException;
@@ -59,6 +61,14 @@ public interface Kn {
     List<Revision> getRevisionsForService(String serviceName) throws IOException;
 
     /**
+     * Return the list of all Knative Functions in current namespace
+     *
+     * @return list of functions
+     * @throws IOException if communication encountered an error
+     */
+    List<Function> getFunctions() throws IOException;
+
+    /**
      * Return the service component
      *
      * @param name name of service
@@ -100,6 +110,14 @@ public interface Kn {
      * @throws IOException if communication errored
      */
     void deleteRevisions(List<String> revisions) throws IOException;
+
+    /**
+     * Delete/Undeploy a list of functions
+     *
+     * @param functions the list of functions to delete/undeploy
+     * @throws IOException if communication errored
+     */
+    void deleteFunctions(List<String> functions) throws IOException;
 
     /**
      * Get a custom resource from the cluster which is namespaced.
@@ -147,4 +165,44 @@ public interface Kn {
      * @throws IOException if communication errored
      */
     void tagRevision(String service, String revision, String tag) throws IOException;
+
+    /**
+     * Create a new function
+     *
+     * @param model model representing the function to be created
+     * @throws IOException if communication errored
+     */
+    void createFunc(CreateFuncModel model) throws IOException;
+
+    /**
+     * Build a function from path
+     *
+     * @param path path where the source code is stored
+     * @param registry registry to use
+     * @param image image name. This option takes precedence over registry which can be omitted
+     * @throws IOException if communication errored
+     */
+    void buildFunc(Project project, String path, String registry, String image) throws IOException;
+
+    /**
+     * Deploy a function from path
+     *
+     * @param namespace namespace where to deploy
+     * @param path path where the source code is stored
+     * @param registry registry to use
+     * @param image image name. This option takes precedence over registry which can be omitted
+     * @throws IOException if communication errored
+     */
+    void deployFunc(String namespace, String path, String registry, String image) throws IOException;
+
+
+    /**
+     * Run a function locally
+     *
+     * @param path path where the function is stored
+     * @throws IOException if communication errored
+     */
+    void runFunc(String path) throws IOException;
+
+
 }

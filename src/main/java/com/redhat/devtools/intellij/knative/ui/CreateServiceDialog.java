@@ -20,6 +20,7 @@ import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Divider;
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.JBColor;
@@ -33,7 +34,6 @@ import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.utils.EditorHelper;
 import com.redhat.devtools.intellij.knative.utils.KnHelper;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -166,16 +166,16 @@ public class CreateServiceDialog extends DialogWrapper {
         verticalBox.add(nameLabel);
 
         Pair<JTextField, DocumentListener> txtNamePair = createJTextField(YAML_NAME_PATH);
-        txtValueParam = txtNamePair.getLeft();
-        txtNameParamListener = txtNamePair.getRight();
+        txtValueParam = txtNamePair.getFirst();
+        txtNameParamListener = txtNamePair.getSecond();
         verticalBox.add(txtValueParam);
 
         JPanel imageLabel = createLabelInFlowPanel("Image", "Image to run (e.g knativesamples/helloworld)");
         verticalBox.add(imageLabel);
 
         Pair<JTextField, DocumentListener> txtImagePair = createJTextField(YAML_FIRST_IMAGE_PATH);
-        txtImageParam = txtImagePair.getLeft();
-        txtImageParamListener = txtImagePair.getRight();
+        txtImageParam = txtImagePair.getFirst();
+        txtImageParamListener = txtImagePair.getSecond();
         verticalBox.add(txtImageParam);
 
         JCheckBox chkPrivateService = new JBCheckBox();
@@ -279,7 +279,7 @@ public class CreateServiceDialog extends DialogWrapper {
         txtField.setMaximumSize(new Dimension(999999, 33));
         DocumentListener listener = createListener(fieldToUpdate, txtField);
         txtField.getDocument().addDocumentListener(listener);
-        return Pair.of(txtField, listener);
+        return Pair.create(txtField, listener);
     }
 
     private JPanel createLabelInFlowPanel(String name, String tooltip) {

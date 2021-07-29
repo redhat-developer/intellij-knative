@@ -67,7 +67,7 @@ public class EditorHelper {
 
     private static void openVirtualFileInEditor(Project project, String name, String content, boolean isWritable, ParentableNode<?> targetNode) throws IOException {
         Optional<FileEditor> editor = Arrays.stream(FileEditorManager.getInstance(project).getAllEditors())
-                                            .filter(fileEditor -> fileEditor.getFile().getName().startsWith(name))
+                                            .filter(fileEditor -> fileEditor.getFile() != null && fileEditor.getFile().getName().startsWith(name))
                                             .findFirst();
         if (!editor.isPresent()) {
             VirtualFile virtualFile = createVirtualFile(project, name, content, isWritable, targetNode);

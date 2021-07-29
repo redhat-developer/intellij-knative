@@ -10,6 +10,7 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.utils;
 
+import com.intellij.ide.util.treeView.AbstractTreeStructure;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
@@ -19,12 +20,17 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.kn.Kn;
+import com.redhat.devtools.intellij.knative.tree.KnFunctionsTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.KnRootNode;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import java.awt.Component;
 import javax.swing.JComponent;
 import javax.swing.JViewport;
+
+
+import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_FUNC_TOOL_WINDOW_ID;
+import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_TOOL_WINDOW_ID;
 
 public class TreeHelper {
 
@@ -34,11 +40,11 @@ public class TreeHelper {
         return errorMessage.length() >= MESSAGE_MAX_LENGTH ? errorMessage.substring(0, MESSAGE_MAX_LENGTH) + "..." : errorMessage;
     }
 
-    public static Tree getTree(Project project) {
+    public static Tree getTree(Project project, String toolWindowId) {
         if (project == null) {
             return null;
         }
-        ToolWindow window = ToolWindowManager.getInstance(project).getToolWindow("Knative");
+        ToolWindow window = ToolWindowManager.getInstance(project).getToolWindow(toolWindowId);
         if (window == null) {
             return null;
         }
@@ -66,7 +72,15 @@ public class TreeHelper {
     }
 
     public static KnTreeStructure getKnTreeStructure(Project project) {
-        Tree tree = getTree(project);
+        return (KnTreeStructure) getTreeStructure(project, KNATIVE_TOOL_WINDOW_ID);
+    }
+
+    public static KnFunctionsTreeStructure getKnFunctionsTreeStructure(Project project) {
+        return (KnFunctionsTreeStructure) getTreeStructure(project, KNATIVE_FUNC_TOOL_WINDOW_ID);
+    }
+
+    private static AbstractTreeStructure getTreeStructure(Project project, String toolWindowId) {
+        Tree tree = getTree(project, toolWindowId);
         if (tree == null) {
             return null;
         }
@@ -74,7 +88,7 @@ public class TreeHelper {
         if (property == null) {
             return null;
         }
-        return (KnTreeStructure) property;
+        return (AbstractTreeStructure) property;
     }
 
     public static Kn getKn(Project project) {
@@ -92,6 +106,15 @@ public class TreeHelper {
             KnTreeStructure structure = getKnTreeStructure(project);
             if (structure != null) {
                 structure.fireModified(node);
+            }
+        }
+    }
+
+    public static void refreshFunc(Project project) {
+        if (project != null) {
+            KnFunctionsTreeStructure structure = getKnFunctionsTreeStructure(project);
+            if (structure != null) {
+                structure.fireModified(structure.getRootElement());
             }
         }
     }

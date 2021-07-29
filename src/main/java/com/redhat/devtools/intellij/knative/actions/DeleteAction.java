@@ -15,6 +15,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.knative.kn.Kn;
+import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.KnRevisionNode;
 import com.redhat.devtools.intellij.knative.tree.KnServiceNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
@@ -32,7 +33,7 @@ import javax.swing.tree.TreePath;
 
 public class DeleteAction extends KnAction {
     public DeleteAction() {
-        super(true, KnServiceNode.class, KnRevisionNode.class);
+        super(true, KnServiceNode.class, KnRevisionNode.class, KnFunctionNode.class);
     }
 
     @Override
@@ -59,7 +60,12 @@ public class DeleteAction extends KnAction {
         if (deleteDialog.isOK()) {
             CompletableFuture.runAsync(() -> executeDelete(anActionEvent.getProject(), kncli, elements));
         }
+    }
 
+    @Override
+    public boolean isEnabled(Object selected) {
+        return !(selected instanceof KnFunctionNode)
+                || ((KnFunctionNode) selected).getFunction().isPushed();
     }
 
     public void executeDelete(Project project, Kn kncli, ParentableNode[] elements) {
@@ -68,6 +74,9 @@ public class DeleteAction extends KnAction {
             try {
                 deleteResources(type, resourcesByClass, kncli);
                 TreeHelper.refresh(project, (ParentableNode) resourcesByClass.get(type).get(0).getParent());
+                if (type.equals(KnFunctionNode.class)) {
+                    TreeHelper.refreshFunc(project);
+                }
             } catch (IOException e) {
                 UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Error"));
             }
@@ -88,6 +97,8 @@ public class DeleteAction extends KnAction {
             kncli.deleteServices(resources);
         } else if (type.equals(KnRevisionNode.class)) {
             kncli.deleteRevisions(resources);
+        } else if(type.equals(KnFunctionNode.class)) {
+            kncli.deleteFunctions(resources);
         }
     }
 }

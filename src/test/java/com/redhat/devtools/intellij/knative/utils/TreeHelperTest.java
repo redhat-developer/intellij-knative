@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.mockito.MockedStatic;
 
 
+import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_TOOL_WINDOW_ID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -86,12 +87,12 @@ public class TreeHelperTest extends FixtureBaseTest {
 
     @Test
     public void GetTree_ProjectIsNull_Null() {
-        assertNull(TreeHelper.getTree(null));
+        assertNull(TreeHelper.getTree(null, KNATIVE_TOOL_WINDOW_ID));
     }
 
     @Test
     public void GetTree_ProjectWithoutWindow_Null() {
-        assertNull(TreeHelper.getTree(project));
+        assertNull(TreeHelper.getTree(project, KNATIVE_TOOL_WINDOW_ID));
     }
 
     @Test
@@ -99,7 +100,7 @@ public class TreeHelperTest extends FixtureBaseTest {
         when(toolWindowManager.getToolWindow("Knative")).thenReturn(toolWindow);
         when(toolWindow.getContentManager()).thenReturn(contentManager);
         when(contentManager.getContent(0)).thenReturn(null);
-        assertNull(TreeHelper.getTree(project));
+        assertNull(TreeHelper.getTree(project, KNATIVE_TOOL_WINDOW_ID));
         verify(toolWindowManager).getToolWindow(any());
         verify(toolWindow).getContentManager();
         verify(contentManager).getContent(0);
@@ -111,7 +112,7 @@ public class TreeHelperTest extends FixtureBaseTest {
         when(toolWindow.getContentManager()).thenReturn(contentManager);
         when(contentManager.getContent(0)).thenReturn(content);
         when(content.getComponent()).thenReturn(null);
-        assertNull(TreeHelper.getTree(project));
+        assertNull(TreeHelper.getTree(project, KNATIVE_TOOL_WINDOW_ID));
         verify(toolWindowManager).getToolWindow(any());
         verify(toolWindow).getContentManager();
         verify(contentManager).getContent(0);
@@ -125,7 +126,7 @@ public class TreeHelperTest extends FixtureBaseTest {
         when(contentManager.getContent(0)).thenReturn(content);
         when(content.getComponent()).thenReturn(simpleToolWindowPanel);
         when(simpleToolWindowPanel.getContent()).thenReturn(null);
-        assertNull(TreeHelper.getTree(project));
+        assertNull(TreeHelper.getTree(project, KNATIVE_TOOL_WINDOW_ID));
         verify(toolWindowManager).getToolWindow(any());
         verify(toolWindow).getContentManager();
         verify(contentManager).getContent(0);
@@ -141,7 +142,7 @@ public class TreeHelperTest extends FixtureBaseTest {
         when(content.getComponent()).thenReturn(simpleToolWindowPanel);
         when(simpleToolWindowPanel.getContent()).thenReturn(jbScrollPane);
         when(jbScrollPane.getViewport()).thenReturn(null);
-        assertNull(TreeHelper.getTree(project));
+        assertNull(TreeHelper.getTree(project, KNATIVE_TOOL_WINDOW_ID));
         verify(toolWindowManager).getToolWindow(any());
         verify(toolWindow).getContentManager();
         verify(contentManager).getContent(0);
@@ -159,7 +160,7 @@ public class TreeHelperTest extends FixtureBaseTest {
         when(simpleToolWindowPanel.getContent()).thenReturn(jbScrollPane);
         when(jbScrollPane.getViewport()).thenReturn(jViewport);
         when(jViewport.getView()).thenReturn(null);
-        assertNull(TreeHelper.getTree(project));
+        assertNull(TreeHelper.getTree(project, KNATIVE_TOOL_WINDOW_ID));
         verify(toolWindowManager).getToolWindow(any());
         verify(toolWindow).getContentManager();
         verify(contentManager).getContent(0);
@@ -172,7 +173,7 @@ public class TreeHelperTest extends FixtureBaseTest {
     @Test
     public void GetTree_Project_Tree() {
         getTree();
-        Tree resultingTree = TreeHelper.getTree(project);
+        Tree resultingTree = TreeHelper.getTree(project, KNATIVE_TOOL_WINDOW_ID);
         assertNotNull(resultingTree);
         assertEquals(tree, resultingTree);
     }
