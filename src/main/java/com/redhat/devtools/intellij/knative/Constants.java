@@ -11,7 +11,6 @@
 package com.redhat.devtools.intellij.knative;
 
 import com.intellij.openapi.util.Key;
-import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 
 public class Constants {
     public static final String STRUCTURE_PROPERTY = Constants.class.getPackage().getName() + ".structure";
@@ -19,7 +18,6 @@ public class Constants {
     public static final Key<String> KNATIVE = Key.create("com.redhat.devtools.intellij.knative");
 
     public static final String NOTIFICATION_ID = "Knative";
-    public static final String TERMINAL_TITLE = "Knative";
 
     public static final String KNATIVE_TOOL_WINDOW_ID = "Knative";
     public static final String KNATIVE_FUNC_TOOL_WINDOW_ID = "KnativeFunction";

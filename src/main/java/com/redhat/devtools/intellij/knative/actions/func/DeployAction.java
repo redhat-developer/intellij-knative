@@ -10,118 +10,32 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.actions.func;
 
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.ui.InputValidator;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.util.Pair;
-import com.redhat.devtools.intellij.common.utils.ExecHelper;
-import com.redhat.devtools.intellij.common.utils.UIHelper;
-import com.redhat.devtools.intellij.common.utils.YAMLHelper;
-import com.redhat.devtools.intellij.knative.actions.KnAction;
 import com.redhat.devtools.intellij.knative.kn.Kn;
-import com.redhat.devtools.intellij.knative.tree.KnFunctionLocalNode;
-import com.redhat.devtools.intellij.knative.tree.ParentableNode;
-import com.redhat.devtools.intellij.knative.utils.TreeHelper;
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
-import javax.swing.tree.TreePath;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
-import static com.intellij.openapi.ui.Messages.CANCEL;
 import static com.intellij.openapi.ui.Messages.CANCEL_BUTTON;
 import static com.intellij.openapi.ui.Messages.OK_BUTTON;
 import static com.intellij.openapi.ui.Messages.showOkCancelDialog;
-import static com.redhat.devtools.intellij.knative.Constants.NOTIFICATION_ID;
 
-public class DeployAction extends KnAction {
-    private static final Logger logger = LoggerFactory.getLogger(DeployAction.class);
+public class DeployAction extends BuildAction {
 
     public DeployAction() {
-        super(KnFunctionLocalNode.class);
+        super();
     }
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Kn knCli) {
-        ParentableNode node = getElement(selected);
-        String localPathFunc = ((KnFunctionLocalNode) node).getFunction().getLocalPath();
-        if (localPathFunc.isEmpty()) {
-            return;
-        }
-        Pair<String, String> dataToDeploy = getDataToDeploy(localPathFunc);
-        String registry = dataToDeploy.getFirst();
-        String image = dataToDeploy.getSecond();
-        if (image.isEmpty() && registry.isEmpty()) {
-            Messages.InputDialog dialog = new Messages.InputDialog(null, "Add image name to deploy your func",
-                    "Deploy func", null, null,
-                    new InputValidator() {
-                        @Override
-                        public boolean checkInput(String inputString) {
-                            return !inputString.isEmpty();
-                        }
-
-                        @Override
-                        public boolean canClose(String inputString) {
-                            return true;
-                        }
-                    },
-                    new String[]{OK_BUTTON, CANCEL_BUTTON},
-                    0, null);
-            dialog.setModal(true);
-            dialog.show();
-
-            if (!dialog.isOK()) {
-                return;
-            }
-            image = dialog.getInputString();
-        } else {
-            int result = showOkCancelDialog("Are you sure you want to deploy function " + node.getName(),
-                    "Deploy Function",
-                    "Ok", "Cancel", null);
-            if (result == CANCEL) {
-                return;
-            }
-        }
-
-        String namespace = node.getRootNode().getKn().getNamespace();
-        try {
-            knCli.deployFunc(namespace, localPathFunc, registry, image);
-            TreeHelper.refreshFunc(getEventProject(anActionEvent));
-        } catch (IOException e) {
-            Notification notification = new Notification(NOTIFICATION_ID,
-                    "Error",
-                    e.getLocalizedMessage(),
-                    NotificationType.ERROR);
-            Notifications.Bus.notify(notification);
-            logger.warn(e.getLocalizedMessage(), e);
-        }
-    }
-
-    private Pair<String, String> getDataToDeploy(String path) {
-        try {
-            File funcSettings = Paths.get(path, "func.yaml").toFile();
-            if (funcSettings.exists()) {
-                String content = YAMLHelper.JSONToYAML(YAMLHelper.URLToJSON(funcSettings.toURI().toURL()));
-                String registry = YAMLHelper.getStringValueFromYAML(content, new String[]{"registry"});
-                String image = YAMLHelper.getStringValueFromYAML(content, new String[]{"image"});
-                return Pair.create(registry, image);
-            }
-        } catch(IOException e) {
-            logger.warn(e.getLocalizedMessage(), e);
-        }
-        return Pair.empty();
+    protected void doExecute(Kn knCli, Project project, String namespace, String localPathFunc, String registry, String image) throws IOException {
+        knCli.deployFunc(namespace, localPathFunc, registry, image);
     }
 
     @Override
-    public boolean isVisible(Object selected) {
-        if (selected instanceof KnFunctionLocalNode) {
-            return !((KnFunctionLocalNode) selected).getFunction().getLocalPath().isEmpty();
-        }
-        return false;
+    protected boolean isActionConfirmed(String name) {
+        int result = showOkCancelDialog("Are you sure you want to deploy function " + name,
+                "Deploy Function " + name,
+                OK_BUTTON, CANCEL_BUTTON, null);
+        return result == Messages.OK;
     }
 }

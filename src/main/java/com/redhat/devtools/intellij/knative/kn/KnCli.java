@@ -15,9 +15,6 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowManager;
-import com.redhat.devtools.intellij.common.CommonConstants;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.NetworkUtils;
 import com.redhat.devtools.intellij.knative.Constants;
@@ -27,25 +24,16 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import org.jetbrains.plugins.terminal.AbstractTerminalRunner;
-import org.jetbrains.plugins.terminal.LocalTerminalDirectRunner;
-import org.jetbrains.plugins.terminal.ShellTerminalWidget;
-import org.jetbrains.plugins.terminal.TerminalToolWindowFactory;
-import org.jetbrains.plugins.terminal.TerminalView;
 
-
-import static com.redhat.devtools.intellij.knative.Constants.TERMINAL_TITLE;
 
 public class KnCli implements Kn {
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper(new JsonFactory());
@@ -154,13 +142,9 @@ public class KnCli implements Kn {
 
     @Override
     public void deleteFunctions(List<String> functions) throws IOException {
-        functions.forEach(func -> {
-            try {
-                ExecHelper.execute(funcCommand, envVars, "delete", func, "-n", getNamespace());
-            } catch (IOException ignored) {
-
-            }
-        });
+        for (String function: functions) {
+            ExecHelper.execute(funcCommand, envVars, "delete", function, "-n", getNamespace());
+        }
     }
 
     private String[] getDeleteArgs(String kind, List<String> resourcesToDelete) {

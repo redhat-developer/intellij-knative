@@ -62,12 +62,6 @@ public class DeleteAction extends KnAction {
         }
     }
 
-    @Override
-    public boolean isEnabled(Object selected) {
-        return !(selected instanceof KnFunctionNode)
-                || ((KnFunctionNode) selected).getFunction().isPushed();
-    }
-
     public void executeDelete(Project project, Kn kncli, ParentableNode[] elements) {
         Map<Class, List<ParentableNode>> resourcesByClass = groupResourcesByClass(elements);
         for(Class type: resourcesByClass.keySet()) {

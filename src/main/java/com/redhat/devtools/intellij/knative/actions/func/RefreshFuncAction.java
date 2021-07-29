@@ -11,7 +11,6 @@
 package com.redhat.devtools.intellij.knative.actions.func;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.actions.RefreshAction;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionLocalNode;
@@ -27,13 +26,7 @@ public class RefreshFuncAction extends RefreshAction {
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
-        Project project = getEventProject(anActionEvent);
-        KnFunctionsTreeStructure structure = TreeHelper.getKnFunctionsTreeStructure(project);
-        if (structure == null) {
-            return;
-        }
-
-        structure.fireModified(structure.getRootElement());
+        TreeHelper.refreshFunc(getEventProject(anActionEvent));
     }
 
     @Override

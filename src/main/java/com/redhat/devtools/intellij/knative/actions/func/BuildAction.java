@@ -19,8 +19,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.InputValidator;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Pair;
-import com.redhat.devtools.intellij.common.utils.ExecHelper;
-import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.actions.KnAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
@@ -61,35 +59,20 @@ public class BuildAction extends KnAction {
         String image = dataToDeploy.getSecond();
         if (Strings.isNullOrEmpty(image) && Strings.isNullOrEmpty(registry)) {
             // ask input to user
-            Messages.InputDialog dialog = UIHelper.executeInUI(() -> {
-                Messages.InputDialog id = new Messages.InputDialog(null, "Provide full image name in the form [registry]/[namespace]/[name]:[tag] (e.g quay.io/boson/image:latest)",
-                        "Build Func", null, null,
-                        new InputValidator() {
-                            @Override
-                            public boolean checkInput(String inputString) {
-                                return !inputString.isEmpty();
-                            }
-
-                            @Override
-                            public boolean canClose(String inputString) {
-                                return true;
-                            }
-                        },
-                        new String[]{OK_BUTTON, CANCEL_BUTTON},
-                        0, null);
-                id.show();
-                return id;
-            });
-
-            if (dialog != null && !dialog.isOK()) {
+            image = getImageFromUser(node.getName());
+            if (image.isEmpty()) {
                 return;
             }
-            image = dialog.getInputString();
+        } else {
+            if (!isActionConfirmed(node.getName())) {
+                return;
+            }
         }
 
         Project project = getEventProject(anActionEvent);
+        String namespace = node.getRootNode().getKn().getNamespace();
         try {
-            knCli.buildFunc(project, localPathFunc, registry, image);
+            doExecute(knCli, project, namespace, localPathFunc, registry, image);
             TreeHelper.refreshFunc(project);
         } catch (IOException e) {
             Notification notification = new Notification(NOTIFICATION_ID,
@@ -101,7 +84,38 @@ public class BuildAction extends KnAction {
         }
     }
 
-    private Pair<String, String> getDataToDeploy(String path) {
+    protected void doExecute(Kn knCli, Project project, String namespace, String localPathFunc, String registry, String image) throws IOException {
+        knCli.buildFunc(project, localPathFunc, registry, image);
+    }
+
+    protected boolean isActionConfirmed(String name) {
+        return true;
+    }
+
+    protected String getImageFromUser(String name) {
+        Messages.InputDialog dialog = new Messages.InputDialog(null, "Provide full image name in the form [registry]/[namespace]/[name]:[tag] (e.g quay.io/boson/image:latest)",
+                "Build Function " + name, null, null,
+                new InputValidator() {
+                    @Override
+                    public boolean checkInput(String inputString) {
+                        return !inputString.isEmpty();
+                    }
+
+                    @Override
+                    public boolean canClose(String inputString) {
+                        return true;
+                    }
+                },
+                new String[]{OK_BUTTON, CANCEL_BUTTON},
+                0, null);
+        dialog.show();
+        if (!dialog.isOK()) {
+            return "";
+        }
+        return dialog.getInputString();
+    }
+
+    protected Pair<String, String> getDataToDeploy(String path) {
         try {
             File funcSettings = Paths.get(path, "func.yaml").toFile();
             if (funcSettings.exists()) {
