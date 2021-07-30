@@ -182,7 +182,7 @@ public interface Kn {
      * @param image image name. This option takes precedence over registry which can be omitted
      * @throws IOException if communication errored
      */
-    void buildFunc(Project project, String path, String registry, String image) throws IOException;
+    void buildFunc(String path, String registry, String image) throws IOException;
 
     /**
      * Deploy a function from path

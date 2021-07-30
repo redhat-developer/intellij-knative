@@ -17,13 +17,13 @@ import com.google.common.base.Strings;
 import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.NetworkUtils;
-import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -33,6 +33,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_TOOL_WINDOW_ID;
 
 
 public class KnCli implements Kn {
@@ -231,13 +233,13 @@ public class KnCli implements Kn {
     }
 
     @Override
-    public void buildFunc(Project project, String path, String registry, String image) throws IOException {
-        ExecHelper.executeWithTerminal(project, Constants.TERMINAL_TITLE, getBuildDeployArgs("build", "", path, registry, image));
+    public void buildFunc(String path, String registry, String image) throws IOException {
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, getBuildDeployArgs("build", "", path, registry, image));
     }
 
     @Override
     public void deployFunc(String namespace, String path, String registry, String image) throws IOException {
-        ExecHelper.executeWithTerminal(project, Constants.TERMINAL_TITLE, getBuildDeployArgs("deploy", namespace, path, registry, image));
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, getBuildDeployArgs("deploy", namespace, path, registry, image));
     }
 
     private String[] getBuildDeployArgs(String command, String namespace, String path, String registry, String image) {
@@ -256,6 +258,6 @@ public class KnCli implements Kn {
 
     @Override
     public void runFunc(String path) throws IOException {
-        ExecHelper.executeWithTerminal(project, Constants.TERMINAL_TITLE, funcCommand, "run", "-p", path);
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, funcCommand, "run", "-p", path);
     }
 }

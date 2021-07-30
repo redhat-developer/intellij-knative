@@ -11,37 +11,71 @@
 package com.redhat.devtools.intellij.knative.actions;
 
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
+import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Test;
+import org.mockito.MockedStatic;
 
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 public class DeleteActionTest extends ActionTest {
 
+    private static final String SERVICE = "service";
+    private static final String REVISION = "revision";
+    private static final String FUNCTION = "function";
+
     @Test
     public void ExecuteDelete_OneKnServiceNodeSelected_DeleteOneService() throws IOException {
-        executeDeleteAction(new ParentableNode[] {knServiceNode}, 1, 0);
+        Map<String, Integer> typePerTimesCalled = new HashMap<>();
+        typePerTimesCalled.put(SERVICE, 1);
+        executeDeleteAction(new ParentableNode[] {knServiceNode}, typePerTimesCalled);
     }
 
     @Test
     public void ExecuteDelete_OneKnRevisionNodeSelected_DeleteOneRevision() throws IOException {
-        executeDeleteAction(new ParentableNode[] {knRevisionNode}, 0 ,1);
+        Map<String, Integer> typePerTimesCalled = new HashMap<>();
+        typePerTimesCalled.put(REVISION, 1);
+        executeDeleteAction(new ParentableNode[] {knRevisionNode}, typePerTimesCalled);
     }
 
     @Test
     public void ExecuteDelete_TwoDifferentKnNodeSelected_CalledTwoDelete() throws IOException {
-        executeDeleteAction(new ParentableNode[] {knServiceNode, knRevisionNode}, 1, 1);
+        Map<String, Integer> typePerTimesCalled = new HashMap<>();
+        typePerTimesCalled.put(SERVICE, 1);
+        typePerTimesCalled.put(REVISION, 1);
+        executeDeleteAction(new ParentableNode[] {knServiceNode, knRevisionNode}, typePerTimesCalled);
     }
 
-    private void executeDeleteAction(ParentableNode[] fakeSelectedNodesToBeDeleted, int timesDeleteServices, int timesDeleteRevisions) throws IOException {
+    @Test
+    public void ExecuteDelete_OneKnFunctionNodeSelected_DeleteOneFunction() throws IOException {
+        Map<String, Integer> typePerTimesCalled = new HashMap<>();
+        typePerTimesCalled.put(FUNCTION, 1);
+        executeDeleteAction(new ParentableNode[] {knFunctionNode}, typePerTimesCalled);
+    }
+
+    @Test
+    public void ExecuteDelete_ThreeDifferentKnNodeSelected_CalledThreeDelete() throws IOException {
+        Map<String, Integer> typePerTimesCalled = new HashMap<>();
+        typePerTimesCalled.put(SERVICE, 1);
+        typePerTimesCalled.put(REVISION, 1);
+        typePerTimesCalled.put(FUNCTION, 1);
+        executeDeleteAction(new ParentableNode[] {knServiceNode, knRevisionNode, knFunctionNode}, typePerTimesCalled);
+    }
+
+    private void executeDeleteAction(ParentableNode[] fakeSelectedNodesToBeDeleted, Map<String, Integer> typePerTimesCalled) throws IOException {
         DeleteAction action = new DeleteAction();
-        action.executeDelete(project, kn, fakeSelectedNodesToBeDeleted);
-        verify(kn, times(timesDeleteServices)).deleteServices(any());
-        verify(kn, times(timesDeleteRevisions)).deleteRevisions(any());
-
-
+        try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
+            treeHelperMockedStatic.when(() -> TreeHelper.getKnFunctionsTreeStructure(any())).thenReturn(null);
+            action.executeDelete(project, kn, fakeSelectedNodesToBeDeleted);
+            verify(kn, times(typePerTimesCalled.getOrDefault(SERVICE, 0))).deleteServices(any());
+            verify(kn, times(typePerTimesCalled.getOrDefault(REVISION, 0))).deleteRevisions(any());
+            verify(kn, times(typePerTimesCalled.getOrDefault(FUNCTION, 0))).deleteFunctions(any());
+        }
     }
 }

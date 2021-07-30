@@ -12,6 +12,7 @@ package com.redhat.devtools.intellij.knative.kn;
 
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.BaseTest;
+import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
 import io.fabric8.kubernetes.api.model.RootPaths;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
@@ -56,9 +57,12 @@ public class KnCliTest extends BaseTest {
         Field clientField = KnCli.class.getDeclaredField("client");
         clientField.setAccessible(true);
         clientField.set(kn, kubernetesClient);
-        Field commandField = KnCli.class.getDeclaredField("command");
-        commandField.setAccessible(true);
-        commandField.set(kn, "command");
+        Field knCommandField = KnCli.class.getDeclaredField("knCommand");
+        knCommandField.setAccessible(true);
+        knCommandField.set(kn, "knCommand");
+        Field funcCommandField = KnCli.class.getDeclaredField("funcCommand");
+        funcCommandField.setAccessible(true);
+        funcCommandField.set(kn, "funcCommand");
         Field envField = KnCli.class.getDeclaredField("envVars");
         envField.setAccessible(true);
         envField.set(kn, Collections.emptyMap());
@@ -196,6 +200,35 @@ public class KnCliTest extends BaseTest {
     }
 
     @Test
+    public void GetFunctions_ClusterHasNoFunctions_EmptyList() throws IOException {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.execute(anyString(), anyMap(), any())).thenReturn("No functions found.");
+            assertEquals(Collections.emptyList(), kn.getFunctions());
+        }
+    }
+
+    @Test
+    public void GetFunctions_ClusterHasRevisions_ListOfFunctions() throws IOException {
+        String functionsListInJson = load(RESOURCES_PATH + "functionsList.json");
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.execute(anyString(), anyMap(), any())).thenReturn(functionsListInJson);
+            List<Function> functionList = kn.getFunctions();
+            assertTrue(functionList.size() == 1);
+            assertEquals("myfunc", functionList.get(0).getName());
+        }
+    }
+
+    @Test
+    public void GetFunctions_ClientFails_Throws() {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.execute(anyString(), anyMap(), any())).thenThrow(new IOException("error"));
+            kn.getFunctions();
+        } catch (IOException e) {
+            assertEquals("error", e.getLocalizedMessage());
+        }
+    }
+
+    @Test
     public void GetService_NameIsValid_Service() throws IOException {
         String serviceInJson = load(RESOURCES_PATH + "service.json");
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
@@ -312,6 +345,25 @@ public class KnCliTest extends BaseTest {
     }
 
     @Test
+    public void DeleteFunctions_OneFunctionToBeDeleted_DeletionIsCalled() throws IOException {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            kn.deleteFunctions(Arrays.asList("one"));
+            execHelperMockedStatic.verify(() ->
+                    ExecHelper.execute(anyString(), anyMap(), eq("delete"), eq("one"), eq("-n"), eq("default")));
+        }
+    }
+
+    @Test
+    public void DeleteFunctions_ClientFails_Throws() {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.execute(anyString(), anyMap(), any())).thenThrow(new IOException("error"));
+            kn.deleteFunctions(Collections.emptyList());
+        } catch (IOException e) {
+            assertEquals("error", e.getLocalizedMessage());
+        }
+    }
+
+    @Test
     public void GetSources_ClusterHasSources_ListOfSources() throws IOException {
         String serviceInJson = load(RESOURCES_PATH + "sourcesList.json");
         ExecHelper.ExecResult execResult = new ExecHelper.ExecResult(serviceInJson, null, 0);
@@ -330,6 +382,102 @@ public class KnCliTest extends BaseTest {
             execHelperMockedStatic.when(() -> ExecHelper.executeWithResult(anyString(), anyMap(), any())).thenReturn(execResult);
             List<Source> sources = kn.getSources();
             assertEquals(Collections.emptyList(), sources);
+        }
+    }
+
+    @Test
+    public void CreateFunc_PathIsInserted_RunIsCalled() throws IOException {
+        CreateFuncModel model = new CreateFuncModel("name", "path", "runtime", "template", true);
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            kn.createFunc(model);
+            execHelperMockedStatic.verify(() ->
+                    ExecHelper.execute(anyString(), anyMap(), eq("create"), eq("path"), eq("-l"), eq("runtime"), eq("-t"), eq("template")));
+        }
+    }
+
+    @Test
+    public void CreateFunc_ClientFails_Throws() {
+        CreateFuncModel model = new CreateFuncModel("name", "path", "runtime", "template", true);
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.execute(any(), anyString())).thenThrow(new IOException("error"));
+            kn.createFunc(model);
+        } catch (IOException e) {
+            assertEquals("error", e.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void BuildFunc_RegistryIsInsertedButNoImage_BuildIsCalled() throws IOException {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            kn.buildFunc("path", "registry", "");
+            execHelperMockedStatic.verify(() ->
+                    ExecHelper.executeWithTerminalWidget(any(), anyString(), eq("build"), eq("-r"), eq("registry"), eq("-p"), eq("path")));
+        }
+    }
+
+    @Test
+    public void BuildFunc_ImageIsInserted_BuildIsCalled() throws IOException {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            kn.buildFunc("path", "registry", "image");
+            execHelperMockedStatic.verify(() ->
+                    ExecHelper.executeWithTerminalWidget(any(), anyString(), eq("build"), eq("-i"), eq("image"), eq("-p"), eq("path")));
+        }
+    }
+
+    @Test
+    public void BuildFunc_ClientFails_Throws() {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.executeWithTerminalWidget(any(), anyString())).thenThrow(new IOException("error"));
+            kn.buildFunc("", "", "");
+        } catch (IOException e) {
+            assertEquals("error", e.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void DeployFunc_RegistryIsInsertedButNoImage_DeployIsCalled() throws IOException {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            kn.deployFunc("namespace", "path", "registry", "");
+            execHelperMockedStatic.verify(() ->
+                    ExecHelper.executeWithTerminalWidget(any(), anyString(), eq("deploy"), eq("-r"), eq("registry"), eq("-n"), eq("namespace"), eq("-p"), eq("path")));
+        }
+    }
+
+    @Test
+    public void DeployFunc_ImageIsInserted_DeployIsCalled() throws IOException {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            kn.deployFunc("namespace", "path", "registry", "image");
+            execHelperMockedStatic.verify(() ->
+                    ExecHelper.executeWithTerminalWidget(any(), anyString(), eq("deploy"), eq("-i"), eq("image"), eq("-n"), eq("namespace"), eq("-p"), eq("path")));
+        }
+    }
+
+    @Test
+    public void DeployFunc_ClientFails_Throws() {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.executeWithTerminalWidget(any(), anyString())).thenThrow(new IOException("error"));
+            kn.deployFunc("", "", "", "");
+        } catch (IOException e) {
+            assertEquals("error", e.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void RunFunc_PathIsInserted_RunIsCalled() throws IOException {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            kn.runFunc("path");
+            execHelperMockedStatic.verify(() ->
+                    ExecHelper.executeWithTerminalWidget(any(), anyString(), eq("run"), eq("-p"), eq("path")));
+        }
+    }
+
+    @Test
+    public void RunFunc_ClientFails_Throws() {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.executeWithTerminalWidget(any(), anyString())).thenThrow(new IOException("error"));
+            kn.runFunc("");
+        } catch (IOException e) {
+            assertEquals("error", e.getLocalizedMessage());
         }
     }
 }

@@ -10,7 +10,6 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.actions.func;
 
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import java.io.IOException;
@@ -27,7 +26,7 @@ public class DeployAction extends BuildAction {
     }
 
     @Override
-    protected void doExecute(Kn knCli, Project project, String namespace, String localPathFunc, String registry, String image) throws IOException {
+    protected void doExecute(Kn knCli, String namespace, String localPathFunc, String registry, String image) throws IOException {
         knCli.deployFunc(namespace, localPathFunc, registry, image);
     }
 

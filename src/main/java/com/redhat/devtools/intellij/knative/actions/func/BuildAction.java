@@ -15,7 +15,6 @@ import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.InputValidator;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Pair;
@@ -69,11 +68,10 @@ public class BuildAction extends KnAction {
             }
         }
 
-        Project project = getEventProject(anActionEvent);
         String namespace = node.getRootNode().getKn().getNamespace();
         try {
-            doExecute(knCli, project, namespace, localPathFunc, registry, image);
-            TreeHelper.refreshFunc(project);
+            doExecute(knCli, namespace, localPathFunc, registry, image);
+            TreeHelper.refreshFunc(getEventProject(anActionEvent));
         } catch (IOException e) {
             Notification notification = new Notification(NOTIFICATION_ID,
                     "Error",
@@ -84,8 +82,8 @@ public class BuildAction extends KnAction {
         }
     }
 
-    protected void doExecute(Kn knCli, Project project, String namespace, String localPathFunc, String registry, String image) throws IOException {
-        knCli.buildFunc(project, localPathFunc, registry, image);
+    protected void doExecute(Kn knCli, String namespace, String localPathFunc, String registry, String image) throws IOException {
+        knCli.buildFunc(localPathFunc, registry, image);
     }
 
     protected boolean isActionConfirmed(String name) {
