@@ -43,7 +43,7 @@ public class KnTreeStructureTest extends BaseTest {
         super.setUp();
         knTreeStructure = mock(KnTreeStructure.class, org.mockito.Mockito.CALLS_REAL_METHODS);
 
-        Field rootField = KnTreeStructure.class.getDeclaredField("root");
+        Field rootField = AbstractKnTreeStructure.class.getDeclaredField("root");
         rootField.setAccessible(true);
         rootField.set(knTreeStructure, knRootNode);
 
@@ -83,7 +83,7 @@ public class KnTreeStructureTest extends BaseTest {
     public void GetChildElements_ElementIsRootWithKnativeServingAndEventing_ArrayWithServingAndEventing() throws IOException {
         Object[] nodes = getChildElements(true, true);
 
-        assertTrue(nodes.length == 2);
+        assertTrue(nodes.length == 3);
         assertNotNull(nodes[0]);
         assertTrue(nodes[0] instanceof KnServingNode);
         assertNotNull(nodes[1]);

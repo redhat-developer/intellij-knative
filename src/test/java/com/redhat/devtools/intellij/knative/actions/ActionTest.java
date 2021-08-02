@@ -29,7 +29,7 @@ public abstract class ActionTest extends FixtureBaseTest {
 
     protected Tree tree;
     protected TreeSelectionModel model;
-    protected TreePath path, path1, path2;
+    protected TreePath path, path1, path2, path3;
     protected Service service;
     protected ServiceStatus serviceStatus;
     protected ServiceTraffic serviceTraffic;
@@ -46,6 +46,7 @@ public abstract class ActionTest extends FixtureBaseTest {
         path = mock(TreePath.class);
         path1 = mock(TreePath.class);
         path2 = mock(TreePath.class);
+        path3 = mock(TreePath.class);
         service = mock(Service.class);
         serviceStatus = mock(ServiceStatus.class);
         serviceTraffic = mock(ServiceTraffic.class);
@@ -55,6 +56,7 @@ public abstract class ActionTest extends FixtureBaseTest {
         when(path.getLastPathComponent()).thenReturn(knServiceNode);
         when(path1.getLastPathComponent()).thenReturn(knRevisionNode);
         when(path2.getLastPathComponent()).thenReturn(knFunctionNode);
+        when(path3.getLastPathComponent()).thenReturn(knFunctionLocalNode);
         when(model.getSelectionPath()).thenReturn(path);
         when(model.getSelectionPaths()).thenReturn(new TreePath[] {path});
         when(tree.getSelectionModel()).thenReturn(model);
