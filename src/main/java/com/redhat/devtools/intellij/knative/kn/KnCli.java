@@ -37,6 +37,9 @@ import java.util.TreeMap;
 import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_TOOL_WINDOW_ID;
 
 
+import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_TOOL_WINDOW_ID;
+
+
 public class KnCli implements Kn {
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper(new JsonFactory());
     private final Project project;
