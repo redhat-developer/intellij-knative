@@ -24,9 +24,11 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -228,6 +230,21 @@ public class KnCli implements Kn {
     @Override
     public void tagRevision(String service, String revision, String tag) throws IOException {
         ExecHelper.execute(knCommand, envVars, "service", "update", service, "--tag", revision + "=" + tag);
+    }
+
+    @Override
+    public File getFuncFile(Path root) throws IOException {
+        File file = root.resolve("func.yaml").toFile();
+        if (!file.exists()) {
+            throw new IOException("No func.yaml file found");
+        }
+        return file;
+    }
+
+    @Override
+    public URL getFuncFileURL(Path root) throws IOException {
+        File file = getFuncFile(root);
+        return file.toURI().toURL();
     }
 
     @Override

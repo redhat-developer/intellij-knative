@@ -14,8 +14,10 @@ import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -165,6 +167,24 @@ public interface Kn {
      * @throws IOException if communication errored
      */
     void tagRevision(String service, String revision, String tag) throws IOException;
+
+    /**
+     * Return the func.yaml file
+     *
+     * @param root the path where to look for the func.yaml file
+     * @return the func.yaml file
+     * @throws IOException if func.yaml doesn't exist
+     */
+    File getFuncFile(Path root) throws IOException;
+
+    /**
+     * Return the func.yaml file url
+     *
+     * @param root the path where to look for the func.yaml file
+     * @return the func.yaml file url
+     * @throws IOException if func.yaml doesn't exist
+     */
+    URL getFuncFileURL(Path root) throws IOException;
 
     /**
      * Create a new function

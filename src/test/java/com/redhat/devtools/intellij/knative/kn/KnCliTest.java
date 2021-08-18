@@ -16,6 +16,8 @@ import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
 import io.fabric8.kubernetes.api.model.RootPaths;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import java.io.File;
+import java.nio.file.Paths;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedStatic;
@@ -30,6 +32,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -479,5 +482,21 @@ public class KnCliTest extends BaseTest {
         } catch (IOException e) {
             assertEquals("error", e.getLocalizedMessage());
         }
+    }
+
+    @Test
+    public void GetFuncFile_FileExists_File() throws IOException {
+        File file = kn.getFuncFile(getPath(RESOURCES_PATH + "func"));
+        assertTrue(file.exists());
+    }
+
+    @Test
+    public void GetFuncFile_FileNotExists_Throws() throws IOException {
+        try {
+            kn.getFuncFile(getPath(RESOURCES_PATH));
+        } catch(IOException e) {
+            assertTrue(e.getLocalizedMessage().equalsIgnoreCase("No func.yaml file found"));
+        }
+
     }
 }

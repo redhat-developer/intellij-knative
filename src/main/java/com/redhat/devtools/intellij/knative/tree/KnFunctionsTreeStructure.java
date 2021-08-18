@@ -67,9 +67,9 @@ public class KnFunctionsTreeStructure extends AbstractKnTreeStructure  {
             Kn kn = parent.getKn();
             List<Function> funcOnCluster = kn.getFunctions();
             // if current project contains new functions, adds them
-            List<String> pathsWithFunc = getModulesPathsWithFunc();
+            List<String> pathsWithFunc = getModulesPathsWithFunc(kn);
             if (!pathsWithFunc.isEmpty()) {
-                getLocalFunctionsFromOpenedProject(pathsWithFunc, funcOnCluster).forEach(it -> functions.add(new KnFunctionLocalNode(parent, parent, it)));
+                getLocalFunctionsFromOpenedProject(pathsWithFunc, funcOnCluster, kn).forEach(it -> functions.add(new KnFunctionLocalNode(parent, parent, it)));
             }
         } catch (IOException e) {
             functions.add(new MessageNode<>(parent, parent, "Failed to load functions"));
@@ -77,11 +77,11 @@ public class KnFunctionsTreeStructure extends AbstractKnTreeStructure  {
         return functions.toArray();
     }
 
-    private List<Function> getLocalFunctionsFromOpenedProject(List<String> paths, List<Function> funcOnCluster) throws IOException {
+    private List<Function> getLocalFunctionsFromOpenedProject(List<String> paths, List<Function> funcOnCluster, Kn kn) throws IOException {
         List<Function> localFunctions = new ArrayList<>();
         for(String path: paths) {
-            if (hasFuncSettingsFile(path)) {
-                Function functionFromLocalModule = buildFuncFromLocalFuncSettingsFile(path);
+            if (hasFuncSettingsFile(path, kn)) {
+                Function functionFromLocalModule = buildFuncFromLocalFuncSettingsFile(path, kn);
                 if (functionFromLocalModule != null) {
                     boolean isOnCluster = funcOnCluster.stream()
                                             .anyMatch(func -> func.getName().equalsIgnoreCase(functionFromLocalModule.getName())
@@ -95,9 +95,9 @@ public class KnFunctionsTreeStructure extends AbstractKnTreeStructure  {
         return localFunctions;
     }
 
-    private Function buildFuncFromLocalFuncSettingsFile(String path) throws IOException {
-        URL settingFile = Paths.get(path, "func.yaml").toUri().toURL();
-        String content = YAMLHelper.JSONToYAML(YAMLHelper.URLToJSON(settingFile));
+    private Function buildFuncFromLocalFuncSettingsFile(String path, Kn kncli) throws IOException {
+        URL funcFileURL = kncli.getFuncFileURL(Paths.get(path));
+        String content = YAMLHelper.JSONToYAML(YAMLHelper.URLToJSON(funcFileURL));
         String name = YAMLHelper.getStringValueFromYAML(content, new String[] { "name" });
         String namespace = YAMLHelper.getStringValueFromYAML(content, new String[] { "namespace" });
         String runtime = YAMLHelper.getStringValueFromYAML(content, new String[] { "runtime" });
@@ -108,21 +108,21 @@ public class KnFunctionsTreeStructure extends AbstractKnTreeStructure  {
         return new Function(name, namespace, runtime, null, image, false, false, path);
     }
 
-    private List<String> getModulesPathsWithFunc() {
+    private List<String> getModulesPathsWithFunc(Kn kn) {
         List<String> paths = new ArrayList<>();
         @NotNull Module[] modules = ModuleManager.getInstance(project).getModules();
         for(Module module : modules) {
-            paths.addAll(getModuleRootPathsWithFunc(module));
+            paths.addAll(getModuleRootPathsWithFunc(module, kn));
 
         }
         return paths;
     }
 
-    private List<String> getModuleRootPathsWithFunc(Module module) {
+    private List<String> getModuleRootPathsWithFunc(Module module, Kn kn) {
         List<String> paths = new ArrayList<>();
         VirtualFile[] roots = getModuleRoots(module);
         for (VirtualFile root: roots) {
-            if (root != null && root.isDirectory() && hasFuncSettingsFile(root.getPath())) {
+            if (root != null && root.isDirectory() && hasFuncSettingsFile(root.getPath(), kn)) {
                 paths.add(root.getPath());
             }
         }
@@ -139,7 +139,7 @@ public class KnFunctionsTreeStructure extends AbstractKnTreeStructure  {
         if (roots.isEmpty()) {
             roots.add(getModuleRootAsDirectory(LocalFileSystem.getInstance().findFileByPath(new File(module.getModuleFilePath()).getParent())));
         }
-        return roots.toArray(new VirtualFile[0]);
+        return roots.toArray(new VirtualFile[roots.size()]);
     }
 
     private VirtualFile getModuleRootAsDirectory(VirtualFile root) {
@@ -149,8 +149,12 @@ public class KnFunctionsTreeStructure extends AbstractKnTreeStructure  {
         return root;
     }
 
-    private boolean hasFuncSettingsFile(String root) {
-        return Paths.get(root, "func.yaml").toFile().exists();
+    private boolean hasFuncSettingsFile(String root, Kn kn) {
+        try {
+            return kn.getFuncFile(Paths.get(root)).exists();
+        } catch(IOException e) {
+            return false;
+        }
     }
 
     @Override

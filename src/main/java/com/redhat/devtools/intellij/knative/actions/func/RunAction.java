@@ -14,6 +14,7 @@ import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.actions.KnAction;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionLocalNode;
@@ -41,16 +42,18 @@ public class RunAction extends KnAction {
             return;
         }
 
-        try {
-            knCli.runFunc(localPathFunc);
-        } catch (IOException e) {
-            Notification notification = new Notification(NOTIFICATION_ID,
-                    "Error",
-                    e.getLocalizedMessage(),
-                    NotificationType.ERROR);
-            Notifications.Bus.notify(notification);
-            logger.warn(e.getLocalizedMessage(), e);
-        }
+        ExecHelper.submit(() -> {
+            try {
+                knCli.runFunc(localPathFunc);
+            } catch (IOException e) {
+                Notification notification = new Notification(NOTIFICATION_ID,
+                        "Error",
+                        e.getLocalizedMessage(),
+                        NotificationType.ERROR);
+                Notifications.Bus.notify(notification);
+                logger.warn(e.getLocalizedMessage(), e);
+            }
+        });
     }
 
     @Override

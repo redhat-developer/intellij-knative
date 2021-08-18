@@ -18,6 +18,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.InputValidator;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Pair;
+import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.actions.KnAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
@@ -27,6 +28,8 @@ import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import javax.swing.tree.TreePath;
 import org.slf4j.Logger;
@@ -53,7 +56,7 @@ public class BuildAction extends KnAction {
             return;
         }
         // get image or registry in func.yaml
-        Pair<String, String> dataToDeploy = getDataToDeploy(localPathFunc);
+        Pair<String, String> dataToDeploy = getDataToDeploy(Paths.get(localPathFunc), knCli);
         String registry = dataToDeploy.getFirst();
         String image = dataToDeploy.getSecond();
         if (Strings.isNullOrEmpty(image) && Strings.isNullOrEmpty(registry)) {
@@ -69,17 +72,20 @@ public class BuildAction extends KnAction {
         }
 
         String namespace = node.getRootNode().getKn().getNamespace();
-        try {
-            doExecute(knCli, namespace, localPathFunc, registry, image);
-            TreeHelper.refreshFunc(getEventProject(anActionEvent));
-        } catch (IOException e) {
-            Notification notification = new Notification(NOTIFICATION_ID,
-                    "Error",
-                    e.getLocalizedMessage(),
-                    NotificationType.ERROR);
-            Notifications.Bus.notify(notification);
-            logger.warn(e.getLocalizedMessage(), e);
-        }
+        String finalImage = image;
+        ExecHelper.submit(() -> {
+            try {
+                doExecute(knCli, namespace, localPathFunc, registry, finalImage);
+                TreeHelper.refreshFunc(getEventProject(anActionEvent));
+            } catch (IOException e) {
+                Notification notification = new Notification(NOTIFICATION_ID,
+                        "Error",
+                        e.getLocalizedMessage(),
+                        NotificationType.ERROR);
+                Notifications.Bus.notify(notification);
+                logger.warn(e.getLocalizedMessage(), e);
+            }
+        });
     }
 
     protected void doExecute(Kn knCli, String namespace, String localPathFunc, String registry, String image) throws IOException {
@@ -113,15 +119,13 @@ public class BuildAction extends KnAction {
         return dialog.getInputString();
     }
 
-    protected Pair<String, String> getDataToDeploy(String path) {
+    protected Pair<String, String> getDataToDeploy(Path root, Kn kncli) {
         try {
-            File funcSettings = Paths.get(path, "func.yaml").toFile();
-            if (funcSettings.exists()) {
-                String content = YAMLHelper.JSONToYAML(YAMLHelper.URLToJSON(funcSettings.toURI().toURL()));
-                String registry = YAMLHelper.getStringValueFromYAML(content, new String[]{"registry"});
-                String image = YAMLHelper.getStringValueFromYAML(content, new String[]{"image"});
-                return Pair.create(registry, image);
-            }
+            URL funcFileURL = kncli.getFuncFileURL(root);
+            String content = YAMLHelper.JSONToYAML(YAMLHelper.URLToJSON(funcFileURL));
+            String registry = YAMLHelper.getStringValueFromYAML(content, new String[]{"registry"});
+            String image = YAMLHelper.getStringValueFromYAML(content, new String[]{"image"});
+            return Pair.create(registry, image);
         } catch(IOException e) {
             logger.warn(e.getLocalizedMessage(), e);
         }
