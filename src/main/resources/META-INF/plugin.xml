@@ -39,7 +39,13 @@
     <actions>
         <group id="com.redhat.devtools.intellij.knative.tree" popup="true">
             <action id="com.redhat.devtools.intellij.knative.actions.CreateServiceAction" class="com.redhat.devtools.intellij.knative.actions.CreateServiceAction" text="New Service"/>
-            <action id="com.redhat.devtools.intellij.knative.actions.func.CreateFuncAction" class="com.intellij.ide.actions.NewProjectAction" text="New Function" icon="AllIcons.General.Add"/>
+
+            <group id="com.redhat.devtools.intellij.knative.tree.functions.new" text="New Function" icon="AllIcons.General.Add" popup="true">
+                <add-to-group group-id="com.redhat.devtools.intellij.knative.tree" anchor="first"/>
+                <action id="com.redhat.devtools.intellij.knative.actions.func.CreateFunctionProjectAction" class="com.intellij.ide.actions.NewProjectAction" text="Project..."/>
+                <action id="com.redhat.devtools.intellij.knative.actions.func.CreateFunctionModuleAction" class="com.intellij.openapi.roots.ui.configuration.actions.NewModuleAction" text="Module..."/>
+            </group>
+
             <action id="com.redhat.devtools.intellij.knative.actions.OpenInEditorAction" class="com.redhat.devtools.intellij.knative.actions.OpenInEditorAction" text="Open in Editor"/>
             <action id="com.redhat.devtools.intellij.knative.actions.OpenInBrowserAction" class="com.redhat.devtools.intellij.knative.actions.OpenInBrowserAction" text="Open in Browser"/>
             <action id="com.redhat.devtools.intellij.knative.actions.DeleteAction" class="com.redhat.devtools.intellij.knative.actions.DeleteAction" text="Delete"
@@ -73,7 +79,7 @@
 
         <group id="com.redhat.devtools.intellij.knative.view.actionsFunctionToolbar">
             <reference id="com.redhat.devtools.intellij.knative.refreshfunc"/>
-            <reference id="com.redhat.devtools.intellij.knative.actions.func.CreateFuncAction"/>
+            <reference id="com.redhat.devtools.intellij.knative.tree.functions.new"/>
         </group>
     </actions>
 </idea-plugin>
