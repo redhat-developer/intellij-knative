@@ -29,8 +29,15 @@ import javax.swing.JScrollPane;
 import org.jetbrains.annotations.NotNull;
 
 
+import static com.redhat.devtools.intellij.knative.Constants.GO_RUNTIME;
+import static com.redhat.devtools.intellij.knative.Constants.NODE_RUNTIME;
+import static com.redhat.devtools.intellij.knative.Constants.PYTHON_RUNTIME;
+import static com.redhat.devtools.intellij.knative.Constants.QUARKUS_RUNTIME;
 import static com.redhat.devtools.intellij.knative.Constants.RUNTIME_FUNCTION_KEY;
+import static com.redhat.devtools.intellij.knative.Constants.RUST_RUNTIME;
+import static com.redhat.devtools.intellij.knative.Constants.SPRINGBOOT_RUNTIME;
 import static com.redhat.devtools.intellij.knative.Constants.TEMPLATE_FUNCTION_KEY;
+import static com.redhat.devtools.intellij.knative.Constants.TYPESCRIPT_RUNTIME;
 
 public class CreateFunctionChooserStep extends ModuleWizardStep {
 
@@ -55,7 +62,7 @@ public class CreateFunctionChooserStep extends ModuleWizardStep {
         JPanel runtimeLabel = createLabelInFlowPanel("Runtime", "Function runtime language/framework");
         verticalBox.add(runtimeLabel);
 
-        cmbRuntime = createComboBox(Arrays.asList("node", "go", "python", "quarkus", "rust", "springboot", "typescript"));
+        cmbRuntime = createComboBox(Arrays.asList(NODE_RUNTIME, GO_RUNTIME, PYTHON_RUNTIME, QUARKUS_RUNTIME, RUST_RUNTIME, SPRINGBOOT_RUNTIME, TYPESCRIPT_RUNTIME));
         verticalBox.add(cmbRuntime);
 
         JPanel imageLabel = createLabelInFlowPanel("Template", "Function template.");
