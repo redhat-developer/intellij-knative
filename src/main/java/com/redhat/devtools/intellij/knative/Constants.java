@@ -16,6 +16,8 @@ public class Constants {
     public static final String STRUCTURE_PROPERTY = Constants.class.getPackage().getName() + ".structure";
     public static final String TOOLBAR_PLACE = Constants.class.getPackage().getName() + ".view.toolbar";
     public static final Key<String> KNATIVE = Key.create("com.redhat.devtools.intellij.knative");
+    public static final Key<String> RUNTIME_FUNCTION_KEY = Key.create(Constants.class.getPackage().getName() + ".runtime");
+    public static final Key<String> TEMPLATE_FUNCTION_KEY = Key.create(Constants.class.getPackage().getName() + ".template");
 
     public static final String NOTIFICATION_ID = "Knative";
 
@@ -24,4 +26,5 @@ public class Constants {
 
     public static final String[] YAML_NAME_PATH = new String[] { "metadata", "name" };
     public static final String[] YAML_FIRST_IMAGE_PATH = new String[] { "spec", "template", "spec", "containers[0]", "image" };
+
 }

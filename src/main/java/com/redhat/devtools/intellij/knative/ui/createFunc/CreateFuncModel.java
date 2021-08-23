@@ -12,19 +12,12 @@ package com.redhat.devtools.intellij.knative.ui.createFunc;
 
 public class CreateFuncModel {
 
-    private String name, path, runtime, template;
-    private boolean importInProject;
+    private String path, runtime, template;
 
-    public CreateFuncModel(String name, String path, String runtime, String template, boolean importInProject) {
-        this.name = name;
+    public CreateFuncModel(String path, String runtime, String template) {
         this.path = path;
         this.runtime = runtime;
         this.template = template;
-        this.importInProject = importInProject;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public String getPath() {
@@ -37,9 +30,5 @@ public class CreateFuncModel {
 
     public String getTemplate() {
         return template;
-    }
-
-    public boolean isImportInProject() {
-        return importInProject;
     }
 }
