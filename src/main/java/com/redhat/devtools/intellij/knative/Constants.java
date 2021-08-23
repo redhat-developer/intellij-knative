@@ -27,4 +27,19 @@ public class Constants {
     public static final String[] YAML_NAME_PATH = new String[] { "metadata", "name" };
     public static final String[] YAML_FIRST_IMAGE_PATH = new String[] { "spec", "template", "spec", "containers[0]", "image" };
 
+    public static final String GO_MODULE_TYPE_ID = "GO_MODULE";
+    public static final String PYTHON_MODULE_TYPE_ID = "PYTHON_MODULE";
+    public static final String RUST_MODULE_TYPE_ID = "RUST_MODULE";
+
+    public static final String NODE_RUNTIME = "node";
+    public static final String GO_RUNTIME = "go";
+    public static final String PYTHON_RUNTIME = "python";
+    public static final String QUARKUS_RUNTIME = "quarkus";
+    public static final String RUST_RUNTIME = "rust";
+    public static final String SPRINGBOOT_RUNTIME = "springboot";
+    public static final String TYPESCRIPT_RUNTIME = "typescript";
+
+
+
+
 }

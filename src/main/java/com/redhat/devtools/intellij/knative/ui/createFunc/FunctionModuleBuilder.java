@@ -17,7 +17,10 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.module.ModifiableModuleModel;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleType;
+import com.intellij.openapi.module.ModuleTypeId;
+import com.intellij.openapi.module.ModuleTypeManager;
 import com.intellij.openapi.module.ModuleWithNameAlreadyExists;
+import com.intellij.openapi.module.WebModuleType;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
@@ -34,8 +37,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 
+import static com.redhat.devtools.intellij.knative.Constants.GO_MODULE_TYPE_ID;
+import static com.redhat.devtools.intellij.knative.Constants.GO_RUNTIME;
+import static com.redhat.devtools.intellij.knative.Constants.NODE_RUNTIME;
+import static com.redhat.devtools.intellij.knative.Constants.PYTHON_MODULE_TYPE_ID;
+import static com.redhat.devtools.intellij.knative.Constants.PYTHON_RUNTIME;
+import static com.redhat.devtools.intellij.knative.Constants.QUARKUS_RUNTIME;
 import static com.redhat.devtools.intellij.knative.Constants.RUNTIME_FUNCTION_KEY;
+import static com.redhat.devtools.intellij.knative.Constants.RUST_MODULE_TYPE_ID;
+import static com.redhat.devtools.intellij.knative.Constants.RUST_RUNTIME;
+import static com.redhat.devtools.intellij.knative.Constants.SPRINGBOOT_RUNTIME;
 import static com.redhat.devtools.intellij.knative.Constants.TEMPLATE_FUNCTION_KEY;
+import static com.redhat.devtools.intellij.knative.Constants.TYPESCRIPT_RUNTIME;
 
 public class FunctionModuleBuilder extends ModuleBuilder {
 
@@ -45,7 +58,34 @@ public class FunctionModuleBuilder extends ModuleBuilder {
 
     @Override
     public ModuleType<?> getModuleType() {
-        return ModuleType.EMPTY;
+        if (wizardContext == null || wizardContext.getUserData(RUNTIME_FUNCTION_KEY) == null) {
+            return ModuleTypeManager.getInstance().getDefaultModuleType();
+        }
+        return getModuleByRuntime(wizardContext.getUserData(RUNTIME_FUNCTION_KEY));
+    }
+
+    private ModuleType<?> getModuleByRuntime(String runtime) {
+        switch (runtime) {
+            case PYTHON_RUNTIME: {
+                return ModuleTypeManager.getInstance().findByID(PYTHON_MODULE_TYPE_ID);
+            }
+            case GO_RUNTIME: {
+                return ModuleTypeManager.getInstance().findByID(GO_MODULE_TYPE_ID);
+            }
+            case NODE_RUNTIME:
+            case TYPESCRIPT_RUNTIME: {
+                return ModuleTypeManager.getInstance().findByID(ModuleTypeId.WEB_MODULE);
+            }
+            case QUARKUS_RUNTIME:
+            case SPRINGBOOT_RUNTIME: {
+                return ModuleTypeManager.getInstance().findByID(ModuleTypeId.JAVA_MODULE);
+            }
+            case RUST_RUNTIME: {
+                return ModuleTypeManager.getInstance().findByID(RUST_MODULE_TYPE_ID);
+            }
+            default:
+                return ModuleTypeManager.getInstance().getDefaultModuleType();
+        }
     }
 
     @Override
