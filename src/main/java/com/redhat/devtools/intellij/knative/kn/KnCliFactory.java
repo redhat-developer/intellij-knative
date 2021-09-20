@@ -13,8 +13,12 @@ package com.redhat.devtools.intellij.knative.kn;
 import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.common.utils.DownloadHelper;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class KnCliFactory {
+    private static final Logger logger = LoggerFactory.getLogger(KnCliFactory.class);
     private static KnCliFactory INSTANCE;
 
     public static KnCliFactory getInstance() {
@@ -30,7 +34,14 @@ public class KnCliFactory {
     }
 
     public CompletableFuture<Kn> getKn(Project project) {
-        if (future == null) {
+        Kn kn = null;
+        try {
+            kn = future != null ? future.get() : null;
+        } catch (InterruptedException | ExecutionException e) {
+            logger.warn(e.getLocalizedMessage(), e);
+        }
+        if (future == null
+                || (kn != null && !kn.getProject().equals(project))) {
             CompletableFuture<String> knCompletableFuture = DownloadHelper.getInstance()
                     .downloadIfRequiredAsync("kn", KnCliFactory.class.getResource("/kn.json"));
             CompletableFuture<String> funcCompletableFuture = DownloadHelper.getInstance()

@@ -61,6 +61,10 @@ public class KnCli implements Kn {
         }
     }
 
+    public Project getProject() {
+        return project;
+    }
+
     @Override
     public boolean isKnativeServingAware() throws IOException {
         try {
