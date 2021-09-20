@@ -14,7 +14,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.actions.RefreshAction;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionLocalNode;
-import com.redhat.devtools.intellij.knative.tree.KnFunctionsTreeStructure;
+import com.redhat.devtools.intellij.knative.tree.KnLocalFunctionsTreeStructure;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import javax.swing.tree.TreePath;
 
@@ -32,7 +32,7 @@ public class RefreshFuncAction extends RefreshAction {
     @Override
     public void update(AnActionEvent e) {
         if (Constants.TOOLBAR_PLACE.equals(e.getPlace())) {
-            updateAction(e, KnFunctionsTreeStructure.class);
+            updateAction(e, KnLocalFunctionsTreeStructure.class);
         } else {
             super.update(e);
         }

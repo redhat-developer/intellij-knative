@@ -11,6 +11,8 @@
 package com.redhat.devtools.intellij.knative;
 
 import com.intellij.openapi.util.Key;
+import com.intellij.ui.JBColor;
+import java.awt.Color;
 
 public class Constants {
     public static final String STRUCTURE_PROPERTY = Constants.class.getPackage().getName() + ".structure";
@@ -22,7 +24,7 @@ public class Constants {
     public static final String NOTIFICATION_ID = "Knative";
 
     public static final String KNATIVE_TOOL_WINDOW_ID = "Knative";
-    public static final String KNATIVE_FUNC_TOOL_WINDOW_ID = "KnativeFunction";
+    public static final String KNATIVE_LOCAL_FUNC_TOOL_WINDOW_ID = "KnativeLocalFunction";
 
     public static final String[] YAML_NAME_PATH = new String[] { "metadata", "name" };
     public static final String[] YAML_FIRST_IMAGE_PATH = new String[] { "spec", "template", "spec", "containers[0]", "image" };
@@ -38,8 +40,6 @@ public class Constants {
     public static final String RUST_RUNTIME = "rust";
     public static final String SPRINGBOOT_RUNTIME = "springboot";
     public static final String TYPESCRIPT_RUNTIME = "typescript";
-
-
 
 
 }

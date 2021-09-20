@@ -10,49 +10,32 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.tree;
 
-import com.google.common.base.Strings;
 import com.intellij.icons.AllIcons;
-import com.intellij.ide.util.treeView.AbstractTreeStructure;
 import com.intellij.ide.util.treeView.NodeDescriptor;
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.util.IconLoader;
-import com.intellij.openapi.vfs.LocalFileSystem;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.ArrayUtil;
 import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
-import com.redhat.devtools.intellij.common.tree.MutableModel;
-import com.redhat.devtools.intellij.common.tree.MutableModelSupport;
 import com.redhat.devtools.intellij.common.utils.ConfigHelper;
 import com.redhat.devtools.intellij.common.utils.ConfigWatcher;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
-import com.redhat.devtools.intellij.common.utils.YAMLHelper;
-import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.kn.Service;
 import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.NamedContext;
 import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.util.Optional;
-import org.apache.commons.codec.binary.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.swing.Icon;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.swing.Icon;
+import org.apache.commons.codec.binary.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class KnTreeStructure extends AbstractKnTreeStructure implements ConfigWatcher.Listener {
     private static Logger logger = LoggerFactory.getLogger(KnTreeStructure.class);
@@ -92,16 +75,11 @@ public class KnTreeStructure extends AbstractKnTreeStructure implements ConfigWa
         if (kn != null) {
             if (element instanceof KnRootNode) {
                 Object[] result = new Object[0];
-                boolean hasKnativeServing = hasKnativeServing(kn);
-                boolean hasKnativeEventing = hasKnativeEventing(kn);
-                if (hasKnativeServing) {
+                if (hasKnativeServing(kn)) {
                     result = ArrayUtil.append(result, new KnServingNode(root, root));
                 }
-                if (hasKnativeEventing) {
+                if (hasKnativeEventing(kn)) {
                     result = ArrayUtil.append(result, new KnEventingNode(root, root));
-                }
-                if (hasKnativeEventing && hasKnativeServing) {
-                    result = ArrayUtil.append(result, new KnFunctionsNode(root, root));
                 }
                 return result;
             }
@@ -125,24 +103,9 @@ public class KnTreeStructure extends AbstractKnTreeStructure implements ConfigWa
             if (element instanceof KnSourceNode) {
                 return getSinkForSource((KnSourceNode) element);
             }
-
-            if (element instanceof KnFunctionsNode) {
-                return getFunctionNodes((KnFunctionsNode) element);
-            }
         }
 
         return new Object[0];
-    }
-
-    private Object[] getFunctionNodes(KnFunctionsNode parent) {
-        List<Object> functions = new ArrayList<>();
-        try {
-            Kn kn = parent.getRootNode().getKn();
-            kn.getFunctions().forEach(it -> functions.add(new KnFunctionNode(parent.getRootNode(), parent, it)));
-        } catch (IOException e) {
-            functions.add(new MessageNode<>(parent.getRootNode(), parent, "Failed to load revisions"));
-        }
-        return functions.toArray();
     }
 
     private Object[] getSinkForSource(KnSourceNode element) {
@@ -235,10 +198,6 @@ public class KnTreeStructure extends AbstractKnTreeStructure implements ConfigWa
         if (element instanceof KnEventingNode) {
             return new LabelAndIconDescriptor<>(project, element, ((KnEventingNode) element).getName(), AllIcons.Nodes.Package, parentDescriptor);
         }
-        if (element instanceof KnFunctionsNode) {
-            return new LabelAndIconDescriptor<>(project, element, ((KnFunctionsNode) element).getName(), AllIcons.Nodes.Package, parentDescriptor);
-        }
-
         if (element instanceof KnServiceNode) {
             return new KnServiceDescriptor(project, (KnServiceNode) element, SERVICE_ICON, parentDescriptor);
         }
@@ -272,10 +231,6 @@ public class KnTreeStructure extends AbstractKnTreeStructure implements ConfigWa
 
         if (element instanceof KnSinkNode) {
             return new KnSinkDescriptor(project, (KnSinkNode) element, parentDescriptor);
-        }
-
-        if (element instanceof KnFunctionNode) {
-            return new KnFunctionDescriptor(project, (KnFunctionNode) element, parentDescriptor);
         }
 
         //if we can present node we try to do that

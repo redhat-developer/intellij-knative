@@ -20,7 +20,7 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.kn.Kn;
-import com.redhat.devtools.intellij.knative.tree.KnFunctionsTreeStructure;
+import com.redhat.devtools.intellij.knative.tree.KnLocalFunctionsTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.KnRootNode;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
@@ -29,7 +29,7 @@ import javax.swing.JComponent;
 import javax.swing.JViewport;
 
 
-import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_FUNC_TOOL_WINDOW_ID;
+import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_LOCAL_FUNC_TOOL_WINDOW_ID;
 import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_TOOL_WINDOW_ID;
 
 public class TreeHelper {
@@ -75,8 +75,8 @@ public class TreeHelper {
         return (KnTreeStructure) getTreeStructure(project, KNATIVE_TOOL_WINDOW_ID);
     }
 
-    public static KnFunctionsTreeStructure getKnFunctionsTreeStructure(Project project) {
-        return (KnFunctionsTreeStructure) getTreeStructure(project, KNATIVE_FUNC_TOOL_WINDOW_ID);
+    public static KnLocalFunctionsTreeStructure getKnLocalFunctionsTreeStructure(Project project) {
+        return (KnLocalFunctionsTreeStructure) getTreeStructure(project, KNATIVE_LOCAL_FUNC_TOOL_WINDOW_ID);
     }
 
     private static AbstractTreeStructure getTreeStructure(Project project, String toolWindowId) {
@@ -112,7 +112,7 @@ public class TreeHelper {
 
     public static void refreshFunc(Project project) {
         if (project != null) {
-            KnFunctionsTreeStructure structure = getKnFunctionsTreeStructure(project);
+            KnLocalFunctionsTreeStructure structure = getKnLocalFunctionsTreeStructure(project);
             if (structure != null) {
                 structure.fireModified(structure.getRootElement());
             }

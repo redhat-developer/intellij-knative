@@ -24,13 +24,14 @@
     <depends>org.jetbrains.plugins.terminal</depends>
     <depends>com.intellij.modules.lang</depends>
     <depends>org.jetbrains.plugins.yaml</depends>
-    <depends>com.redhat.devtools.intellij.kubernetes</depends>
+   <!-- <depends>com.redhat.devtools.intellij.kubernetes</depends> -->
     <depends optional="true" config-file="plugin-json.xml">com.intellij.modules.json</depends>
     <depends optional="true" config-file="plugin-kubernetes.xml">com.intellij.kubernetes</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Knative" anchor="left" factoryClass="com.redhat.devtools.intellij.knative.ui.toolwindow.WindowToolFactory" />
-        <toolWindow id="KnativeFunction" anchor="left" factoryClass="com.redhat.devtools.intellij.knative.ui.toolwindow.FunctionWindowToolFactory" secondary="true" order="after Knative" />
+        <toolWindow id="KnativeFunction" anchor="left" factoryClass="com.redhat.devtools.intellij.knative.ui.toolwindow.FunctionsWindowToolFactory" />
+        <toolWindow id="KnativeLocalFunction" anchor="left" factoryClass="com.redhat.devtools.intellij.knative.ui.toolwindow.LocalFunctionsWindowToolFactory" secondary="true" order="after KnativeFunction" />
         <fileDocumentSynchronizationVetoer id="com.redhat.devtools.intellij.knative.listener.KnSaveInEditorListener" implementation="com.redhat.devtools.intellij.knative.listener.KnSaveInEditorListener" order="first" />
         <moduleBuilder builderClass="com.redhat.devtools.intellij.knative.ui.createFunc.FunctionModuleBuilder"/>
         <nonProjectFileWritingAccessExtension id="com.redhat.devtools.intellij.common.editor.AllowNonProjectEditing" implementation="com.redhat.devtools.intellij.common.editor.AllowNonProjectEditing" />

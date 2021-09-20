@@ -71,7 +71,7 @@ public class DeleteActionTest extends ActionTest {
     private void executeDeleteAction(ParentableNode[] fakeSelectedNodesToBeDeleted, Map<String, Integer> typePerTimesCalled) throws IOException {
         DeleteAction action = new DeleteAction();
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
-            treeHelperMockedStatic.when(() -> TreeHelper.getKnFunctionsTreeStructure(any())).thenReturn(null);
+            treeHelperMockedStatic.when(() -> TreeHelper.getKnLocalFunctionsTreeStructure(any())).thenReturn(null);
             action.executeDelete(project, kn, fakeSelectedNodesToBeDeleted);
             verify(kn, times(typePerTimesCalled.getOrDefault(SERVICE, 0))).deleteServices(any());
             verify(kn, times(typePerTimesCalled.getOrDefault(REVISION, 0))).deleteRevisions(any());
