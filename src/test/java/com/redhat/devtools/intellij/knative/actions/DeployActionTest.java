@@ -56,16 +56,17 @@ public class DeployActionTest extends ActionTest {
     }
 
     @Test
-    public void ActionPerformed_SelectedHasNotLocalPath_DoNothing() throws IOException {
+    public void ActionPerformed_SelectedHasNotLocalPath_DoNothing() throws IOException, InterruptedException {
         AnAction action = new DeployAction();
         AnActionEvent anActionEvent = createDeployActionEvent();
         when(function.getLocalPath()).thenReturn("");
         action.actionPerformed(anActionEvent);
+        Thread.sleep(1000);
         verify(kn, times(0)).deployFunc(anyString(), anyString(), anyString(), anyString());
     }
 
     @Test
-    public void ActionPerformed_SelectedHasLocalPathAndImageSpecified_DoDeploy() throws IOException {
+    public void ActionPerformed_SelectedHasLocalPathAndImageSpecified_DoDeploy() throws IOException, InterruptedException {
         AnAction action = new DeployAction();
         AnActionEvent anActionEvent = createDeployActionEvent();
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
@@ -73,12 +74,14 @@ public class DeployActionTest extends ActionTest {
                 try (MockedStatic<YAMLHelper> yamlHelperMockedStatic = mockStatic(YAMLHelper.class)) {
                     try(MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
                         treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+                        when(kn.getFuncFileURL(any())).thenReturn(mock(URL.class));
                         pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
                         yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
                         yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("image: test");
                         yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("test");
                         messagesMockedStatic.when(() -> Messages.showOkCancelDialog(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
                         action.actionPerformed(anActionEvent);
+                        Thread.sleep(1000);
                         verify(kn, times(1)).deployFunc("namespace", "path", "", "test");
                     }
                 }
@@ -88,7 +91,7 @@ public class DeployActionTest extends ActionTest {
     }
 
     @Test
-    public void ActionPerformed_SelectedHasLocalPathAndImageSpecifiedButDeployIsNotConfirmed_DoDeploy() throws IOException {
+    public void ActionPerformed_SelectedHasLocalPathAndImageSpecifiedButDeployIsNotConfirmed_DoDeploy() throws IOException, InterruptedException {
         AnAction action = new DeployAction();
         AnActionEvent anActionEvent = createDeployActionEvent();
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
@@ -97,11 +100,13 @@ public class DeployActionTest extends ActionTest {
                     try(MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
                         treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
                         pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
+                        when(kn.getFuncFileURL(any())).thenReturn(mock(URL.class));
                         yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
                         yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("image: test");
                         yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("test");
                         messagesMockedStatic.when(() -> Messages.showOkCancelDialog(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.CANCEL);
                         action.actionPerformed(anActionEvent);
+                        Thread.sleep(1000);
                         verify(kn, times(0)).deployFunc("namespace", "path", "", "test");
                     }
                 }
@@ -111,7 +116,7 @@ public class DeployActionTest extends ActionTest {
     }
 
     @Test
-    public void ActionPerformed_SelectedHasLocalPathAndRegistrySpecified_DoDeploy() throws IOException {
+    public void ActionPerformed_SelectedHasLocalPathAndRegistrySpecified_DoDeploy() throws IOException, InterruptedException {
         AnAction action = new DeployAction();
         AnActionEvent anActionEvent = createDeployActionEvent();
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
@@ -120,11 +125,13 @@ public class DeployActionTest extends ActionTest {
                     try(MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
                         treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
                         pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
+                        when(kn.getFuncFileURL(any())).thenReturn(mock(URL.class));
                         yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
                         yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("registry: test");
                         yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("test").thenReturn("");
                         messagesMockedStatic.when(() -> Messages.showOkCancelDialog(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
                         action.actionPerformed(anActionEvent);
+                        Thread.sleep(1000);
                         verify(kn, times(1)).deployFunc("namespace", "path", "test", "");
                     }
                 }
@@ -133,7 +140,7 @@ public class DeployActionTest extends ActionTest {
     }
 
     @Test
-    public void ActionPerformed_SelectedHasLocalPathAndHasFuncFileWithoutRegistryAndImageSpecified_UIAskForImage() throws IOException {
+    public void ActionPerformed_SelectedHasLocalPathAndHasFuncFileWithoutRegistryAndImageSpecified_UIAskForImage() throws IOException, InterruptedException {
         AnAction action = new DeployAction();
         AnActionEvent anActionEvent = createDeployActionEvent();
 
@@ -148,10 +155,12 @@ public class DeployActionTest extends ActionTest {
 
                         treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
                         pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
+                        when(kn.getFuncFileURL(any())).thenReturn(mock(URL.class));
                         yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
                         yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("");
                         yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("");
                         action.actionPerformed(anActionEvent);
+                        Thread.sleep(1000);
                         verify(kn, times(1)).deployFunc("namespace","path", "", "image");
                     }
                 }
@@ -160,7 +169,7 @@ public class DeployActionTest extends ActionTest {
     }
 
     @Test
-    public void ActionPerformed_SelectedHasLocalPathAndHasNoFuncFile_UIAskForImage() throws IOException {
+    public void ActionPerformed_SelectedHasLocalPathAndHasNoFuncFile_UIAskForImage() throws IOException, InterruptedException {
         AnAction action = new DeployAction();
         AnActionEvent anActionEvent = createDeployActionEvent();
 
@@ -175,6 +184,7 @@ public class DeployActionTest extends ActionTest {
                     treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
                     pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
                     action.actionPerformed(anActionEvent);
+                    Thread.sleep(1000);
                     verify(kn, times(1)).deployFunc("namespace","path", null, "image");
                 }
             }
@@ -183,7 +193,7 @@ public class DeployActionTest extends ActionTest {
     }
 
     @Test
-    public void ActionPerformed_SelectedHasLocalPathAndFailOpeningFuncFile_UIAskForImage() throws IOException {
+    public void ActionPerformed_SelectedHasLocalPathAndFailOpeningFuncFile_UIAskForImage() throws IOException, InterruptedException {
         AnAction action = new DeployAction();
         AnActionEvent anActionEvent = createDeployActionEvent();
 
@@ -200,6 +210,7 @@ public class DeployActionTest extends ActionTest {
                         pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
                         yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenThrow(new IOException("error"));
                         action.actionPerformed(anActionEvent);
+                        Thread.sleep(1000);
                         verify(kn, times(0)).deployFunc("namespace","path", "", "image");
                     }
                 }
@@ -208,7 +219,7 @@ public class DeployActionTest extends ActionTest {
     }
 
     @Test
-    public void ActionPerformed_SelectedHasLocalPathAndHasFuncFileWithoutRegistryAndImageSpecifiedAndImageInsertedByUserIsEmptyString_doNothing() throws IOException {
+    public void ActionPerformed_SelectedHasLocalPathAndHasFuncFileWithoutRegistryAndImageSpecifiedAndImageInsertedByUserIsEmptyString_doNothing() throws IOException, InterruptedException {
         AnAction action = new DeployAction();
         AnActionEvent anActionEvent = createDeployActionEvent();
 
@@ -227,6 +238,7 @@ public class DeployActionTest extends ActionTest {
                         yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("");
                         yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("");
                         action.actionPerformed(anActionEvent);
+                        Thread.sleep(1000);
                         verify(kn, times(0)).deployFunc("namespace","path", "", "image");
                     }
                 }

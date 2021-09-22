@@ -49,22 +49,24 @@ public class RunActionTest extends ActionTest {
     }
 
     @Test
-    public void ActionPerformed_SelectedHasNotLocalPath_DoNothing() throws IOException {
+    public void ActionPerformed_SelectedHasNotLocalPath_DoNothing() throws IOException, InterruptedException {
         AnAction action = new RunAction();
         AnActionEvent anActionEvent = createRunActionEvent();
         when(function.getLocalPath()).thenReturn("");
         action.actionPerformed(anActionEvent);
+        Thread.sleep(1000);
         verify(kn, times(0)).runFunc(anyString());
     }
 
     @Test
-    public void ActionPerformed_SelectedHasLocalPath_DoRun() throws IOException {
+    public void ActionPerformed_SelectedHasLocalPath_DoRun() throws IOException, InterruptedException {
         AnAction action = new RunAction();
         AnActionEvent anActionEvent = createRunActionEvent();
         when(function.getLocalPath()).thenReturn("path");
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
             treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
             action.actionPerformed(anActionEvent);
+            Thread.sleep(1000);
             verify(kn, times(1)).runFunc(anyString());
         }
     }

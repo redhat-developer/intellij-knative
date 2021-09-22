@@ -83,7 +83,7 @@ public class KnTreeStructureTest extends BaseTest {
     public void GetChildElements_ElementIsRootWithKnativeServingAndEventing_ArrayWithServingAndEventing() throws IOException {
         Object[] nodes = getChildElements(true, true);
 
-        assertTrue(nodes.length == 3);
+        assertTrue(nodes.length == 2);
         assertNotNull(nodes[0]);
         assertTrue(nodes[0] instanceof KnServingNode);
         assertNotNull(nodes[1]);

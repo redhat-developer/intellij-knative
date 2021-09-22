@@ -21,11 +21,9 @@ public class CreateFuncModelTest {
 
     @Test
     public void Constructor_CreateFuncModel() {
-        CreateFuncModel createFuncModel = new CreateFuncModel("name", "path", "runtime", "template", true);
-        assertEquals("name", createFuncModel.getName());
+        CreateFuncModel createFuncModel = new CreateFuncModel("path", "runtime", "template");
         assertEquals("path", createFuncModel.getPath());
         assertEquals("runtime", createFuncModel.getRuntime());
         assertEquals("template", createFuncModel.getTemplate());
-        assertTrue(createFuncModel.isImportInProject());
     }
 }

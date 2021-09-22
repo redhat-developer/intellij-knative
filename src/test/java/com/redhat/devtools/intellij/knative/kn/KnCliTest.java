@@ -390,7 +390,7 @@ public class KnCliTest extends BaseTest {
 
     @Test
     public void CreateFunc_PathIsInserted_RunIsCalled() throws IOException {
-        CreateFuncModel model = new CreateFuncModel("name", "path", "runtime", "template", true);
+        CreateFuncModel model = new CreateFuncModel("path", "runtime", "template");
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.createFunc(model);
             execHelperMockedStatic.verify(() ->
@@ -400,7 +400,7 @@ public class KnCliTest extends BaseTest {
 
     @Test
     public void CreateFunc_ClientFails_Throws() {
-        CreateFuncModel model = new CreateFuncModel("name", "path", "runtime", "template", true);
+        CreateFuncModel model = new CreateFuncModel("path", "runtime", "template");
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             execHelperMockedStatic.when(() -> ExecHelper.execute(any(), anyString())).thenThrow(new IOException("error"));
             kn.createFunc(model);
@@ -414,7 +414,7 @@ public class KnCliTest extends BaseTest {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.buildFunc("path", "registry", "");
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.executeWithTerminalWidget(any(), anyString(), eq("build"), eq("-r"), eq("registry"), eq("-p"), eq("path")));
+                    ExecHelper.executeWithTerminalWidget(any(), anyString(), anyString(), eq("build"), eq("-r"), eq("registry"), eq("-p"), eq("path")));
         }
     }
 
@@ -423,7 +423,7 @@ public class KnCliTest extends BaseTest {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.buildFunc("path", "registry", "image");
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.executeWithTerminalWidget(any(), anyString(), eq("build"), eq("-i"), eq("image"), eq("-p"), eq("path")));
+                    ExecHelper.executeWithTerminalWidget(any(), anyString(), anyString(), eq("build"), eq("-i"), eq("image"), eq("-p"), eq("path")));
         }
     }
 
@@ -442,7 +442,7 @@ public class KnCliTest extends BaseTest {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.deployFunc("namespace", "path", "registry", "");
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.executeWithTerminalWidget(any(), anyString(), eq("deploy"), eq("-r"), eq("registry"), eq("-n"), eq("namespace"), eq("-p"), eq("path")));
+                    ExecHelper.executeWithTerminalWidget(any(), anyString(), anyString(), eq("deploy"), eq("-r"), eq("registry"), eq("-n"), eq("namespace"), eq("-p"), eq("path")));
         }
     }
 
@@ -451,7 +451,7 @@ public class KnCliTest extends BaseTest {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.deployFunc("namespace", "path", "registry", "image");
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.executeWithTerminalWidget(any(), anyString(), eq("deploy"), eq("-i"), eq("image"), eq("-n"), eq("namespace"), eq("-p"), eq("path")));
+                    ExecHelper.executeWithTerminalWidget(any(), anyString(), anyString(), eq("deploy"), eq("-i"), eq("image"), eq("-n"), eq("namespace"), eq("-p"), eq("path")));
         }
     }
 
@@ -470,7 +470,7 @@ public class KnCliTest extends BaseTest {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.runFunc("path");
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.executeWithTerminalWidget(any(), anyString(), eq("run"), eq("-p"), eq("path")));
+                    ExecHelper.executeWithTerminalWidget(any(), anyString(), anyString(), eq("run"), eq("-p"), eq("path")));
         }
     }
 

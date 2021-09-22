@@ -34,12 +34,7 @@ public class KnCliFactory {
     }
 
     public CompletableFuture<Kn> getKn(Project project) {
-        Kn kn = null;
-        try {
-            kn = future != null ? future.get() : null;
-        } catch (InterruptedException | ExecutionException e) {
-            logger.warn(e.getLocalizedMessage(), e);
-        }
+        Kn kn = getKn();
         if (future == null
                 || (kn != null && !kn.getProject().equals(project))) {
             CompletableFuture<String> knCompletableFuture = DownloadHelper.getInstance()
@@ -50,6 +45,17 @@ public class KnCliFactory {
                     funcCompletableFuture.thenApply(funcCommand -> new KnCli(project, knCommand, funcCommand)));
         }
         return future;
+    }
+
+    private Kn getKn() {
+        try {
+            if (future != null) {
+                return future.get();
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            logger.warn(e.getLocalizedMessage(), e);
+        }
+        return null;
     }
 
     public void resetKn() {

@@ -18,7 +18,7 @@ import java.util.Map;
 public class ClusterModelSynchronizer {
 
     private KnTreeStructure treeStructure;
-    private volatile Map<String, ParentableNode<?>> resourceToNodeMap = new HashMap<>();
+    private volatile Map<String, ParentableNode<?>> resourceToNodeMapping = new HashMap<>();
 
     public ClusterModelSynchronizer(KnTreeStructure treeStructure) {
         this.treeStructure = treeStructure;
@@ -26,12 +26,12 @@ public class ClusterModelSynchronizer {
 
     public void updateElementOnChange(ParentableNode<?> element, String kindToWatch) {
         String id = TreeHelper.getId(element);
-        resourceToNodeMap.put(id, element);
+        resourceToNodeMapping.put(id, element);
         WatchHandler.get(element.getRootNode().getKn()).watchResource(id, kindToWatch, getUpdateRunnable(id));
     }
 
     private Runnable getUpdateRunnable(String id) {
-        return () -> treeStructure.fireModified(resourceToNodeMap.get(id));
+        return () -> treeStructure.fireModified(resourceToNodeMapping.get(id));
     }
 
 }
