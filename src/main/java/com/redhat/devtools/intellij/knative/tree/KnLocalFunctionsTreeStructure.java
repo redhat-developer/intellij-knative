@@ -11,35 +11,39 @@
 package com.redhat.devtools.intellij.knative.tree;
 
 import com.google.common.base.Strings;
-import com.intellij.ide.util.treeView.AbstractTreeStructure;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
-import com.intellij.openapi.util.IconLoader;
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileEvent;
+import com.intellij.openapi.vfs.VirtualFileListener;
+import com.intellij.openapi.vfs.VirtualFileSystem;
 import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
-import com.redhat.devtools.intellij.common.tree.MutableModel;
-import com.redhat.devtools.intellij.common.tree.MutableModelSupport;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.kn.Kn;
+import com.redhat.devtools.intellij.knative.utils.Scheduler;
+import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.Icon;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class KnLocalFunctionsTreeStructure extends AbstractKnTreeStructure  {
 
+    private List<Pair<String, VirtualFileListener>> funcYamlListeners;
+
     public KnLocalFunctionsTreeStructure(Project project) {
         super(project);
+        funcYamlListeners = new ArrayList<>();
     }
 
     @Override
@@ -47,15 +51,7 @@ public class KnLocalFunctionsTreeStructure extends AbstractKnTreeStructure  {
         Kn kn = root.getKn();
         if (kn != null) {
             if (element instanceof KnRootNode) {
-                Object[] result = new Object[0];
-                boolean hasKnativeServing = hasKnativeServing(kn);
-                boolean hasKnativeEventing = hasKnativeEventing(kn);
-                if (hasKnativeEventing && hasKnativeServing) {
-                    result = getFunctionNodes((KnRootNode) element);
-                } else {
-                    // return node message saying it needs both
-                }
-                return result;
+                return getFunctionNodes((KnRootNode) element);
             }
         }
         return new Object[0];
@@ -69,12 +65,57 @@ public class KnLocalFunctionsTreeStructure extends AbstractKnTreeStructure  {
             // if current project contains new functions, adds them
             List<String> pathsWithFunc = getModulesPathsWithFunc(kn);
             if (!pathsWithFunc.isEmpty()) {
-                getLocalFunctionsFromOpenedProject(pathsWithFunc, funcOnCluster, kn).forEach(it -> functions.add(new KnFunctionLocalNode(parent, parent, it)));
+                List<Function> localFunctions = getLocalFunctionsFromOpenedProject(pathsWithFunc, funcOnCluster, kn);
+                setListenerToFunctions(kn, localFunctions);
+                localFunctions.forEach(it -> functions.add(new KnFunctionLocalNode(parent, parent, it)));
             }
         } catch (IOException e) {
             functions.add(new MessageNode<>(parent, parent, "Failed to load functions"));
         }
         return functions.toArray();
+    }
+
+    private void setListenerToFunctions(Kn kn, List<Function> functions) throws IOException {
+        clearOpenedListeners();
+        for (Function function: functions) {
+            File funcYaml = kn.getFuncFile(Paths.get(function.getLocalPath()));
+            setListenerOnFile(funcYaml.toPath().toString());
+        }
+    }
+
+    private void clearOpenedListeners() {
+        while (funcYamlListeners.size() > 0) {
+            Pair<String, VirtualFileListener> entry = funcYamlListeners.remove(0);
+            removeListenerOnFile(entry.getFirst(), entry.getSecond());
+        }
+    }
+
+    private void removeListenerOnFile(String path, VirtualFileListener virtualFileListener) {
+        VirtualFile vf = LocalFileSystem.getInstance().findFileByPath(path);
+        if (vf != null) {
+            VirtualFileSystem virtualFileSystem = vf.getFileSystem();
+            virtualFileSystem.removeVirtualFileListener(virtualFileListener);
+        }
+    }
+
+    private void setListenerOnFile(String path) {
+        VirtualFile vf = LocalFileSystem.getInstance().findFileByPath(path);
+        VirtualFileListener virtualFileListener = getVirtualFileListener();
+        if (vf != null) {
+            VirtualFileSystem virtualFileSystem = vf.getFileSystem();
+            virtualFileSystem.addVirtualFileListener(virtualFileListener);
+            funcYamlListeners.add(Pair.create(path, virtualFileListener));
+        }
+    }
+
+    private VirtualFileListener getVirtualFileListener() {
+        Scheduler scheduler = new Scheduler(1000);
+        return new VirtualFileListener() {
+            @Override
+            public void contentsChanged(@NotNull VirtualFileEvent event) {
+                scheduler.schedule(() -> TreeHelper.refreshFunc(project));
+            }
+        };
     }
 
     private List<Function> getLocalFunctionsFromOpenedProject(List<String> paths, List<Function> funcOnCluster, Kn kn) throws IOException {
@@ -95,8 +136,8 @@ public class KnLocalFunctionsTreeStructure extends AbstractKnTreeStructure  {
         return localFunctions;
     }
 
-    private Function buildFuncFromLocalFuncSettingsFile(String path, Kn kncli) throws IOException {
-        URL funcFileURL = kncli.getFuncFileURL(Paths.get(path));
+    private Function buildFuncFromLocalFuncSettingsFile(String path, Kn kn) throws IOException {
+        URL funcFileURL = kn.getFuncFileURL(Paths.get(path));
         String content = YAMLHelper.JSONToYAML(YAMLHelper.URLToJSON(funcFileURL));
         String name = YAMLHelper.getStringValueFromYAML(content, new String[] { "name" });
         String namespace = YAMLHelper.getStringValueFromYAML(content, new String[] { "namespace" });
@@ -156,6 +197,8 @@ public class KnLocalFunctionsTreeStructure extends AbstractKnTreeStructure  {
             return false;
         }
     }
+
+
 
     @Override
     public @Nullable Object getParentElement(@NotNull Object element) {

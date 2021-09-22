@@ -42,6 +42,10 @@ public class KnFunctionsTreeStructure extends KnTreeStructure {
                     KnFunctionsNode functionsNode = new KnFunctionsNode(root, root);
                     clusterModelSynchronizer.updateElementOnChange(functionsNode, KIND_FUNCTION);
                     result = ArrayUtil.append(result, functionsNode);
+                } else {
+                    result = ArrayUtil.append(result,
+                            new MessageNode(root, root,
+                                    "Unable to load functions. Functions need both knative serving and eventing installed."));
                 }
                 return result;
             }
