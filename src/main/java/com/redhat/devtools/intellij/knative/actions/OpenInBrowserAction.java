@@ -65,6 +65,8 @@ public class OpenInBrowserAction extends KnAction {
             String url = getURL(node, kncli);
             if (!Strings.isNullOrEmpty(url)) {
                 BrowserUtil.browse(url);
+            } else {
+                notifyFailingAction(selected, NotificationType.WARNING, "");
             }
         });
     }
@@ -75,8 +77,6 @@ public class OpenInBrowserAction extends KnAction {
             ServiceStatus status = ((KnServiceNode) selected).getService(false).getStatus();
             if (status != null) {
                 url = status.getUrl();
-            } else {
-                notifyFailingAction(selected, NotificationType.WARNING, "");
             }
         } else if (selected instanceof KnRevisionNode) {
             url = getRevisionURL((KnRevisionNode) selected, kncli);

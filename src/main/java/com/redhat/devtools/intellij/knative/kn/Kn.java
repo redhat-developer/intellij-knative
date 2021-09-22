@@ -12,6 +12,8 @@ package com.redhat.devtools.intellij.knative.kn;
 
 import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
+import io.fabric8.kubernetes.client.Watch;
+import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 
 import java.io.File;
@@ -132,7 +134,7 @@ public interface Kn {
     /**
      * Get a custom resource from the cluster which is namespaced.
      *
-     * @param name name of custom resource
+     * @param name       name of custom resource
      * @param crdContext the custom resource definition context of the resource kind
      * @return Object as HashMap, null if no resource was found
      * @throws IOException if communication errored
@@ -142,8 +144,8 @@ public interface Kn {
     /**
      * Edit a custom resource object which is a namespaced object
      *
-     * @param name name of custom resource
-     * @param crdContext the custom resource definition context of the resource kind
+     * @param name           name of custom resource
+     * @param crdContext     the custom resource definition context of the resource kind
      * @param objectAsString new object as a JSON string
      * @throws IOException if communication errored
      */
@@ -169,9 +171,9 @@ public interface Kn {
     /**
      * Tag a service revision
      *
-     * @param service the service which the revision belongs to
+     * @param service  the service which the revision belongs to
      * @param revision the revision to tag
-     * @param tag the tag name
+     * @param tag      the tag name
      * @throws IOException if communication errored
      */
     void tagRevision(String service, String revision, String tag) throws IOException;
@@ -205,9 +207,9 @@ public interface Kn {
     /**
      * Build a function from path
      *
-     * @param path path where the source code is stored
+     * @param path     path where the source code is stored
      * @param registry registry to use
-     * @param image image name. This option takes precedence over registry which can be omitted
+     * @param image    image name. This option takes precedence over registry which can be omitted
      * @throws IOException if communication errored
      */
     void buildFunc(String path, String registry, String image) throws IOException;
@@ -216,9 +218,9 @@ public interface Kn {
      * Deploy a function from path
      *
      * @param namespace namespace where to deploy
-     * @param path path where the source code is stored
-     * @param registry registry to use
-     * @param image image name. This option takes precedence over registry which can be omitted
+     * @param path      path where the source code is stored
+     * @param registry  registry to use
+     * @param image     image name. This option takes precedence over registry which can be omitted
      * @throws IOException if communication errored
      */
     void deployFunc(String namespace, String path, String registry, String image) throws IOException;
@@ -232,5 +234,15 @@ public interface Kn {
      */
     void runFunc(String path) throws IOException;
 
+    /**
+     * Set a watch on Service resource with label
+     *
+     * @param key     key label
+     * @param value   value label
+     * @param watcher the watcher to call when a new event is received
+     * @return the watch object
+     * @throws IOException if communication errored
+     */
+    Watch watchServiceWithLabel(String key, String value, Watcher<io.fabric8.knative.serving.v1.Service> watcher) throws IOException;
 
 }

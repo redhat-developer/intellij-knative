@@ -22,6 +22,9 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+
+import static com.redhat.devtools.intellij.knative.Constants.KIND_FUNCTION;
+
 public class KnFunctionsTreeStructure extends KnTreeStructure {
     public KnFunctionsTreeStructure(Project project) {
         super(project);
@@ -36,7 +39,9 @@ public class KnFunctionsTreeStructure extends KnTreeStructure {
                 boolean hasKnativeServing = hasKnativeServing(kn);
                 boolean hasKnativeEventing = hasKnativeEventing(kn);
                 if (hasKnativeEventing && hasKnativeServing) {
-                    result = ArrayUtil.append(result, new KnFunctionsNode(root, root));
+                    KnFunctionsNode functionsNode = new KnFunctionsNode(root, root);
+                    clusterModelSynchronizer.updateElementOnChange(functionsNode, KIND_FUNCTION);
+                    result = ArrayUtil.append(result, functionsNode);
                 }
                 return result;
             }

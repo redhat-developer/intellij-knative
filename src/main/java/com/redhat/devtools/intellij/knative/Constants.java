@@ -41,5 +41,18 @@ public class Constants {
     public static final String SPRINGBOOT_RUNTIME = "springboot";
     public static final String TYPESCRIPT_RUNTIME = "typescript";
 
+    public static final String LOCAL_FUNCTIONS_ACTION_GROUP_ID = "com.redhat.devtools.intellij.knative.tree.localfunctions";
+    public static final String LOCAL_FUNCTIONS_TOOLBAR_ACTION_GROUP_ID = "com.redhat.devtools.intellij.knative.view.actionsLocalFunctionToolbar";
+    public static final String FUNCTIONS_ACTION_GROUP_ID = "com.redhat.devtools.intellij.knative.tree.functions";
+    public static final String FUNCTIONS_TOOLBAR_ACTION_GROUP_ID = "com.redhat.devtools.intellij.knative.view.actionsFunctionToolbar";
+    public static final String KNATIVE_ACTION_GROUP_ID = "com.redhat.devtools.intellij.knative.tree";
+    public static final String KNATIVE_TOOLBAR_ACTION_GROUP_ID = "com.redhat.devtools.intellij.knative.view.actionsToolbar";
+
+    public static final String FUNCTIONS = "functions";
+    public static final String FUNCTON_LABEL_KEY = "boson.dev/function";
+
+
+    public static final String KIND_FUNCTIONS = "functions";
+    public static final String KIND_FUNCTION = "function";
 
 }

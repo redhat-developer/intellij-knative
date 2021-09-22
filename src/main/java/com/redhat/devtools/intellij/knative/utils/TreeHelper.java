@@ -20,6 +20,7 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.kn.Kn;
+import com.redhat.devtools.intellij.knative.tree.KnFunctionsNode;
 import com.redhat.devtools.intellij.knative.tree.KnLocalFunctionsTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.KnRootNode;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
@@ -29,6 +30,7 @@ import javax.swing.JComponent;
 import javax.swing.JViewport;
 
 
+import static com.redhat.devtools.intellij.knative.Constants.KIND_FUNCTIONS;
 import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_LOCAL_FUNC_TOOL_WINDOW_ID;
 import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_TOOL_WINDOW_ID;
 
@@ -117,5 +119,18 @@ public class TreeHelper {
                 structure.fireModified(structure.getRootElement());
             }
         }
+    }
+
+    public static String getId(ParentableNode node) {
+        Kn kn = node.getRootNode().getKn();
+        String kind = getKind(node);
+        return kn.getNamespace() + "-" + kind + "-" + node.getName();
+    }
+
+    public static String getKind(ParentableNode node) {
+        if (node instanceof KnFunctionsNode) {
+            return KIND_FUNCTIONS;
+        }
+        return "";
     }
 }

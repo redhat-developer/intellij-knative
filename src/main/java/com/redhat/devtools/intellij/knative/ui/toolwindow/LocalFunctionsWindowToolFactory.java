@@ -23,18 +23,15 @@ import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import javax.swing.Icon;
 import org.jetbrains.annotations.NotNull;
 
-public class LocalFunctionsWindowToolFactory extends KnBaseWindowTool<KnLocalFunctionsTreeStructure> implements ToolWindowFactory {
 
-    private static final String ACTION_GROUP_ID = "com.redhat.devtools.intellij.knative.tree.functions";
-    private static final String TOOLBAR_ACTION_GROUP_ID = "com.redhat.devtools.intellij.knative.view.actionsFunctionToolbar";
+import static com.redhat.devtools.intellij.knative.Constants.LOCAL_FUNCTIONS_ACTION_GROUP_ID;
+import static com.redhat.devtools.intellij.knative.Constants.LOCAL_FUNCTIONS_TOOLBAR_ACTION_GROUP_ID;
+
+public class LocalFunctionsWindowToolFactory extends KnBaseWindowTool<KnLocalFunctionsTreeStructure> implements ToolWindowFactory {
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-        Icon icon = IconLoader.findIcon("/images/knative-logo.svg", LocalFunctionsWindowToolFactory.class);
-        if (icon != null) {
-            toolWindow.setIcon(icon);
-        }
-        toolWindow.setStripeTitle("Knative Functions");
+        setTitleAndIcon(toolWindow, "Local Functions");
 
         KnTreeStructure knTreeStructure = TreeHelper.getKnTreeStructure(project);
         if (knTreeStructure != null) {
@@ -43,11 +40,11 @@ public class LocalFunctionsWindowToolFactory extends KnBaseWindowTool<KnLocalFun
             KnLocalFunctionsTreeStructure knFunctionsTreeStructure = new KnLocalFunctionsTreeStructure(project);
             if (kn != null) {
                 Tree tree = createTree(project, knFunctionsTreeStructure, false);
-                createContent(toolWindow, tree, ACTION_GROUP_ID, TOOLBAR_ACTION_GROUP_ID);
+                createContent(toolWindow, tree, LOCAL_FUNCTIONS_ACTION_GROUP_ID, LOCAL_FUNCTIONS_TOOLBAR_ACTION_GROUP_ID);
             } else {
                 root.load().whenComplete((kncli, err) -> {
                     Tree tree = createTree(project, knFunctionsTreeStructure, false);
-                    createContent(toolWindow, tree, ACTION_GROUP_ID, TOOLBAR_ACTION_GROUP_ID);
+                    createContent(toolWindow, tree, LOCAL_FUNCTIONS_ACTION_GROUP_ID, LOCAL_FUNCTIONS_TOOLBAR_ACTION_GROUP_ID);
                 });
             }
         }

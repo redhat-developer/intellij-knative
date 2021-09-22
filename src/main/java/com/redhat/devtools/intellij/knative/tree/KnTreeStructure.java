@@ -15,12 +15,14 @@ import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.util.ArrayUtil;
+import com.intellij.util.Function;
 import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
 import com.redhat.devtools.intellij.common.utils.ConfigHelper;
 import com.redhat.devtools.intellij.common.utils.ConfigWatcher;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.kn.Service;
+import com.redhat.devtools.intellij.knative.utils.WatchHandler;
 import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.NamedContext;
 import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
@@ -46,10 +48,12 @@ public class KnTreeStructure extends AbstractKnTreeStructure implements ConfigWa
 
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private Config config;
+    protected ClusterModelSynchronizer clusterModelSynchronizer;
 
     public KnTreeStructure(Project project) {
         super(project);
         this.config = loadConfig();
+        this.clusterModelSynchronizer = new ClusterModelSynchronizer(this);
         initConfigWatcher();
     }
 
@@ -158,7 +162,7 @@ public class KnTreeStructure extends AbstractKnTreeStructure implements ConfigWa
         return services.toArray();
     }
 
-    private com.intellij.util.Function<Boolean, Service> getService(Kn kn, Service service) {
+    private Function<Boolean, Service> getService(Kn kn, Service service) {
         AtomicReference<Service> serviceObj = new AtomicReference<>(service);
         return (toUpdate) -> {
             if (!toUpdate) {
@@ -282,6 +286,7 @@ public class KnTreeStructure extends AbstractKnTreeStructure implements ConfigWa
 
     protected void refresh() {
         try {
+            WatchHandler.get(null).removeAll();
             root.load().whenComplete((kn, err) -> {
                 mutableModelSupport.fireModified(root);
             });

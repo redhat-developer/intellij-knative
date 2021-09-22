@@ -31,7 +31,8 @@
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Knative" anchor="left" factoryClass="com.redhat.devtools.intellij.knative.ui.toolwindow.WindowToolFactory" />
         <toolWindow id="KnativeFunction" anchor="left" factoryClass="com.redhat.devtools.intellij.knative.ui.toolwindow.FunctionsWindowToolFactory" />
-        <toolWindow id="KnativeLocalFunction" anchor="left" factoryClass="com.redhat.devtools.intellij.knative.ui.toolwindow.LocalFunctionsWindowToolFactory" secondary="true" order="after KnativeFunction" />
+        <toolWindow id="
+" anchor="left" factoryClass="com.redhat.devtools.intellij.knative.ui.toolwindow.LocalFunctionsWindowToolFactory" secondary="true" order="after KnativeFunction" />
         <fileDocumentSynchronizationVetoer id="com.redhat.devtools.intellij.knative.listener.KnSaveInEditorListener" implementation="com.redhat.devtools.intellij.knative.listener.KnSaveInEditorListener" order="first" />
         <moduleBuilder builderClass="com.redhat.devtools.intellij.knative.ui.createFunc.FunctionModuleBuilder"/>
         <nonProjectFileWritingAccessExtension id="com.redhat.devtools.intellij.common.editor.AllowNonProjectEditing" implementation="com.redhat.devtools.intellij.common.editor.AllowNonProjectEditing" />
@@ -40,12 +41,6 @@
     <actions>
         <group id="com.redhat.devtools.intellij.knative.tree" popup="true">
             <action id="com.redhat.devtools.intellij.knative.actions.CreateServiceAction" class="com.redhat.devtools.intellij.knative.actions.CreateServiceAction" text="New Service"/>
-
-            <group id="com.redhat.devtools.intellij.knative.tree.functions.new" text="New Function" icon="AllIcons.General.Add" popup="true">
-                <add-to-group group-id="com.redhat.devtools.intellij.knative.tree" anchor="first"/>
-                <action id="com.redhat.devtools.intellij.knative.actions.func.CreateFunctionProjectAction" class="com.intellij.ide.actions.NewProjectAction" text="Project..."/>
-                <action id="com.redhat.devtools.intellij.knative.actions.func.CreateFunctionModuleAction" class="com.intellij.openapi.roots.ui.configuration.actions.NewModuleAction" text="Module..."/>
-            </group>
 
             <action id="com.redhat.devtools.intellij.knative.actions.OpenInEditorAction" class="com.redhat.devtools.intellij.knative.actions.OpenInEditorAction" text="Open in Editor"/>
             <action id="com.redhat.devtools.intellij.knative.actions.OpenInBrowserAction" class="com.redhat.devtools.intellij.knative.actions.OpenInBrowserAction" text="Open in Browser"/>
@@ -58,7 +53,17 @@
                     use-shortcut-of="Refresh"/>
         </group>
 
+        <group id="com.redhat.devtools.intellij.knative.tree.functions.new" text="New Function" icon="AllIcons.General.Add" popup="true">
+            <action id="com.redhat.devtools.intellij.knative.actions.func.CreateFunctionProjectAction" class="com.intellij.ide.actions.NewProjectAction" text="Project..."/>
+            <action id="com.redhat.devtools.intellij.knative.actions.func.CreateFunctionModuleAction" class="com.intellij.openapi.roots.ui.configuration.actions.NewModuleAction" text="Module..."/>
+        </group>
+
         <group id="com.redhat.devtools.intellij.knative.tree.functions" popup="true">
+            <reference id="com.redhat.devtools.intellij.knative.actions.DeleteAction"/>
+            <reference id="com.redhat.devtools.intellij.knative.refresh"/>
+        </group>
+
+        <group id="com.redhat.devtools.intellij.knative.tree.localfunctions" popup="true">
             <action id="com.redhat.devtools.intellij.knative.actions.func.BuildAction"
                     class="com.redhat.devtools.intellij.knative.actions.func.BuildAction"
                     text="Build"/>
@@ -79,6 +84,11 @@
         </group>
 
         <group id="com.redhat.devtools.intellij.knative.view.actionsFunctionToolbar">
+            <reference id="com.redhat.devtools.intellij.knative.refresh"/>
+            <reference id="com.redhat.devtools.intellij.knative.tree.functions.new"/>
+        </group>
+
+        <group id="com.redhat.devtools.intellij.knative.view.actionsLocalFunctionToolbar">
             <reference id="com.redhat.devtools.intellij.knative.refreshfunc"/>
             <reference id="com.redhat.devtools.intellij.knative.tree.functions.new"/>
         </group>

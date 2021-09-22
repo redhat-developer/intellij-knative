@@ -26,6 +26,7 @@ intellij {
 }
 
 dependencies {
+    compile 'io.fabric8:knative-client:5.0.2'
     compile 'com.redhat.devtools.intellij:intellij-common:1.5.0-SNAPSHOT'
     testCompile 'org.mockito:mockito-inline:3.8.0'
     compile 'com.squareup.okio:okio:1.15.0'

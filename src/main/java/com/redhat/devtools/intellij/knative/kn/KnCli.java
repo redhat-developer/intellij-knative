@@ -18,10 +18,14 @@ import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.NetworkUtils;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
+import io.fabric8.knative.client.KnativeClient;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.Watch;
+import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.WatcherException;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 
 import java.io.File;
@@ -283,5 +287,15 @@ public class KnCli implements Kn {
     @Override
     public void runFunc(String path) throws IOException {
         ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, funcCommand, "run", "-p", path);
+    }
+
+    @Override
+    public Watch watchServiceWithLabel(String key, String value, Watcher<io.fabric8.knative.serving.v1.Service> watcher) throws IOException {
+        try {
+            return client.adapt(KnativeClient.class).services().inNamespace(getNamespace()).withLabel(key, value)
+                    .watch(watcher);
+        } catch (KubernetesClientException e) {
+            throw new IOException(e);
+        }
     }
 }

@@ -17,11 +17,13 @@ import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.tree.KnEventingNode;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionsNode;
+import com.redhat.devtools.intellij.knative.tree.KnFunctionsTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.KnRevisionNode;
 import com.redhat.devtools.intellij.knative.tree.KnRootNode;
 import com.redhat.devtools.intellij.knative.tree.KnServiceNode;
 import com.redhat.devtools.intellij.knative.tree.KnServingNode;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
+import java.util.Arrays;
 import javax.swing.tree.TreePath;
 
 public class RefreshAction extends StructureTreeAction {

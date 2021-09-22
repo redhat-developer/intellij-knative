@@ -19,6 +19,7 @@ import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
+import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.PopupHandler;
 import com.intellij.ui.components.JBScrollPane;
@@ -34,8 +35,18 @@ import com.redhat.devtools.intellij.knative.tree.AbstractKnTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.KnNodeComparator;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import javax.swing.Icon;
 
 public abstract class KnBaseWindowTool<T extends AbstractKnTreeStructure> {
+
+    protected void setTitleAndIcon(ToolWindow toolWindow, String title) {
+        Icon icon = IconLoader.findIcon("/images/knative-logo.svg", KnBaseWindowTool.class);
+        if (icon != null) {
+            toolWindow.setIcon(icon);
+        }
+        toolWindow.setStripeTitle(title);
+        toolWindow.setTitle(title);
+    }
 
     protected Tree createTree(Project project, T structure, boolean isRootVisible) {
         try {

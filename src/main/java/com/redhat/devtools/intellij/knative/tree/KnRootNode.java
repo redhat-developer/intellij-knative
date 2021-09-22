@@ -26,7 +26,8 @@ public class KnRootNode {
     }
 
     public static KnRootNode getInstance(Project project) {
-        if (instance == null) {
+        if (instance == null
+                || !instance.getProject().equals(project)) {
             instance = new KnRootNode(project);
         }
         return instance;
