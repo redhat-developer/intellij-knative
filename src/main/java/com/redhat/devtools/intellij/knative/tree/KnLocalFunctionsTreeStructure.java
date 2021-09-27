@@ -70,7 +70,7 @@ public class KnLocalFunctionsTreeStructure extends AbstractKnTreeStructure  {
                 localFunctions.forEach(it -> functions.add(new KnFunctionLocalNode(parent, parent, it)));
             }
         } catch (IOException e) {
-            functions.add(new MessageNode<>(parent, parent, "Failed to load functions"));
+            functions.add(new MessageNode<>(parent, parent, "Unable to load local functions. Functions need both knative serving and eventing installed."));
         }
         return functions.toArray();
     }

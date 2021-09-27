@@ -36,11 +36,8 @@ import javax.swing.Icon;
 import org.apache.commons.codec.binary.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class KnTreeStructure extends AbstractKnTreeStructure implements ConfigWatcher.Listener {
-    private static Logger logger = LoggerFactory.getLogger(KnTreeStructure.class);
 
     private static final Icon SERVICE_ICON = IconLoader.findIcon("/images/service.svg");
     private static final Icon REVISION_ICON = IconLoader.findIcon("/images/revision.svg");
@@ -191,11 +188,6 @@ public class KnTreeStructure extends AbstractKnTreeStructure implements ConfigWa
             Kn kn = ((KnRootNode) element).getKn();
             return new LabelAndIconDescriptor<>(project, element, kn != null ? kn.getNamespace() : "Loading", CLUSTER_ICON, parentDescriptor);
         }
-
-        if (element instanceof MessageNode) {
-            return new LabelAndIconDescriptor<>(project, element, ((MessageNode<?>) element).getName(), AllIcons.Nodes.EmptyNode, parentDescriptor);
-        }
-
         if (element instanceof KnServingNode) {
             return new LabelAndIconDescriptor<>(project, element, ((KnServingNode) element).getName(), AllIcons.Nodes.Package, parentDescriptor);
         }
@@ -236,13 +228,7 @@ public class KnTreeStructure extends AbstractKnTreeStructure implements ConfigWa
         if (element instanceof KnSinkNode) {
             return new KnSinkDescriptor(project, (KnSinkNode) element, parentDescriptor);
         }
-
-        //if we can present node we try to do that
-        if (element instanceof ParentableNode) {
-            logger.warn("There are no descriptor for " + element.getClass().getName() + ", using default.");
-            return new LabelAndIconDescriptor<>(project, element, ((ParentableNode<?>) element).getName(), AllIcons.Nodes.ErrorIntroduction, parentDescriptor);
-        }
-        throw new RuntimeException("Can't find NodeDescriptor for " + element.getClass().getName());
+        return super.createDescriptor(element, parentDescriptor);
     }
 
     @Override

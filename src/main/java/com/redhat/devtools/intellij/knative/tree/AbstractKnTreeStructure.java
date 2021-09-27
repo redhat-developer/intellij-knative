@@ -10,10 +10,12 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.tree;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.ide.util.treeView.AbstractTreeStructure;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
+import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
 import com.redhat.devtools.intellij.common.tree.MutableModel;
 import com.redhat.devtools.intellij.common.tree.MutableModelSupport;
 import com.redhat.devtools.intellij.knative.kn.Kn;
@@ -21,8 +23,11 @@ import java.io.IOException;
 import javax.swing.Icon;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AbstractKnTreeStructure extends AbstractTreeStructure implements MutableModel<Object> {
+    private static Logger logger = LoggerFactory.getLogger(AbstractKnTreeStructure.class);
     protected static final Icon CLUSTER_ICON = IconLoader.findIcon("/images/knative-logo.svg", AbstractKnTreeStructure.class);
     protected Project project;
     protected KnRootNode root;
@@ -50,6 +55,13 @@ public class AbstractKnTreeStructure extends AbstractTreeStructure implements Mu
 
     @Override
     public @NotNull NodeDescriptor createDescriptor(@NotNull Object element, @Nullable NodeDescriptor parentDescriptor) {
+        if (element instanceof MessageNode) {
+            return new LabelAndIconDescriptor<>(project, element, ((MessageNode<?>) element).getName(), AllIcons.Nodes.EmptyNode, parentDescriptor);
+        }
+        if (element instanceof ParentableNode) {
+            logger.warn("There are no descriptor for " + element.getClass().getName() + ", using default.");
+            return new LabelAndIconDescriptor<>(project, element, ((ParentableNode<?>) element).getName(), AllIcons.Nodes.ErrorIntroduction, parentDescriptor);
+        }
         throw new RuntimeException("Can't find NodeDescriptor for " + element.getClass().getName());
     }
 
