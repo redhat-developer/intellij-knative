@@ -46,11 +46,6 @@ public class RunAction extends KnAction {
             try {
                 knCli.runFunc(localPathFunc);
             } catch (IOException e) {
-                Notification notification = new Notification(NOTIFICATION_ID,
-                        "Error",
-                        e.getLocalizedMessage(),
-                        NotificationType.ERROR);
-                Notifications.Bus.notify(notification);
                 logger.warn(e.getLocalizedMessage(), e);
             }
         });

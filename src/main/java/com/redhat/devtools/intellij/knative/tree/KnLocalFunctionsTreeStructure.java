@@ -33,12 +33,15 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class KnLocalFunctionsTreeStructure extends AbstractKnTreeStructure  {
-
+    private Logger logger = LoggerFactory.getLogger(KnLocalFunctionsTreeStructure.class);
     private List<Pair<String, VirtualFileListener>> funcYamlListeners;
 
     public KnLocalFunctionsTreeStructure(Project project) {
@@ -59,9 +62,13 @@ public class KnLocalFunctionsTreeStructure extends AbstractKnTreeStructure  {
 
     private Object[] getFunctionNodes(KnRootNode parent) {
         List<Object> functions = new ArrayList<>();
+        Kn kn = parent.getKn();
+        List<Function> funcOnCluster = Collections.emptyList();
         try {
-            Kn kn = parent.getKn();
-            List<Function> funcOnCluster = kn.getFunctions();
+            funcOnCluster = kn.getFunctions();
+        } catch (IOException ignored) { }
+
+        try {
             // if current project contains new functions, adds them
             List<String> pathsWithFunc = getModulesPathsWithFunc(kn);
             if (!pathsWithFunc.isEmpty()) {
@@ -69,8 +76,9 @@ public class KnLocalFunctionsTreeStructure extends AbstractKnTreeStructure  {
                 setListenerToFunctions(kn, localFunctions);
                 localFunctions.forEach(it -> functions.add(new KnFunctionLocalNode(parent, parent, it)));
             }
-        } catch (IOException e) {
-            functions.add(new MessageNode<>(parent, parent, "Unable to load local functions. Functions need both knative serving and eventing installed."));
+        }catch (IOException e) {
+            functions.add(new MessageNode<>(parent, parent, "Unable to load local functions. Error while parsing opened project."));
+            logger.warn(e.getLocalizedMessage(), e);
         }
         return functions.toArray();
     }
@@ -197,8 +205,6 @@ public class KnLocalFunctionsTreeStructure extends AbstractKnTreeStructure  {
             return false;
         }
     }
-
-
 
     @Override
     public @Nullable Object getParentElement(@NotNull Object element) {
