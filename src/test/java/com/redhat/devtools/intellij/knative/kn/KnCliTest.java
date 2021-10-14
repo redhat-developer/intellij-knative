@@ -414,7 +414,7 @@ public class KnCliTest extends BaseTest {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.buildFunc("path", "registry", "");
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.executeWithTerminalWidget(any(), anyString(), anyString(), eq("build"), eq("-r"), eq("registry"), eq("-p"), eq("path")));
+                    ExecHelper.executeWithTerminal(any(), anyString(), anyString(), eq("build"), eq("-r"), eq("registry"), eq("-p"), eq("path")));
         }
     }
 
@@ -423,14 +423,14 @@ public class KnCliTest extends BaseTest {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.buildFunc("path", "registry", "image");
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.executeWithTerminalWidget(any(), anyString(), anyString(), eq("build"), eq("-i"), eq("image"), eq("-p"), eq("path")));
+                    ExecHelper.executeWithTerminal(any(), anyString(), anyString(), eq("build"), eq("-i"), eq("image"), eq("-p"), eq("path")));
         }
     }
 
     @Test
     public void BuildFunc_ClientFails_Throws() {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            execHelperMockedStatic.when(() -> ExecHelper.executeWithTerminalWidget(any(), anyString())).thenThrow(new IOException("error"));
+            execHelperMockedStatic.when(() -> ExecHelper.executeWithTerminal(any(), anyString())).thenThrow(new IOException("error"));
             kn.buildFunc("", "", "");
         } catch (IOException e) {
             assertEquals("error", e.getLocalizedMessage());
@@ -442,7 +442,7 @@ public class KnCliTest extends BaseTest {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.deployFunc("namespace", "path", "registry", "");
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.executeWithTerminalWidget(any(), anyString(), anyString(), eq("deploy"), eq("-r"), eq("registry"), eq("-n"), eq("namespace"), eq("-p"), eq("path")));
+                    ExecHelper.executeWithTerminal(any(), anyString(), anyString(), eq("deploy"), eq("-r"), eq("registry"), eq("-n"), eq("namespace"), eq("-p"), eq("path")));
         }
     }
 
@@ -451,14 +451,14 @@ public class KnCliTest extends BaseTest {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.deployFunc("namespace", "path", "registry", "image");
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.executeWithTerminalWidget(any(), anyString(), anyString(), eq("deploy"), eq("-i"), eq("image"), eq("-n"), eq("namespace"), eq("-p"), eq("path")));
+                    ExecHelper.executeWithTerminal(any(), anyString(), anyString(), eq("deploy"), eq("-i"), eq("image"), eq("-n"), eq("namespace"), eq("-p"), eq("path")));
         }
     }
 
     @Test
     public void DeployFunc_ClientFails_Throws() {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            execHelperMockedStatic.when(() -> ExecHelper.executeWithTerminalWidget(any(), anyString())).thenThrow(new IOException("error"));
+            execHelperMockedStatic.when(() -> ExecHelper.executeWithTerminal(any(), anyString())).thenThrow(new IOException("error"));
             kn.deployFunc("", "", "", "");
         } catch (IOException e) {
             assertEquals("error", e.getLocalizedMessage());
@@ -470,14 +470,14 @@ public class KnCliTest extends BaseTest {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.runFunc("path");
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.executeWithTerminalWidget(any(), anyString(), anyString(), eq("run"), eq("-p"), eq("path")));
+                    ExecHelper.executeWithTerminal(any(), anyString(), anyString(), eq("run"), eq("-p"), eq("path")));
         }
     }
 
     @Test
     public void RunFunc_ClientFails_Throws() {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            execHelperMockedStatic.when(() -> ExecHelper.executeWithTerminalWidget(any(), anyString())).thenThrow(new IOException("error"));
+            execHelperMockedStatic.when(() -> ExecHelper.executeWithTerminal(any(), anyString())).thenThrow(new IOException("error"));
             kn.runFunc("");
         } catch (IOException e) {
             assertEquals("error", e.getLocalizedMessage());
