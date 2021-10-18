@@ -65,10 +65,6 @@ public class KnCli implements Kn {
         }
     }
 
-    public Project getProject() {
-        return project;
-    }
-
     @Override
     public boolean isKnativeServingAware() throws IOException {
         try {
@@ -294,7 +290,7 @@ public class KnCli implements Kn {
         try {
             return client.adapt(KnativeClient.class).services().inNamespace(getNamespace()).withLabel(key, value)
                     .watch(watcher);
-        } catch (KubernetesClientException e) {
+        } catch (Exception e) {
             throw new IOException(e);
         }
     }

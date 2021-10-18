@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 public class KnCliFactory {
     private static final Logger logger = LoggerFactory.getLogger(KnCliFactory.class);
     private static KnCliFactory INSTANCE;
+    private Project lastProject;
 
     public static KnCliFactory getInstance() {
         if (INSTANCE == null) {
@@ -34,28 +35,26 @@ public class KnCliFactory {
     }
 
     public CompletableFuture<Kn> getKn(Project project) {
-        Kn kn = getKn();
-        if (future == null
-                || (kn != null && !kn.getProject().equals(project))) {
-            CompletableFuture<String> knCompletableFuture = DownloadHelper.getInstance()
-                    .downloadIfRequiredAsync("kn", KnCliFactory.class.getResource("/kn.json"));
-            CompletableFuture<String> funcCompletableFuture = DownloadHelper.getInstance()
-                    .downloadIfRequiredAsync("func", KnCliFactory.class.getResource("/func.json"));
-            future = knCompletableFuture.thenCompose(knCommand ->
-                    funcCompletableFuture.thenApply(funcCommand -> new KnCli(project, knCommand, funcCommand)));
+        if (future == null) {
+            download(project);
+        } else {
+            future.whenComplete((kn, throwable) -> {
+                if (!lastProject.equals(project)) {
+                    download(project);
+                }
+            });
         }
         return future;
     }
 
-    private Kn getKn() {
-        try {
-            if (future != null) {
-                return future.get();
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            logger.warn(e.getLocalizedMessage(), e);
-        }
-        return null;
+    private void download(Project project) {
+        lastProject = project;
+        CompletableFuture<String> knCompletableFuture = DownloadHelper.getInstance()
+                .downloadIfRequiredAsync("kn", KnCliFactory.class.getResource("/kn.json"));
+        CompletableFuture<String> funcCompletableFuture = DownloadHelper.getInstance()
+                .downloadIfRequiredAsync("func", KnCliFactory.class.getResource("/func.json"));
+        future = knCompletableFuture.thenCompose(knCommand ->
+                funcCompletableFuture.thenApply(funcCommand -> new KnCli(project, knCommand, funcCommand)));
     }
 
     public void resetKn() {

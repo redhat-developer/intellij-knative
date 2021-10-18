@@ -26,13 +26,6 @@ import java.util.Map;
 public interface Kn {
 
     /**
-     * Get the project linked to the Kn instance
-     *
-     * @return the project
-     */
-    public Project getProject();
-
-    /**
      * Check if the cluster is Knative serving aware.
      *
      * @return true if Knative Serving is installed on cluster false otherwise
