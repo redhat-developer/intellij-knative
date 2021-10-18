@@ -53,8 +53,8 @@
         </group>
 
         <group id="com.redhat.devtools.intellij.knative.tree.functions.new" text="New Function" icon="AllIcons.General.Add" popup="true">
-            <action class="com.intellij.ide.actions.NewProjectAction" text="Project..."/>
-            <action class="com.intellij.openapi.roots.ui.configuration.actions.NewModuleAction" text="Module..."/>
+            <action id="com.redhat.devtools.intellij.knative.NewProject" class="com.intellij.ide.actions.NewProjectAction" text="Project..."/>
+            <action id="com.redhat.devtools.intellij.knative.NewModule" class="com.intellij.openapi.roots.ui.configuration.actions.NewModuleAction" text="Module..."/>
         </group>
 
         <group id="com.redhat.devtools.intellij.knative.tree.functions" popup="true">
