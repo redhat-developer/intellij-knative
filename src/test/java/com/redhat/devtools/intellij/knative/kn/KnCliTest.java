@@ -486,12 +486,12 @@ public class KnCliTest extends BaseTest {
 
     @Test
     public void GetFuncFile_FileExists_File() throws IOException {
-        File file = kn.getFuncFile(getPath(RESOURCES_PATH + "func"));
+        File file = kn.getFuncFile(getPath(RESOURCES_PATH + "func/"));
         assertTrue(file.exists());
     }
 
     @Test
-    public void GetFuncFile_FileNotExists_Throws() throws IOException {
+    public void GetFuncFile_FileNotExists_Throws() {
         try {
             kn.getFuncFile(getPath(RESOURCES_PATH));
         } catch(IOException e) {

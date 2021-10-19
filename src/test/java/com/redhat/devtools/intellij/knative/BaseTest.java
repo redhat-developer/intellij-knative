@@ -31,6 +31,9 @@ import com.redhat.devtools.intellij.knative.tree.KnSinkNode;
 import com.redhat.devtools.intellij.knative.tree.KnSourceNode;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
+
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.apache.commons.io.IOUtils;
@@ -89,10 +92,21 @@ public class BaseTest {
     }
 
     protected String load(String name) throws IOException {
-        return IOUtils.toString(BaseTest.class.getResource("/" + name), StandardCharsets.UTF_8);
+        return IOUtils.toString(getUrl(name), StandardCharsets.UTF_8);
     }
 
     protected Path getPath(String name) throws IOException {
-        return Paths.get(BaseTest.class.getResource("/" + name).getPath());
+        try {
+            return Paths.get(getUrl(name).toURI());
+        } catch (URISyntaxException e) {
+            throw new IOException(e.getLocalizedMessage());
+        }
+    }
+    private URL getUrl(String name) throws IOException {
+        URL url = BaseTest.class.getResource("/" + name);
+        if (url == null) {
+            throw new IOException("File " + name + " not found");
+        }
+        return url;
     }
 }
