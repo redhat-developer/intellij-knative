@@ -52,11 +52,6 @@
                     use-shortcut-of="Refresh"/>
         </group>
 
-        <group id="com.redhat.devtools.intellij.knative.tree.functions.new" text="New Function" icon="AllIcons.General.Add" popup="true">
-            <action id="com.redhat.devtools.intellij.knative.NewProject" class="com.intellij.ide.actions.NewProjectAction" text="Project..."/>
-            <action id="com.redhat.devtools.intellij.knative.NewModule" class="com.intellij.openapi.roots.ui.configuration.actions.NewModuleAction" text="Module..."/>
-        </group>
-
         <group id="com.redhat.devtools.intellij.knative.tree.functions" popup="true">
             <reference id="com.redhat.devtools.intellij.knative.actions.DeleteAction"/>
             <reference id="com.redhat.devtools.intellij.knative.refresh"/>
@@ -84,12 +79,10 @@
 
         <group id="com.redhat.devtools.intellij.knative.view.actionsFunctionToolbar">
             <reference id="com.redhat.devtools.intellij.knative.refresh"/>
-            <reference id="com.redhat.devtools.intellij.knative.tree.functions.new"/>
         </group>
 
         <group id="com.redhat.devtools.intellij.knative.view.actionsLocalFunctionToolbar">
             <reference id="com.redhat.devtools.intellij.knative.refreshfunc"/>
-            <reference id="com.redhat.devtools.intellij.knative.tree.functions.new"/>
         </group>
     </actions>
 </idea-plugin>
