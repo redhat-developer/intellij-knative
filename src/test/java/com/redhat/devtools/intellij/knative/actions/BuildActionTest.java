@@ -217,7 +217,7 @@ public class BuildActionTest extends ActionTest {
     private AnActionEvent createBuildActionEvent() throws IOException {
         AnActionEvent anActionEvent = mock(AnActionEvent.class);
         when(anActionEvent.getData(PlatformDataKeys.CONTEXT_COMPONENT)).thenReturn(tree);
-        when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(knFunctionsTreeStructure);
+        when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(knLocalFunctionsTreeStructure);
         when(knFunctionLocalNode.getRootNode()).thenReturn(knRootNode);
         when(knRootNode.getKn()).thenReturn(kn);
         when(kn.getNamespace()).thenReturn("namespace");

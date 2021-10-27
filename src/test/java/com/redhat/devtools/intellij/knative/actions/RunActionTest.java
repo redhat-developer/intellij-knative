@@ -10,20 +10,15 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.actions;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.redhat.devtools.intellij.knative.Constants;
-import com.redhat.devtools.intellij.knative.actions.func.BuildAction;
 import com.redhat.devtools.intellij.knative.actions.func.RunAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
-import java.io.File;
+
 import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
-import java.nio.file.Path;
 import javax.swing.tree.TreePath;
 import org.junit.Before;
 import org.junit.Test;
@@ -74,7 +69,7 @@ public class RunActionTest extends ActionTest {
     private AnActionEvent createRunActionEvent() throws IOException {
         AnActionEvent anActionEvent = mock(AnActionEvent.class);
         when(anActionEvent.getData(PlatformDataKeys.CONTEXT_COMPONENT)).thenReturn(tree);
-        when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(knFunctionsTreeStructure);
+        when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(knLocalFunctionsTreeStructure);
         when(anActionEvent.getProject()).thenReturn(project);
         when(model.getSelectionPath()).thenReturn(path3);
         when(model.getSelectionPaths()).thenReturn(new TreePath[] {path3});

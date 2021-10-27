@@ -76,19 +76,19 @@ public class TreeHelper {
         return (Tree) view;
     }
 
-    public static KnTreeStructure getKnTreeStructure(@NotNull Project project) {
+    public static KnTreeStructure getKnTreeStructure(Project project) {
         return getKnTreeStructure(project, KNATIVE_TOOL_WINDOW_ID);
     }
 
-    public static KnLocalFunctionsTreeStructure getKnLocalFunctionsTreeStructure(@NotNull Project project) {
+    public static KnLocalFunctionsTreeStructure getKnLocalFunctionsTreeStructure(Project project) {
         return (KnLocalFunctionsTreeStructure) getTreeStructure(project, KNATIVE_LOCAL_FUNC_TOOL_WINDOW_ID);
     }
 
-    public static KnTreeStructure getKnFunctionsTreeStructure(@NotNull Project project) {
+    public static KnTreeStructure getKnFunctionsTreeStructure(Project project) {
         return getKnTreeStructure(project, KNATIVE_FUNC_TOOL_WINDOW_ID);
     }
 
-    private static KnTreeStructure getKnTreeStructure(@NotNull Project project, String toolWindowId) {
+    private static KnTreeStructure getKnTreeStructure(Project project, String toolWindowId) {
         return (KnTreeStructure) getTreeStructure(project, toolWindowId);
     }
 

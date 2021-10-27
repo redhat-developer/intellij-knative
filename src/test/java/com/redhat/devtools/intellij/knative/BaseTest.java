@@ -22,6 +22,7 @@ import com.redhat.devtools.intellij.knative.tree.KnEventingTriggersNode;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionLocalNode;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionsNode;
+import com.redhat.devtools.intellij.knative.tree.KnFunctionsTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.KnLocalFunctionsTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.KnRevisionNode;
 import com.redhat.devtools.intellij.knative.tree.KnRootNode;
@@ -58,7 +59,8 @@ public class BaseTest {
     protected KnFunctionNode knFunctionNode;
     protected KnFunctionLocalNode knFunctionLocalNode;
     protected KnTreeStructure knTreeStructure;
-    protected KnLocalFunctionsTreeStructure knFunctionsTreeStructure;
+    protected KnFunctionsTreeStructure knFunctionsTreeStructure;
+    protected KnLocalFunctionsTreeStructure knLocalFunctionsTreeStructure;
     protected KnEventingBrokerNode knEventingBrokerNode;
     protected KnEventingChannelsNode knEventingChannelsNode;
     protected KnEventingSourcesNode knEventingSourcesNode;
@@ -78,7 +80,8 @@ public class BaseTest {
         knEventingNode = mock(KnEventingNode.class);
         knRevisionNode = mock(KnRevisionNode.class);
         knTreeStructure = mock(KnTreeStructure.class);
-        knFunctionsTreeStructure = mock(KnLocalFunctionsTreeStructure.class);
+        knFunctionsTreeStructure = mock(KnFunctionsTreeStructure.class);
+        knLocalFunctionsTreeStructure = mock(KnLocalFunctionsTreeStructure.class);
         knEventingBrokerNode = mock(KnEventingBrokerNode.class);
         knEventingChannelsNode = mock(KnEventingChannelsNode.class);
         knEventingSourcesNode = mock(KnEventingSourcesNode.class);
