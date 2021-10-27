@@ -121,7 +121,7 @@ public class KnLocalFunctionsTreeStructure extends AbstractKnTreeStructure  {
         return new VirtualFileListener() {
             @Override
             public void contentsChanged(@NotNull VirtualFileEvent event) {
-                scheduler.schedule(() -> TreeHelper.refreshFunc(project));
+                scheduler.schedule(() -> TreeHelper.refreshLocalFuncTree(project));
             }
         };
     }

@@ -25,12 +25,15 @@ import com.redhat.devtools.intellij.knative.tree.KnLocalFunctionsTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.KnRootNode;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
+import org.jetbrains.annotations.NotNull;
+
 import java.awt.Component;
 import javax.swing.JComponent;
 import javax.swing.JViewport;
 
 
 import static com.redhat.devtools.intellij.knative.Constants.KIND_FUNCTIONS;
+import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_FUNC_TOOL_WINDOW_ID;
 import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_LOCAL_FUNC_TOOL_WINDOW_ID;
 import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_TOOL_WINDOW_ID;
 
@@ -73,12 +76,20 @@ public class TreeHelper {
         return (Tree) view;
     }
 
-    public static KnTreeStructure getKnTreeStructure(Project project) {
-        return (KnTreeStructure) getTreeStructure(project, KNATIVE_TOOL_WINDOW_ID);
+    public static KnTreeStructure getKnTreeStructure(@NotNull Project project) {
+        return getKnTreeStructure(project, KNATIVE_TOOL_WINDOW_ID);
     }
 
-    public static KnLocalFunctionsTreeStructure getKnLocalFunctionsTreeStructure(Project project) {
+    public static KnLocalFunctionsTreeStructure getKnLocalFunctionsTreeStructure(@NotNull Project project) {
         return (KnLocalFunctionsTreeStructure) getTreeStructure(project, KNATIVE_LOCAL_FUNC_TOOL_WINDOW_ID);
+    }
+
+    public static KnTreeStructure getKnFunctionsTreeStructure(@NotNull Project project) {
+        return getKnTreeStructure(project, KNATIVE_FUNC_TOOL_WINDOW_ID);
+    }
+
+    private static KnTreeStructure getKnTreeStructure(@NotNull Project project, String toolWindowId) {
+        return (KnTreeStructure) getTreeStructure(project, toolWindowId);
     }
 
     private static AbstractTreeStructure getTreeStructure(Project project, String toolWindowId) {
@@ -104,15 +115,24 @@ public class TreeHelper {
     }
 
     public static void refresh(Project project, ParentableNode node) {
-        if (project != null && node != null) {
-            KnTreeStructure structure = getKnTreeStructure(project);
-            if (structure != null) {
-                structure.fireModified(node);
-            }
+        if (project != null) {
+            refreshTreeStructure(getKnTreeStructure(project), node);
         }
     }
 
-    public static void refreshFunc(Project project) {
+    public static void refreshFuncTree(Project project, ParentableNode node) {
+        if (project != null) {
+            refreshTreeStructure(getKnFunctionsTreeStructure(project), node);
+        }
+    }
+
+    private static void refreshTreeStructure(KnTreeStructure structure, ParentableNode node) {
+        if (structure != null && node != null) {
+            structure.fireModified(node);
+        }
+    }
+
+    public static void refreshLocalFuncTree(Project project) {
         if (project != null) {
             KnLocalFunctionsTreeStructure structure = getKnLocalFunctionsTreeStructure(project);
             if (structure != null) {

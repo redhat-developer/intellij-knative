@@ -67,9 +67,11 @@ public class DeleteAction extends KnAction {
         for(Class type: resourcesByClass.keySet()) {
             try {
                 deleteResources(type, resourcesByClass, kncli);
-                TreeHelper.refresh(project, (ParentableNode) resourcesByClass.get(type).get(0).getParent());
                 if (type.equals(KnFunctionNode.class)) {
-                    TreeHelper.refreshFunc(project);
+                    TreeHelper.refreshFuncTree(project, (ParentableNode) resourcesByClass.get(type).get(0).getParent());
+                    TreeHelper.refreshLocalFuncTree(project);
+                } else {
+                    TreeHelper.refresh(project, (ParentableNode) resourcesByClass.get(type).get(0).getParent());
                 }
             } catch (IOException e) {
                 UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Error"));

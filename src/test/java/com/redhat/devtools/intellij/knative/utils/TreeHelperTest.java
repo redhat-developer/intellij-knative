@@ -265,7 +265,7 @@ public class TreeHelperTest extends FixtureBaseTest {
 
     @Test
     public void RefreshFunc_ProjectIsNull_Nothing() {
-        TreeHelper.refreshFunc(null);
+        TreeHelper.refreshLocalFuncTree(null);
         verify(knFunctionsTreeStructure, never()).fireModified(any());
     }
 
@@ -273,14 +273,14 @@ public class TreeHelperTest extends FixtureBaseTest {
     public void RefreshFunc_ProjectWithoutTreeStructure_Nothing() {
         getTree(KNATIVE_LOCAL_FUNC_TOOL_WINDOW_ID);
         when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(null);
-        TreeHelper.refreshFunc(project);
+        TreeHelper.refreshLocalFuncTree(project);
         verify(knFunctionsTreeStructure, never()).fireModified(any());
     }
 
     @Test
     public void RefreshFunc_ProjectAndNodeAreValid_Refresh() {
         getKnLocalFunctionsTreeStructure();
-        TreeHelper.refreshFunc(project);
+        TreeHelper.refreshLocalFuncTree(project);
         verify(knFunctionsTreeStructure).fireModified(any());
     }
 

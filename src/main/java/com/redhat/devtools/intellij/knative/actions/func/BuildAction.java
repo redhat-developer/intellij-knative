@@ -26,7 +26,7 @@ import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionLocalNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
-import java.io.File;
+
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -76,7 +76,7 @@ public class BuildAction extends KnAction {
         ExecHelper.submit(() -> {
             try {
                 doExecute(knCli, namespace, localPathFunc, registry, finalImage);
-                TreeHelper.refreshFunc(getEventProject(anActionEvent));
+                TreeHelper.refreshLocalFuncTree(getEventProject(anActionEvent));
             } catch (IOException e) {
                 Notification notification = new Notification(NOTIFICATION_ID,
                         "Error",

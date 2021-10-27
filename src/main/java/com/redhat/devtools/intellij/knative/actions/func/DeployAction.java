@@ -11,10 +11,15 @@
 package com.redhat.devtools.intellij.knative.actions.func;
 
 import com.intellij.openapi.ui.Messages;
+import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionLocalNode;
-import java.io.IOException;
 
+import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static com.intellij.openapi.ui.Messages.CANCEL_BUTTON;
 import static com.intellij.openapi.ui.Messages.OK_BUTTON;
@@ -44,16 +49,24 @@ public class DeployAction extends BuildAction {
         boolean visible = super.isVisible(selected);
         if (visible) {
             Kn kn = ((KnFunctionLocalNode) selected).getRootNode().getKn();
-            return isKnativeReady(kn);
+            try {
+                return isKnativeReady(kn).get(500, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                return false;
+            }
         }
         return false;
     }
 
-    private boolean isKnativeReady(Kn kn) {
-        try {
-            return kn.isKnativeServingAware() && kn.isKnativeEventingAware();
-        } catch (IOException e) {
-            return false;
-        }
+    private CompletableFuture<Boolean> isKnativeReady(Kn kn) {
+        CompletableFuture<Boolean> result = new CompletableFuture<>();
+        ExecHelper.submit(() -> {
+            try {
+                result.complete(kn.isKnativeServingAware() && kn.isKnativeEventingAware());
+            } catch (IOException e) {
+                result.complete(false);
+            }
+        });
+        return result;
     }
 }

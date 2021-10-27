@@ -26,7 +26,7 @@ public class RefreshFuncAction extends RefreshAction {
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
-        TreeHelper.refreshFunc(getEventProject(anActionEvent));
+        TreeHelper.refreshLocalFuncTree(getEventProject(anActionEvent));
     }
 
     @Override
