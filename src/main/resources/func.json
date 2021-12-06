@@ -1,24 +1,24 @@
 {
   "tools": {
     "func": {
-      "version": "0.16.0",
+      "version": "0.19.0",
       "versionCmd": "version",
       "versionExtractRegExp": "Version: (v\\d+[\\.\\d+]*)\\s.*",
       "versionMatchRegExpr": "0\\..*",
       "baseDir": "$HOME/.knative",
       "platforms": {
         "win": {
-          "url": "https://github.com/knative-sandbox/kn-plugin-func/releases/download/v0.16.0/func_windows_amd64.exe.gz",
+          "url": "https://github.com/knative-sandbox/kn-plugin-func/releases/download/v0.19.0/func_windows_amd64.exe.gz",
           "cmdFileName": "func_windows_amd64.exe",
           "dlFileName": "func_windows_amd64.exe.gz"
         },
         "osx": {
-          "url": "https://github.com/knative-sandbox/kn-plugin-func/releases/download/v0.16.0/func_darwin_amd64.gz",
+          "url": "https://github.com/knative-sandbox/kn-plugin-func/releases/download/v0.19.0/func_darwin_amd64.gz",
           "cmdFileName": "func_darwin_amd64",
           "dlFileName": "func_darwin_amd64.gz"
         },
         "lnx": {
-          "url": "https://github.com/knative-sandbox/kn-plugin-func/releases/download/v0.16.0/func_linux_amd64.gz",
+          "url": "https://github.com/knative-sandbox/kn-plugin-func/releases/download/v0.19.0/func_linux_amd64.gz",
           "cmdFileName": "func_linux_amd64",
           "dlFileName": "func_linux_amd64.gz"
         }
