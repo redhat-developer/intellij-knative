@@ -19,6 +19,7 @@ import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
 import com.intellij.testFramework.fixtures.TestFixtureBuilder;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.kn.KnCliFactory;
+import com.redhat.devtools.intellij.common.utils.MessagesHelper;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
@@ -40,13 +41,13 @@ public class BaseTest {
         myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture);
         myFixture.setUp();
         project = myFixture.getProject();
-        previousTestDialog = Messages.setTestDialog(message -> 0);
+        previousTestDialog = MessagesHelper.setTestDialog(message -> 0);
         kn = KnCliFactory.getInstance().getKn(project).get();
     }
 
     @After
     public void tearDown() throws Exception {
-        Messages.setTestDialog(previousTestDialog);
+        MessagesHelper.setTestDialog(previousTestDialog);
         myFixture.tearDown();
     }
 

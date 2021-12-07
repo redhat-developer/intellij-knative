@@ -27,23 +27,18 @@ import com.intellij.ui.OnePixelSplitter;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTabbedPane;
-import com.intellij.ui.mac.TouchbarDataKeys;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.utils.EditorHelper;
 import com.redhat.devtools.intellij.knative.utils.KnHelper;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
+import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -57,16 +52,18 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import org.apache.commons.lang3.tuple.Pair;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import static com.redhat.devtools.intellij.knative.Constants.YAML_FIRST_IMAGE_PATH;
 import static com.redhat.devtools.intellij.knative.Constants.YAML_NAME_PATH;
@@ -346,15 +343,12 @@ public class CreateServiceDialog extends DialogWrapper {
             footerPanel.add(buttonPanel, BorderLayout.EAST);
             buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
 
-            int index = 0;
             JPanel leftPanel = new JPanel();
             leftPanel.add(cancelButton);
-            TouchbarDataKeys.putDialogButtonDescriptor(cancelButton, index++);
             footerPanel.add(leftPanel, BorderLayout.WEST);
 
             buttonPanel.add(Box.createHorizontalStrut(5));
             buttonPanel.add(saveButton);
-            TouchbarDataKeys.putDialogButtonDescriptor(saveButton, index++).setMainGroup(true).setDefault(true);
         }
         else {
             footerPanel.add(buttonPanel, BorderLayout.CENTER);
