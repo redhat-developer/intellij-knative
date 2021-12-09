@@ -97,8 +97,10 @@ public class BuildAction extends KnAction {
     }
 
     protected String getImageFromUser(String name) {
+        String defaultUsername = System.getProperty("user.name");
+        String defaultImage = "quay.io/" + defaultUsername + "/" + name + ":latest";
         Messages.InputDialog dialog = new Messages.InputDialog(null, "Provide full image name in the form [registry]/[namespace]/[name]:[tag] (e.g quay.io/boson/image:latest)",
-                "Build Function " + name, null, null,
+                "Build Function " + name, null, defaultImage,
                 new InputValidator() {
                     @Override
                     public boolean checkInput(String inputString) {
