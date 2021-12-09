@@ -139,7 +139,7 @@ public class KnLocalFunctionsTreeStructure extends AbstractKnTreeStructure  {
                 if (functionFromLocalModule != null) {
                     boolean isOnCluster = funcOnCluster.stream()
                                             .anyMatch(func -> func.getName().equalsIgnoreCase(functionFromLocalModule.getName())
-                                                                && (functionFromLocalModule.getNamespace().isEmpty() ||
+                                                                && (Strings.isNullOrEmpty(functionFromLocalModule.getNamespace()) ||
                                                                     func.getNamespace().equalsIgnoreCase(functionFromLocalModule.getNamespace())));
                     functionFromLocalModule.setPushed(isOnCluster);
                     localFunctions.add(functionFromLocalModule);
