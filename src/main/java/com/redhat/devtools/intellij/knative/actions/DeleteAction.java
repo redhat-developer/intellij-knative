@@ -68,8 +68,7 @@ public class DeleteAction extends KnAction {
             try {
                 deleteResources(type, resourcesByClass, kncli);
                 if (type.equals(KnFunctionNode.class)) {
-                    TreeHelper.refreshFuncTree(project, (ParentableNode) resourcesByClass.get(type).get(0).getParent());
-                    TreeHelper.refreshLocalFuncTree(project);
+                    TreeHelper.refreshWholeFuncTree(project);
                 } else {
                     TreeHelper.refresh(project, (ParentableNode) resourcesByClass.get(type).get(0).getParent());
                 }

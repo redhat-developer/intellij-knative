@@ -23,7 +23,7 @@ import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.actions.KnAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.kn.Kn;
-import com.redhat.devtools.intellij.knative.tree.KnFunctionLocalNode;
+import com.redhat.devtools.intellij.knative.tree.KnLocalFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 
@@ -44,13 +44,13 @@ public class BuildAction extends KnAction {
     private static final Logger logger = LoggerFactory.getLogger(BuildAction.class);
 
     public BuildAction() {
-        super(KnFunctionLocalNode.class);
+        super(KnLocalFunctionNode.class);
     }
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Kn knCli) {
         ParentableNode node = getElement(selected);
-        Function function = ((KnFunctionLocalNode) node).getFunction();
+        Function function = ((KnLocalFunctionNode) node).getFunction();
         String localPathFunc = function.getLocalPath();
         if (localPathFunc.isEmpty()) {
             return;
@@ -76,7 +76,7 @@ public class BuildAction extends KnAction {
         ExecHelper.submit(() -> {
             try {
                 doExecute(knCli, namespace, localPathFunc, registry, finalImage);
-                TreeHelper.refreshLocalFuncTree(getEventProject(anActionEvent));
+                TreeHelper.refreshFuncTree(getEventProject(anActionEvent), ((KnLocalFunctionNode) node).getParent());
             } catch (IOException e) {
                 Notification notification = new Notification(NOTIFICATION_ID,
                         "Error",
@@ -136,8 +136,8 @@ public class BuildAction extends KnAction {
 
     @Override
     public boolean isVisible(Object selected) {
-        if (selected instanceof KnFunctionLocalNode) {
-            return !((KnFunctionLocalNode) selected).getFunction().getLocalPath().isEmpty();
+        if (selected instanceof KnLocalFunctionNode) {
+            return !((KnLocalFunctionNode) selected).getFunction().getLocalPath().isEmpty();
         }
         return false;
     }

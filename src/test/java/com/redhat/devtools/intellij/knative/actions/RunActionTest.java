@@ -16,6 +16,7 @@ import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.actions.func.RunAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
+import com.redhat.devtools.intellij.knative.tree.KnFunctionsTreeStructure;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 
 import java.io.IOException;
@@ -69,11 +70,11 @@ public class RunActionTest extends ActionTest {
     private AnActionEvent createRunActionEvent() throws IOException {
         AnActionEvent anActionEvent = mock(AnActionEvent.class);
         when(anActionEvent.getData(PlatformDataKeys.CONTEXT_COMPONENT)).thenReturn(tree);
-        when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(knLocalFunctionsTreeStructure);
+        when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(knFunctionsTreeStructure);
         when(anActionEvent.getProject()).thenReturn(project);
         when(model.getSelectionPath()).thenReturn(path3);
         when(model.getSelectionPaths()).thenReturn(new TreePath[] {path3});
-        when(knFunctionLocalNode.getFunction()).thenReturn(function);
+        when(knLocalFunctionNode.getFunction()).thenReturn(function);
 
         return anActionEvent;
     }

@@ -20,7 +20,6 @@ import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.FixtureBaseTest;
 import com.redhat.devtools.intellij.knative.kn.Kn;
-import com.redhat.devtools.intellij.knative.tree.KnLocalFunctionsTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
 import javax.swing.JViewport;
 import org.apache.commons.lang.StringUtils;
@@ -222,26 +221,6 @@ public class TreeHelperTest extends FixtureBaseTest {
     }
 
     @Test
-    public void GetLocalKnFunctionsTreeStructure_ProjectIsNull_Null() {
-        assertNull(TreeHelper.getKnLocalFunctionsTreeStructure(null));
-    }
-
-    @Test
-    public void GetLocalKnFunctionsTreeStructure_ProjectWithoutClientProperty_Null() {
-        getTree(KNATIVE_LOCAL_FUNC_TOOL_WINDOW_ID);
-        when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(null);
-        assertNull(TreeHelper.getKnLocalFunctionsTreeStructure(project));
-    }
-
-    @Test
-    public void GetLocalKnFunctionsTreeStructure_Project_KnTreeStructure() {
-        getKnLocalFunctionsTreeStructure();
-        KnLocalFunctionsTreeStructure resultingStructure = TreeHelper.getKnLocalFunctionsTreeStructure(project);
-        assertNotNull(resultingStructure);
-        assertEquals(knLocalFunctionsTreeStructure, resultingStructure);
-    }
-
-    @Test
     public void GetKn_ProjectNotValid_Null() {
         assertNull(TreeHelper.getKn(null));
     }
@@ -284,27 +263,6 @@ public class TreeHelperTest extends FixtureBaseTest {
         verify(knTreeStructure).fireModified(any());
     }
 
-    @Test
-    public void RefreshFunc_ProjectIsNull_Nothing() {
-        TreeHelper.refreshLocalFuncTree(null);
-        verify(knLocalFunctionsTreeStructure, never()).fireModified(any());
-    }
-
-    @Test
-    public void RefreshFunc_ProjectWithoutTreeStructure_Nothing() {
-        getTree(KNATIVE_LOCAL_FUNC_TOOL_WINDOW_ID);
-        when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(null);
-        TreeHelper.refreshLocalFuncTree(project);
-        verify(knLocalFunctionsTreeStructure, never()).fireModified(any());
-    }
-
-    @Test
-    public void RefreshFunc_ProjectAndNodeAreValid_Refresh() {
-        getKnLocalFunctionsTreeStructure();
-        TreeHelper.refreshLocalFuncTree(project);
-        verify(knLocalFunctionsTreeStructure).fireModified(any());
-    }
-
     private void getTree(String idToolWindow) {
         when(toolWindowManager.getToolWindow(idToolWindow)).thenReturn(toolWindow);
         when(toolWindow.getContentManager()).thenReturn(contentManager);
@@ -323,10 +281,5 @@ public class TreeHelperTest extends FixtureBaseTest {
     private void getKnFunctionsTreeStructure() {
         getTree(KNATIVE_FUNC_TOOL_WINDOW_ID);
         when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(knFunctionsTreeStructure);
-    }
-
-    private void getKnLocalFunctionsTreeStructure() {
-        getTree(KNATIVE_LOCAL_FUNC_TOOL_WINDOW_ID);
-        when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(knLocalFunctionsTreeStructure);
     }
 }

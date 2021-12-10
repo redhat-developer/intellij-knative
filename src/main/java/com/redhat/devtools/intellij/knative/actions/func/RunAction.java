@@ -10,34 +10,28 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.actions.func;
 
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.actions.KnAction;
 import com.redhat.devtools.intellij.knative.kn.Kn;
-import com.redhat.devtools.intellij.knative.tree.KnFunctionLocalNode;
+import com.redhat.devtools.intellij.knative.tree.KnLocalFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import java.io.IOException;
 import javax.swing.tree.TreePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-import static com.redhat.devtools.intellij.knative.Constants.NOTIFICATION_ID;
-
 public class RunAction extends KnAction {
     private static final Logger logger = LoggerFactory.getLogger(RunAction.class);
 
     public RunAction() {
-        super(KnFunctionLocalNode.class);
+        super(KnLocalFunctionNode.class);
     }
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Kn knCli) {
         ParentableNode node = getElement(selected);
-        String localPathFunc = ((KnFunctionLocalNode) node).getFunction().getLocalPath();
+        String localPathFunc = ((KnLocalFunctionNode) node).getFunction().getLocalPath();
         if (localPathFunc.isEmpty()) {
             return;
         }
@@ -53,13 +47,13 @@ public class RunAction extends KnAction {
 
     @Override
     public boolean isVisible(Object selected) {
-        return selected instanceof KnFunctionLocalNode && !((KnFunctionLocalNode) selected).getFunction().getLocalPath().isEmpty();
+        return selected instanceof KnLocalFunctionNode && !((KnLocalFunctionNode) selected).getFunction().getLocalPath().isEmpty();
     }
 
     @Override
     public boolean isEnabled(Object selected) {
-        if (selected instanceof KnFunctionLocalNode) {
-            String image = ((KnFunctionLocalNode) selected).getFunction().getImage();
+        if (selected instanceof KnLocalFunctionNode) {
+            String image = ((KnLocalFunctionNode) selected).getFunction().getImage();
             return image != null && !image.isEmpty();
         }
         return false;

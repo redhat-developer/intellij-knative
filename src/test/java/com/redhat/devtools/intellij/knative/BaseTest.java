@@ -19,11 +19,10 @@ import com.redhat.devtools.intellij.knative.tree.KnEventingNode;
 import com.redhat.devtools.intellij.knative.tree.KnEventingSourcesNode;
 import com.redhat.devtools.intellij.knative.tree.KnEventingSubscriptionsNode;
 import com.redhat.devtools.intellij.knative.tree.KnEventingTriggersNode;
-import com.redhat.devtools.intellij.knative.tree.KnFunctionLocalNode;
+import com.redhat.devtools.intellij.knative.tree.KnLocalFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionsNode;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionsTreeStructure;
-import com.redhat.devtools.intellij.knative.tree.KnLocalFunctionsTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.KnRevisionNode;
 import com.redhat.devtools.intellij.knative.tree.KnRootNode;
 import com.redhat.devtools.intellij.knative.tree.KnServiceNode;
@@ -57,10 +56,9 @@ public class BaseTest {
     protected KnRevisionNode knRevisionNode;
     protected KnFunctionsNode knFunctionsNode;
     protected KnFunctionNode knFunctionNode;
-    protected KnFunctionLocalNode knFunctionLocalNode;
+    protected KnLocalFunctionNode knLocalFunctionNode;
     protected KnTreeStructure knTreeStructure;
     protected KnFunctionsTreeStructure knFunctionsTreeStructure;
-    protected KnLocalFunctionsTreeStructure knLocalFunctionsTreeStructure;
     protected KnEventingBrokerNode knEventingBrokerNode;
     protected KnEventingChannelsNode knEventingChannelsNode;
     protected KnEventingSourcesNode knEventingSourcesNode;
@@ -81,7 +79,6 @@ public class BaseTest {
         knRevisionNode = mock(KnRevisionNode.class);
         knTreeStructure = mock(KnTreeStructure.class);
         knFunctionsTreeStructure = mock(KnFunctionsTreeStructure.class);
-        knLocalFunctionsTreeStructure = mock(KnLocalFunctionsTreeStructure.class);
         knEventingBrokerNode = mock(KnEventingBrokerNode.class);
         knEventingChannelsNode = mock(KnEventingChannelsNode.class);
         knEventingSourcesNode = mock(KnEventingSourcesNode.class);
@@ -91,7 +88,7 @@ public class BaseTest {
         knSinkNode = mock(KnSinkNode.class);
         knFunctionsNode = mock(KnFunctionsNode.class);
         knFunctionNode = mock(KnFunctionNode.class);
-        knFunctionLocalNode = mock(KnFunctionLocalNode.class);
+        knLocalFunctionNode = mock(KnLocalFunctionNode.class);
     }
 
     protected String load(String name) throws IOException {

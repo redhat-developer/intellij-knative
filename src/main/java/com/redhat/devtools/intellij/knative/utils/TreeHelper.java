@@ -21,11 +21,10 @@ import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionsNode;
-import com.redhat.devtools.intellij.knative.tree.KnLocalFunctionsTreeStructure;
+import com.redhat.devtools.intellij.knative.tree.KnFunctionsTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.KnRootNode;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
-import org.jetbrains.annotations.NotNull;
 
 import java.awt.Component;
 import javax.swing.JComponent;
@@ -80,10 +79,6 @@ public class TreeHelper {
         return getKnTreeStructure(project, KNATIVE_TOOL_WINDOW_ID);
     }
 
-    public static KnLocalFunctionsTreeStructure getKnLocalFunctionsTreeStructure(Project project) {
-        return (KnLocalFunctionsTreeStructure) getTreeStructure(project, KNATIVE_LOCAL_FUNC_TOOL_WINDOW_ID);
-    }
-
     public static KnTreeStructure getKnFunctionsTreeStructure(Project project) {
         return getKnTreeStructure(project, KNATIVE_FUNC_TOOL_WINDOW_ID);
     }
@@ -126,18 +121,16 @@ public class TreeHelper {
         }
     }
 
-    private static void refreshTreeStructure(KnTreeStructure structure, ParentableNode node) {
-        if (structure != null && node != null) {
-            structure.fireModified(node);
+    public static void refreshWholeFuncTree(Project project) {
+        if (project != null) {
+            KnTreeStructure knFunctionsTreeStructure = getKnFunctionsTreeStructure(project);
+            refreshTreeStructure(knFunctionsTreeStructure, knFunctionsTreeStructure.getRootElement());
         }
     }
 
-    public static void refreshLocalFuncTree(Project project) {
-        if (project != null) {
-            KnLocalFunctionsTreeStructure structure = getKnLocalFunctionsTreeStructure(project);
-            if (structure != null) {
-                structure.fireModified(structure.getRootElement());
-            }
+    private static void refreshTreeStructure(KnTreeStructure structure, Object node) {
+        if (structure != null && node != null) {
+            structure.fireModified(node);
         }
     }
 

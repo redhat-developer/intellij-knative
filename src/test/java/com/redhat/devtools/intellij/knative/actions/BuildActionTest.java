@@ -217,14 +217,14 @@ public class BuildActionTest extends ActionTest {
     private AnActionEvent createBuildActionEvent() throws IOException {
         AnActionEvent anActionEvent = mock(AnActionEvent.class);
         when(anActionEvent.getData(PlatformDataKeys.CONTEXT_COMPONENT)).thenReturn(tree);
-        when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(knLocalFunctionsTreeStructure);
-        when(knFunctionLocalNode.getRootNode()).thenReturn(knRootNode);
+        when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(knFunctionsTreeStructure);
+        when(knLocalFunctionNode.getRootNode()).thenReturn(knRootNode);
         when(knRootNode.getKn()).thenReturn(kn);
         when(kn.getNamespace()).thenReturn("namespace");
         when(anActionEvent.getProject()).thenReturn(project);
         when(model.getSelectionPath()).thenReturn(path3);
         when(model.getSelectionPaths()).thenReturn(new TreePath[] {path3});
-        when(knFunctionLocalNode.getFunction()).thenReturn(function);
+        when(knLocalFunctionNode.getFunction()).thenReturn(function);
 
         when(function.getLocalPath()).thenReturn("path");
         pathFuncFile = mock(Path.class);

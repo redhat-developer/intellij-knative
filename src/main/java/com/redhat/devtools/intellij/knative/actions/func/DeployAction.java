@@ -13,7 +13,7 @@ package com.redhat.devtools.intellij.knative.actions.func;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.kn.Kn;
-import com.redhat.devtools.intellij.knative.tree.KnFunctionLocalNode;
+import com.redhat.devtools.intellij.knative.tree.KnLocalFunctionNode;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -48,7 +48,7 @@ public class DeployAction extends BuildAction {
     public boolean isVisible(Object selected) {
         boolean visible = super.isVisible(selected);
         if (visible) {
-            Kn kn = ((KnFunctionLocalNode) selected).getRootNode().getKn();
+            Kn kn = ((KnLocalFunctionNode) selected).getRootNode().getKn();
             try {
                 return isKnativeReady(kn).get(500, TimeUnit.MILLISECONDS);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {

@@ -31,7 +31,6 @@
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Knative" anchor="left" factoryClass="com.redhat.devtools.intellij.knative.ui.toolwindow.WindowToolFactory" />
         <toolWindow id="KnativeFunction" anchor="left" factoryClass="com.redhat.devtools.intellij.knative.ui.toolwindow.FunctionsWindowToolFactory" />
-        <toolWindow id="KnativeLocalFunction" anchor="left" factoryClass="com.redhat.devtools.intellij.knative.ui.toolwindow.LocalFunctionsWindowToolFactory" secondary="true" order="after KnativeFunction" />
         <fileDocumentSynchronizationVetoer id="com.redhat.devtools.intellij.knative.listener.KnSaveInEditorListener" implementation="com.redhat.devtools.intellij.knative.listener.KnSaveInEditorListener" order="first" />
         <moduleBuilder builderClass="com.redhat.devtools.intellij.knative.ui.createFunc.FunctionModuleBuilder"/>
         <nonProjectFileWritingAccessExtension id="com.redhat.devtools.intellij.common.editor.AllowNonProjectEditing" implementation="com.redhat.devtools.intellij.common.editor.AllowNonProjectEditing" />
@@ -53,11 +52,6 @@
         </group>
 
         <group id="com.redhat.devtools.intellij.knative.tree.functions" popup="true">
-            <reference id="com.redhat.devtools.intellij.knative.actions.DeleteAction"/>
-            <reference id="com.redhat.devtools.intellij.knative.refresh"/>
-        </group>
-
-        <group id="com.redhat.devtools.intellij.knative.tree.localfunctions" popup="true">
             <action id="com.redhat.devtools.intellij.knative.actions.func.BuildAction"
                     class="com.redhat.devtools.intellij.knative.actions.func.BuildAction"
                     text="Build"/>
@@ -67,10 +61,8 @@
             <action id="com.redhat.devtools.intellij.knative.actions.func.DeployAction"
                     class="com.redhat.devtools.intellij.knative.actions.func.DeployAction"
                     text="Deploy"/>
-            <action id="com.redhat.devtools.intellij.knative.refreshfunc"
-                    class="com.redhat.devtools.intellij.knative.actions.func.RefreshFuncAction"
-                    text="Refresh" icon="AllIcons.Actions.Refresh"
-                    use-shortcut-of="Refresh"/>
+            <reference id="com.redhat.devtools.intellij.knative.actions.DeleteAction"/>
+            <reference id="com.redhat.devtools.intellij.knative.refresh"/>
         </group>
 
         <group id="com.redhat.devtools.intellij.knative.view.actionsToolbar">
@@ -79,10 +71,6 @@
 
         <group id="com.redhat.devtools.intellij.knative.view.actionsFunctionToolbar">
             <reference id="com.redhat.devtools.intellij.knative.refresh"/>
-        </group>
-
-        <group id="com.redhat.devtools.intellij.knative.view.actionsLocalFunctionToolbar">
-            <reference id="com.redhat.devtools.intellij.knative.refreshfunc"/>
         </group>
     </actions>
 </idea-plugin>
