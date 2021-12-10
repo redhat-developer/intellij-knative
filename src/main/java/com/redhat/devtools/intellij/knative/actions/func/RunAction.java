@@ -14,7 +14,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.actions.KnAction;
 import com.redhat.devtools.intellij.knative.kn.Kn;
-import com.redhat.devtools.intellij.knative.tree.KnLocalFunctionNode;
+import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import java.io.IOException;
 import javax.swing.tree.TreePath;
@@ -25,13 +25,13 @@ public class RunAction extends KnAction {
     private static final Logger logger = LoggerFactory.getLogger(RunAction.class);
 
     public RunAction() {
-        super(KnLocalFunctionNode.class);
+        super(KnFunctionNode.class);
     }
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Kn knCli) {
         ParentableNode node = getElement(selected);
-        String localPathFunc = ((KnLocalFunctionNode) node).getFunction().getLocalPath();
+        String localPathFunc = ((KnFunctionNode) node).getFunction().getLocalPath();
         if (localPathFunc.isEmpty()) {
             return;
         }
@@ -47,13 +47,13 @@ public class RunAction extends KnAction {
 
     @Override
     public boolean isVisible(Object selected) {
-        return selected instanceof KnLocalFunctionNode && !((KnLocalFunctionNode) selected).getFunction().getLocalPath().isEmpty();
+        return selected instanceof KnFunctionNode && !((KnFunctionNode) selected).getFunction().getLocalPath().isEmpty();
     }
 
     @Override
     public boolean isEnabled(Object selected) {
-        if (selected instanceof KnLocalFunctionNode) {
-            String image = ((KnLocalFunctionNode) selected).getFunction().getImage();
+        if (selected instanceof KnFunctionNode) {
+            String image = ((KnFunctionNode) selected).getFunction().getImage();
             return image != null && !image.isEmpty();
         }
         return false;

@@ -68,7 +68,7 @@ public class DeleteAction extends KnAction {
             try {
                 deleteResources(type, resourcesByClass, kncli);
                 if (type.equals(KnFunctionNode.class)) {
-                    TreeHelper.refreshWholeFuncTree(project);
+                    TreeHelper.refreshFuncTree(project);
                 } else {
                     TreeHelper.refresh(project, (ParentableNode) resourcesByClass.get(type).get(0).getParent());
                 }
@@ -95,5 +95,13 @@ public class DeleteAction extends KnAction {
         } else if(type.equals(KnFunctionNode.class)) {
             kncli.deleteFunctions(resources);
         }
+    }
+
+    @Override
+    public boolean isVisible(Object selected) {
+        if (selected instanceof KnFunctionNode) {
+            return ((KnFunctionNode) selected).getFunction().isPushed();
+        }
+        return super.isVisible(selected);
     }
 }

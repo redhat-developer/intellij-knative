@@ -10,6 +10,7 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.tree;
 
+import com.google.common.base.Strings;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.ide.util.treeView.PresentableNodeDescriptor;
@@ -33,7 +34,7 @@ public class KnFunctionDescriptor extends PresentableNodeDescriptor<IKnFunctionN
     protected void update(@NotNull PresentationData presentation) {
         Function function = node.getFunction();
         presentation.setPresentableText(function.getName());
-        presentation.setLocationString(function.isPushed() ? "" : "not pushed");
+        presentation.setLocationString(getLabel(function));
         presentation.setIcon(SERVICE_ICON);
         if (!function.getLocalPath().isEmpty()) {
             presentation.setTooltip("Name: " + function.getName() + "\n" +
@@ -41,6 +42,17 @@ public class KnFunctionDescriptor extends PresentableNodeDescriptor<IKnFunctionN
                     "Runtime: " + function.getRuntime() + "\n" +
                     "Context: " + function.getLocalPath()
             );
+        }
+    }
+
+    private String getLabel(Function function) {
+        boolean isLocal = !Strings.isNullOrEmpty(function.getLocalPath());
+        if (function.isPushed() && isLocal) {
+            return "local/cluster";
+        } else if (isLocal) {
+            return "local only";
+        } else {
+            return "cluster only";
         }
     }
 

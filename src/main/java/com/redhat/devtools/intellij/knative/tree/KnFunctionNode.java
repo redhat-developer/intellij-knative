@@ -13,9 +13,9 @@ package com.redhat.devtools.intellij.knative.tree;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import org.jetbrains.annotations.NotNull;
 
-public class KnFunctionNode extends ParentableNode<KnFunctionsNode> implements IKnFunctionNode {
+public class KnFunctionNode extends ParentableNode<KnRootNode> implements IKnFunctionNode {
     private Function function;
-    public KnFunctionNode(@NotNull KnRootNode rootNode, @NotNull KnFunctionsNode parent, Function function) {
+    public KnFunctionNode(@NotNull KnRootNode rootNode, @NotNull KnRootNode parent, Function function) {
         super(rootNode, parent, function.getName());
         this.function = function;
     }

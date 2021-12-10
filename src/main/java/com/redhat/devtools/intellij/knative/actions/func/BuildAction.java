@@ -23,7 +23,7 @@ import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.actions.KnAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.kn.Kn;
-import com.redhat.devtools.intellij.knative.tree.KnLocalFunctionNode;
+import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 
@@ -44,13 +44,13 @@ public class BuildAction extends KnAction {
     private static final Logger logger = LoggerFactory.getLogger(BuildAction.class);
 
     public BuildAction() {
-        super(KnLocalFunctionNode.class);
+        super(KnFunctionNode.class);
     }
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Kn knCli) {
         ParentableNode node = getElement(selected);
-        Function function = ((KnLocalFunctionNode) node).getFunction();
+        Function function = ((KnFunctionNode) node).getFunction();
         String localPathFunc = function.getLocalPath();
         if (localPathFunc.isEmpty()) {
             return;
@@ -65,18 +65,18 @@ public class BuildAction extends KnAction {
             if (image.isEmpty()) {
                 return;
             }
-        } else {
-            if (!isActionConfirmed(node.getName())) {
-                return;
-            }
         }
 
         String namespace = node.getRootNode().getKn().getNamespace();
+        if (!isActionConfirmed(node.getName(), function.getNamespace(), namespace)) {
+            return;
+        }
+
         String finalImage = image;
         ExecHelper.submit(() -> {
             try {
                 doExecute(knCli, namespace, localPathFunc, registry, finalImage);
-                TreeHelper.refreshFuncTree(getEventProject(anActionEvent), ((KnLocalFunctionNode) node).getParent());
+                TreeHelper.refreshFuncTree(getEventProject(anActionEvent));
             } catch (IOException e) {
                 Notification notification = new Notification(NOTIFICATION_ID,
                         "Error",
@@ -92,7 +92,7 @@ public class BuildAction extends KnAction {
         knCli.buildFunc(localPathFunc, registry, image);
     }
 
-    protected boolean isActionConfirmed(String name) {
+    protected boolean isActionConfirmed(String name, String funcNamespace, String activeNamespace) {
         return true;
     }
 
@@ -136,8 +136,8 @@ public class BuildAction extends KnAction {
 
     @Override
     public boolean isVisible(Object selected) {
-        if (selected instanceof KnLocalFunctionNode) {
-            return !((KnLocalFunctionNode) selected).getFunction().getLocalPath().isEmpty();
+        if (selected instanceof KnFunctionNode) {
+            return !((KnFunctionNode) selected).getFunction().getLocalPath().isEmpty();
         }
         return false;
     }

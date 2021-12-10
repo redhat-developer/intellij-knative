@@ -74,7 +74,7 @@ public class RunActionTest extends ActionTest {
         when(anActionEvent.getProject()).thenReturn(project);
         when(model.getSelectionPath()).thenReturn(path3);
         when(model.getSelectionPaths()).thenReturn(new TreePath[] {path3});
-        when(knLocalFunctionNode.getFunction()).thenReturn(function);
+        when(knFunctionNode.getFunction()).thenReturn(function);
 
         return anActionEvent;
     }

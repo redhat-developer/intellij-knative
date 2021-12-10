@@ -13,7 +13,7 @@ package com.redhat.devtools.intellij.knative.actions.func;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.kn.Kn;
-import com.redhat.devtools.intellij.knative.tree.KnLocalFunctionNode;
+import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -37,8 +37,17 @@ public class DeployAction extends BuildAction {
     }
 
     @Override
-    protected boolean isActionConfirmed(String name) {
-        int result = showOkCancelDialog("Are you sure you want to deploy function " + name,
+    protected boolean isActionConfirmed(String name, String funcNamespace, String activeNamespace) {
+        String message = "";
+        if (!funcNamespace.isEmpty()) {
+            if (!funcNamespace.equalsIgnoreCase(activeNamespace)) {
+                message = "Function namespace (declared in func.yaml) is different from the current active namespace. \n";
+            }
+            message += "Deploy function " + name + " to namespace " + funcNamespace + "?";
+        } else {
+            message += "Deploy function " + name + " to namespace " + activeNamespace + "?";
+        }
+        int result = showOkCancelDialog(message,
                 "Deploy Function " + name,
                 OK_BUTTON, CANCEL_BUTTON, null);
         return result == Messages.OK;
@@ -48,7 +57,7 @@ public class DeployAction extends BuildAction {
     public boolean isVisible(Object selected) {
         boolean visible = super.isVisible(selected);
         if (visible) {
-            Kn kn = ((KnLocalFunctionNode) selected).getRootNode().getKn();
+            Kn kn = ((KnFunctionNode) selected).getRootNode().getKn();
             try {
                 return isKnativeReady(kn).get(500, TimeUnit.MILLISECONDS);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {

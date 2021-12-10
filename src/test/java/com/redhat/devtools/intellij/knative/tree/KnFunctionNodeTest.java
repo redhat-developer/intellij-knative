@@ -21,10 +21,10 @@ public class KnFunctionNodeTest extends BaseTest {
 
     @Test
     public void Constructor_KnFunctionNode() {
-        KnFunctionNode knFunctionNode = new KnFunctionNode(knRootNode, knFunctionsNode, getFunction());
+        KnFunctionNode knFunctionNode = new KnFunctionNode(knRootNode, knRootNode, getFunction());
         assertEquals("name", knFunctionNode.getFunction().getName());
         assertEquals(knRootNode, knFunctionNode.getRootNode());
-        assertEquals(knFunctionsNode, knFunctionNode.getParent());
+        assertEquals(knRootNode, knFunctionNode.getParent());
     }
 
     private Function getFunction() {

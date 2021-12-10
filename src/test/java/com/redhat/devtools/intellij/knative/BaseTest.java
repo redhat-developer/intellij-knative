@@ -19,9 +19,7 @@ import com.redhat.devtools.intellij.knative.tree.KnEventingNode;
 import com.redhat.devtools.intellij.knative.tree.KnEventingSourcesNode;
 import com.redhat.devtools.intellij.knative.tree.KnEventingSubscriptionsNode;
 import com.redhat.devtools.intellij.knative.tree.KnEventingTriggersNode;
-import com.redhat.devtools.intellij.knative.tree.KnLocalFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
-import com.redhat.devtools.intellij.knative.tree.KnFunctionsNode;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionsTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.KnRevisionNode;
 import com.redhat.devtools.intellij.knative.tree.KnRootNode;
@@ -54,9 +52,7 @@ public class BaseTest {
     protected KnServiceNode knServiceNode;
     protected KnEventingNode knEventingNode;
     protected KnRevisionNode knRevisionNode;
-    protected KnFunctionsNode knFunctionsNode;
     protected KnFunctionNode knFunctionNode;
-    protected KnLocalFunctionNode knLocalFunctionNode;
     protected KnTreeStructure knTreeStructure;
     protected KnFunctionsTreeStructure knFunctionsTreeStructure;
     protected KnEventingBrokerNode knEventingBrokerNode;
@@ -86,9 +82,7 @@ public class BaseTest {
         knEventingTriggersNode = mock(KnEventingTriggersNode.class);
         knSourceNode = mock(KnSourceNode.class);
         knSinkNode = mock(KnSinkNode.class);
-        knFunctionsNode = mock(KnFunctionsNode.class);
         knFunctionNode = mock(KnFunctionNode.class);
-        knLocalFunctionNode = mock(KnLocalFunctionNode.class);
     }
 
     protected String load(String name) throws IOException {

@@ -186,7 +186,7 @@ public class KnTreeStructure extends AbstractKnTreeStructure implements ConfigWa
     public NodeDescriptor<?> createDescriptor(@NotNull Object element, @Nullable NodeDescriptor parentDescriptor) {
         if (element instanceof KnRootNode) {
             Kn kn = ((KnRootNode) element).getKn();
-            return new LabelAndIconDescriptor<>(project, element, kn != null ? kn.getNamespace() : "Loading", CLUSTER_ICON, parentDescriptor);
+            return new KnRootNodeDescriptor(project, (KnRootNode) element, kn != null ? kn.getNamespace() : "Loading", CLUSTER_ICON, parentDescriptor);
         }
         if (element instanceof KnServingNode) {
             return new LabelAndIconDescriptor<>(project, element, ((KnServingNode) element).getName(), AllIcons.Nodes.Package, parentDescriptor);

@@ -52,6 +52,7 @@ public class KnCli implements Kn {
     private KubernetesClient client;
     private final String knCommand, funcCommand;
     private Map<String, String> envVars;
+    private boolean hasKnativeServing, hasKnativeEventing;
 
     public KnCli(Project project, String knCommand, String funcCommand) {
         this.knCommand = knCommand;
@@ -63,24 +64,34 @@ public class KnCli implements Kn {
         } catch (URISyntaxException e) {
             this.envVars = Collections.emptyMap();
         }
+        this.hasKnativeServing = false;
+        this.hasKnativeEventing = false;
     }
 
     @Override
     public boolean isKnativeServingAware() throws IOException {
-        try {
-            return client.rootPaths().getPaths().stream().anyMatch(path -> path.endsWith("serving.knative.dev"));
-        } catch (KubernetesClientException e) {
-            throw new IOException(e);
+        // to speed up a bit the process we only call the cluster if we didn't find knative serving in last call
+        if (!hasKnativeServing) {
+            try {
+                hasKnativeServing = client.rootPaths().getPaths().stream().anyMatch(path -> path.endsWith("serving.knative.dev"));
+            } catch (KubernetesClientException e) {
+                throw new IOException(e);
+            }
         }
+        return hasKnativeServing;
     }
 
     @Override
     public boolean isKnativeEventingAware() throws IOException {
-        try {
-            return client.rootPaths().getPaths().stream().anyMatch(path -> path.endsWith("eventing.knative.dev"));
-        } catch (KubernetesClientException e) {
-            throw new IOException(e);
+        // to speed up a bit the process we only call the cluster if we didn't find knative eventing in last call
+        if (!hasKnativeEventing) {
+            try {
+                hasKnativeEventing = client.rootPaths().getPaths().stream().anyMatch(path -> path.endsWith("eventing.knative.dev"));
+            } catch (KubernetesClientException e) {
+                throw new IOException(e);
+            }
         }
+        return hasKnativeEventing;
     }
 
     @Override
