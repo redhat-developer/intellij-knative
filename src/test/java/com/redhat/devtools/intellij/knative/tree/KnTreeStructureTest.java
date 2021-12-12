@@ -208,7 +208,7 @@ public class KnTreeStructureTest extends BaseTest {
 
     @Test
     public void GetDescriptor_ElementIsKnRoot_LabelAndIconDescriptor() {
-        assertNodeDescriptor(knRootNode, LabelAndIconDescriptor.class);
+        assertNodeDescriptor(knRootNode, KnRootNodeDescriptor.class);
     }
 
     @Test

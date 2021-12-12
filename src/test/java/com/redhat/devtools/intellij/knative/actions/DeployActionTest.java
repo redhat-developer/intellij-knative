@@ -152,16 +152,19 @@ public class DeployActionTest extends ActionTest {
                                 when(mock.isOK()).thenReturn(true);
                                 when(mock.getInputString()).thenReturn("image");
                             })) {
+                        try(MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
 
-                        treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
-                        pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
-                        when(kn.getFuncFileURL(any())).thenReturn(mock(URL.class));
-                        yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
-                        yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("");
-                        yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("");
-                        action.actionPerformed(anActionEvent);
-                        Thread.sleep(1000);
-                        verify(kn, times(1)).deployFunc("namespace","path", "", "image");
+                            treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+                            pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
+                            when(kn.getFuncFileURL(any())).thenReturn(mock(URL.class));
+                            yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
+                            yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("");
+                            yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("");
+                            messagesMockedStatic.when(() -> Messages.showOkCancelDialog(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
+                            action.actionPerformed(anActionEvent);
+                            Thread.sleep(1000);
+                            verify(kn, times(1)).deployFunc("namespace", "path", "", "image");
+                        }
                     }
                 }
             }
@@ -180,12 +183,14 @@ public class DeployActionTest extends ActionTest {
                             when(mock.isOK()).thenReturn(true);
                             when(mock.getInputString()).thenReturn("image");
                         })) {
-
-                    treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
-                    pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
-                    action.actionPerformed(anActionEvent);
-                    Thread.sleep(1000);
-                    verify(kn, times(1)).deployFunc("namespace","path", null, "image");
+                    try(MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
+                        treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+                        pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
+                        messagesMockedStatic.when(() -> Messages.showOkCancelDialog(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
+                        action.actionPerformed(anActionEvent);
+                        Thread.sleep(1000);
+                        verify(kn, times(1)).deployFunc("namespace", "path", null, "image");
+                    }
                 }
             }
 
@@ -205,13 +210,15 @@ public class DeployActionTest extends ActionTest {
                                 when(mock.isOK()).thenReturn(true);
                                 when(mock.getInputString()).thenReturn("image");
                             })) {
-
-                        treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
-                        pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
-                        yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenThrow(new IOException("error"));
-                        action.actionPerformed(anActionEvent);
-                        Thread.sleep(1000);
-                        verify(kn, times(0)).deployFunc("namespace","path", "", "image");
+                        try(MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
+                            treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+                            pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
+                            yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenThrow(new IOException("error"));
+                            messagesMockedStatic.when(() -> Messages.showOkCancelDialog(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
+                            action.actionPerformed(anActionEvent);
+                            Thread.sleep(1000);
+                            verify(kn, times(0)).deployFunc("namespace", "path", "", "image");
+                        }
                     }
                 }
             }
@@ -251,6 +258,7 @@ public class DeployActionTest extends ActionTest {
         when(anActionEvent.getData(PlatformDataKeys.CONTEXT_COMPONENT)).thenReturn(tree);
         when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(knFunctionsTreeStructure);
         when(knFunctionNode.getRootNode()).thenReturn(knRootNode);
+        when(knFunctionNode.getName()).thenReturn("name");
         when(knRootNode.getKn()).thenReturn(kn);
         when(kn.getNamespace()).thenReturn("namespace");
         when(anActionEvent.getProject()).thenReturn(project);

@@ -56,6 +56,7 @@ public abstract class ActionTest extends FixtureBaseTest {
         when(path.getLastPathComponent()).thenReturn(knServiceNode);
         when(path1.getLastPathComponent()).thenReturn(knRevisionNode);
         when(path2.getLastPathComponent()).thenReturn(knFunctionNode);
+        when(path3.getLastPathComponent()).thenReturn(knFunctionNode);
         when(model.getSelectionPath()).thenReturn(path);
         when(model.getSelectionPaths()).thenReturn(new TreePath[] {path});
         when(tree.getSelectionModel()).thenReturn(model);

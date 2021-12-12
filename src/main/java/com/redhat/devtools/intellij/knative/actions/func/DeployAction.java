@@ -10,6 +10,7 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.actions.func;
 
+import com.google.common.base.Strings;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.kn.Kn;
@@ -39,7 +40,7 @@ public class DeployAction extends BuildAction {
     @Override
     protected boolean isActionConfirmed(String name, String funcNamespace, String activeNamespace) {
         String message = "";
-        if (!funcNamespace.isEmpty()) {
+        if (!Strings.isNullOrEmpty(funcNamespace)) {
             if (!funcNamespace.equalsIgnoreCase(activeNamespace)) {
                 message = "Function namespace (declared in func.yaml) is different from the current active namespace. \n";
             }
