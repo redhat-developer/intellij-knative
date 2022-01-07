@@ -61,8 +61,8 @@
             <action id="com.redhat.devtools.intellij.knative.actions.func.DeployAction"
                     class="com.redhat.devtools.intellij.knative.actions.func.DeployAction"
                     text="Deploy"/>
-            <action id="com.redhat.devtools.intellij.knative.actions.Undeploy"
-                    class="com.redhat.devtools.intellij.knative.actions.DeleteAction"
+            <action id="com.redhat.devtools.intellij.knative.actions.func.UndeployAction"
+                    class="com.redhat.devtools.intellij.knative.actions.func.UndeployAction"
                     text="Undeploy"/>
             <reference id="com.redhat.devtools.intellij.knative.refresh"/>
         </group>

@@ -28,7 +28,6 @@ public class DeleteActionTest extends ActionTest {
 
     private static final String SERVICE = "service";
     private static final String REVISION = "revision";
-    private static final String FUNCTION = "function";
 
     @Test
     public void ExecuteDelete_OneKnServiceNodeSelected_DeleteOneService() throws IOException {
@@ -53,19 +52,11 @@ public class DeleteActionTest extends ActionTest {
     }
 
     @Test
-    public void ExecuteDelete_OneKnFunctionNodeSelected_DeleteOneFunction() throws IOException {
-        Map<String, Integer> typePerTimesCalled = new HashMap<>();
-        typePerTimesCalled.put(FUNCTION, 1);
-        executeDeleteAction(new ParentableNode[] {knFunctionNode}, typePerTimesCalled);
-    }
-
-    @Test
     public void ExecuteDelete_ThreeDifferentKnNodeSelected_CalledThreeDelete() throws IOException {
         Map<String, Integer> typePerTimesCalled = new HashMap<>();
         typePerTimesCalled.put(SERVICE, 1);
         typePerTimesCalled.put(REVISION, 1);
-        typePerTimesCalled.put(FUNCTION, 1);
-        executeDeleteAction(new ParentableNode[] {knServiceNode, knRevisionNode, knFunctionNode}, typePerTimesCalled);
+        executeDeleteAction(new ParentableNode[] {knServiceNode, knRevisionNode}, typePerTimesCalled);
     }
 
     private void executeDeleteAction(ParentableNode[] fakeSelectedNodesToBeDeleted, Map<String, Integer> typePerTimesCalled) throws IOException {
@@ -75,7 +66,6 @@ public class DeleteActionTest extends ActionTest {
             action.executeDelete(project, kn, fakeSelectedNodesToBeDeleted);
             verify(kn, times(typePerTimesCalled.getOrDefault(SERVICE, 0))).deleteServices(any());
             verify(kn, times(typePerTimesCalled.getOrDefault(REVISION, 0))).deleteRevisions(any());
-            verify(kn, times(typePerTimesCalled.getOrDefault(FUNCTION, 0))).deleteFunctions(any());
         }
     }
 }

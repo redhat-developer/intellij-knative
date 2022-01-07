@@ -36,18 +36,22 @@ public class DeleteAction extends KnAction {
         super(true, KnServiceNode.class, KnRevisionNode.class, KnFunctionNode.class);
     }
 
+    public DeleteAction(boolean acceptMultipleItems, Class... filters) {
+        super(acceptMultipleItems, filters);
+    }
+
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath[] path, Object[] selected, Kn kncli) {
         ParentableNode[] elements = Arrays.stream(selected).map(item -> getElement(item)).toArray(ParentableNode[]::new);
-        String title, dialogText = "Are you sure you want to delete ";
+        String title, dialogText = "Are you sure you want to " + getActionName(false) + " ";
 
         if (elements.length == 1) {
             String name = elements[0].getName();
             String kind = elements[0].getClass().getSimpleName().toLowerCase().replace("node", "");
-            title = "Delete " + name;
+            title = getActionName(true) + " " + name;
             dialogText += kind + " " + name + " ?";
         } else {
-            title = "Delete multiple items";
+            title = getActionName(true) + " multiple items";
             dialogText += "the following items?\n";
             for (ParentableNode element: elements) {
                 dialogText += element.getName() + "\n";
@@ -62,20 +66,25 @@ public class DeleteAction extends KnAction {
         }
     }
 
+    protected String getActionName(boolean firstLetterCapital) {
+        String d = firstLetterCapital ? "D" : "d";
+        return d + "elete";
+    }
+
     public void executeDelete(Project project, Kn kncli, ParentableNode[] elements) {
         Map<Class, List<ParentableNode>> resourcesByClass = groupResourcesByClass(elements);
         for(Class type: resourcesByClass.keySet()) {
             try {
-                deleteResources(type, resourcesByClass, kncli);
-                if (type.equals(KnFunctionNode.class)) {
-                    TreeHelper.refreshFuncTree(project);
-                } else {
-                    TreeHelper.refresh(project, (ParentableNode) resourcesByClass.get(type).get(0).getParent());
-                }
+                doDelete(project, kncli, type, resourcesByClass);
             } catch (IOException e) {
                 UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Error"));
             }
         }
+    }
+
+    protected void doDelete(Project project, Kn kncli, Class type, Map<Class, List<ParentableNode>> resourcesByClass) throws IOException {
+        deleteResources(type, resourcesByClass, kncli);
+        TreeHelper.refresh(project, (ParentableNode) resourcesByClass.get(type).get(0).getParent());
     }
 
     private Map<Class, List<ParentableNode>> groupResourcesByClass(ParentableNode[] elements) {
@@ -92,16 +101,6 @@ public class DeleteAction extends KnAction {
             kncli.deleteServices(resources);
         } else if (type.equals(KnRevisionNode.class)) {
             kncli.deleteRevisions(resources);
-        } else if(type.equals(KnFunctionNode.class)) {
-            kncli.deleteFunctions(resources);
         }
-    }
-
-    @Override
-    public boolean isVisible(Object selected) {
-        if (selected instanceof KnFunctionNode) {
-            return ((KnFunctionNode) selected).getFunction().isPushed();
-        }
-        return super.isVisible(selected);
     }
 }
