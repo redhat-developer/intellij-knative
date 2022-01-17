@@ -58,7 +58,7 @@ public class DeleteAction extends KnAction {
             }
         }
 
-        DeleteDialog deleteDialog = new DeleteDialog(null, title, dialogText);
+        DeleteDialog deleteDialog = new DeleteDialog(null, title, dialogText, getActionName(true));
         deleteDialog.show();
 
         if (deleteDialog.isOK()) {
