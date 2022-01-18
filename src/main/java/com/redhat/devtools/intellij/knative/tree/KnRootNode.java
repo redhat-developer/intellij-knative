@@ -14,14 +14,26 @@ import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.kn.KnCliFactory;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class KnRootNode {
     private final Project project;
     private Kn kn;
+    private static KnRootNode instance;
+    private Consumer<List<String>> consumerWarnings;
 
-    public KnRootNode(Project project) {
+    private KnRootNode(Project project) {
         this.project = project;
+    }
+
+    public static KnRootNode getInstance(Project project) {
+        if (instance == null
+                || !instance.getProject().equals(project)) {
+            instance = new KnRootNode(project);
+        }
+        return instance;
     }
 
     public CompletableFuture<Kn> initializeKn() {
@@ -39,5 +51,15 @@ public class KnRootNode {
 
     public Project getProject() {
         return project;
+    }
+
+    public void showWarnings(List<String> warnings) {
+        if (consumerWarnings != null) {
+            consumerWarnings.accept(warnings);
+        }
+    }
+
+    public void setConsumerWarnings(Consumer<List<String>> consumerWarnings) {
+        this.consumerWarnings = consumerWarnings;
     }
 }

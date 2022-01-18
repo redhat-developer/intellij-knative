@@ -10,14 +10,21 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.kn;
 
+import com.intellij.openapi.project.Project;
+import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
+import io.fabric8.kubernetes.client.Watch;
+import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
 public interface Kn {
+
     /**
      * Check if the cluster is Knative serving aware.
      *
@@ -57,6 +64,14 @@ public interface Kn {
      * @throws IOException if communication encountered an error
      */
     List<Revision> getRevisionsForService(String serviceName) throws IOException;
+
+    /**
+     * Return the list of all Knative Functions in current namespace
+     *
+     * @return list of functions
+     * @throws IOException if communication encountered an error
+     */
+    List<Function> getFunctions() throws IOException;
 
     /**
      * Return the service component
@@ -102,9 +117,17 @@ public interface Kn {
     void deleteRevisions(List<String> revisions) throws IOException;
 
     /**
+     * Delete/Undeploy a list of functions
+     *
+     * @param functions the list of functions to delete/undeploy
+     * @throws IOException if communication errored
+     */
+    void deleteFunctions(List<String> functions) throws IOException;
+
+    /**
      * Get a custom resource from the cluster which is namespaced.
      *
-     * @param name name of custom resource
+     * @param name       name of custom resource
      * @param crdContext the custom resource definition context of the resource kind
      * @return Object as HashMap, null if no resource was found
      * @throws IOException if communication errored
@@ -114,8 +137,8 @@ public interface Kn {
     /**
      * Edit a custom resource object which is a namespaced object
      *
-     * @param name name of custom resource
-     * @param crdContext the custom resource definition context of the resource kind
+     * @param name           name of custom resource
+     * @param crdContext     the custom resource definition context of the resource kind
      * @param objectAsString new object as a JSON string
      * @throws IOException if communication errored
      */
@@ -141,10 +164,78 @@ public interface Kn {
     /**
      * Tag a service revision
      *
-     * @param service the service which the revision belongs to
+     * @param service  the service which the revision belongs to
      * @param revision the revision to tag
-     * @param tag the tag name
+     * @param tag      the tag name
      * @throws IOException if communication errored
      */
     void tagRevision(String service, String revision, String tag) throws IOException;
+
+    /**
+     * Return the func.yaml file
+     *
+     * @param root the path where to look for the func.yaml file
+     * @return the func.yaml file
+     * @throws IOException if func.yaml doesn't exist
+     */
+    File getFuncFile(Path root) throws IOException;
+
+    /**
+     * Return the func.yaml file url
+     *
+     * @param root the path where to look for the func.yaml file
+     * @return the func.yaml file url
+     * @throws IOException if func.yaml doesn't exist
+     */
+    URL getFuncFileURL(Path root) throws IOException;
+
+    /**
+     * Create a new function
+     *
+     * @param model model representing the function to be created
+     * @throws IOException if communication errored
+     */
+    void createFunc(CreateFuncModel model) throws IOException;
+
+    /**
+     * Build a function from path
+     *
+     * @param path     path where the source code is stored
+     * @param registry registry to use
+     * @param image    image name. This option takes precedence over registry which can be omitted
+     * @throws IOException if communication errored
+     */
+    void buildFunc(String path, String registry, String image) throws IOException;
+
+    /**
+     * Deploy a function from path
+     *
+     * @param namespace namespace where to deploy
+     * @param path      path where the source code is stored
+     * @param registry  registry to use
+     * @param image     image name. This option takes precedence over registry which can be omitted
+     * @throws IOException if communication errored
+     */
+    void deployFunc(String namespace, String path, String registry, String image) throws IOException;
+
+
+    /**
+     * Run a function locally
+     *
+     * @param path path where the function is stored
+     * @throws IOException if communication errored
+     */
+    void runFunc(String path) throws IOException;
+
+    /**
+     * Set a watch on Service resource with label
+     *
+     * @param key     key label
+     * @param value   value label
+     * @param watcher the watcher to call when a new event is received
+     * @return the watch object
+     * @throws IOException if communication errored
+     */
+    Watch watchServiceWithLabel(String key, String value, Watcher<io.fabric8.knative.serving.v1.Service> watcher) throws IOException;
+
 }

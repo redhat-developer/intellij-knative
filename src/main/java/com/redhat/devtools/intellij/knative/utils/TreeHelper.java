@@ -10,6 +10,7 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.utils;
 
+import com.intellij.ide.util.treeView.AbstractTreeStructure;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
@@ -22,9 +23,15 @@ import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.tree.KnRootNode;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
+
 import java.awt.Component;
 import javax.swing.JComponent;
 import javax.swing.JViewport;
+
+
+import static com.redhat.devtools.intellij.knative.Constants.KIND_FUNCTIONS;
+import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_FUNC_TOOL_WINDOW_ID;
+import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_TOOL_WINDOW_ID;
 
 public class TreeHelper {
 
@@ -34,11 +41,11 @@ public class TreeHelper {
         return errorMessage.length() >= MESSAGE_MAX_LENGTH ? errorMessage.substring(0, MESSAGE_MAX_LENGTH) + "..." : errorMessage;
     }
 
-    public static Tree getTree(Project project) {
+    public static Tree getTree(Project project, String toolWindowId) {
         if (project == null) {
             return null;
         }
-        ToolWindow window = ToolWindowManager.getInstance(project).getToolWindow("Knative");
+        ToolWindow window = ToolWindowManager.getInstance(project).getToolWindow(toolWindowId);
         if (window == null) {
             return null;
         }
@@ -66,7 +73,19 @@ public class TreeHelper {
     }
 
     public static KnTreeStructure getKnTreeStructure(Project project) {
-        Tree tree = getTree(project);
+        return getKnTreeStructure(project, KNATIVE_TOOL_WINDOW_ID);
+    }
+
+    public static KnTreeStructure getKnFunctionsTreeStructure(Project project) {
+        return getKnTreeStructure(project, KNATIVE_FUNC_TOOL_WINDOW_ID);
+    }
+
+    private static KnTreeStructure getKnTreeStructure(Project project, String toolWindowId) {
+        return (KnTreeStructure) getTreeStructure(project, toolWindowId);
+    }
+
+    private static AbstractTreeStructure getTreeStructure(Project project, String toolWindowId) {
+        Tree tree = getTree(project, toolWindowId);
         if (tree == null) {
             return null;
         }
@@ -74,7 +93,7 @@ public class TreeHelper {
         if (property == null) {
             return null;
         }
-        return (KnTreeStructure) property;
+        return (AbstractTreeStructure) property;
     }
 
     public static Kn getKn(Project project) {
@@ -88,11 +107,26 @@ public class TreeHelper {
     }
 
     public static void refresh(Project project, ParentableNode node) {
-        if (project != null && node != null) {
-            KnTreeStructure structure = getKnTreeStructure(project);
-            if (structure != null) {
-                structure.fireModified(node);
-            }
+        if (project != null) {
+            refreshTreeStructure(getKnTreeStructure(project), node);
         }
+    }
+
+    public static void refreshFuncTree(Project project) {
+        if (project != null) {
+            KnTreeStructure knFunctionsTreeStructure = getKnFunctionsTreeStructure(project);
+            refreshTreeStructure(knFunctionsTreeStructure, knFunctionsTreeStructure.getRootElement());
+        }
+    }
+
+    private static void refreshTreeStructure(KnTreeStructure structure, Object node) {
+        if (structure != null && node != null) {
+            structure.fireModified(node);
+        }
+    }
+
+    public static String getId(KnRootNode node) {
+        Kn kn = node.getKn();
+        return kn.getNamespace() + "-" + KIND_FUNCTIONS;
     }
 }

@@ -8,7 +8,7 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative;
+package com.redhat.devtools.intellij.knative.ui.toolwindow;
 
 import com.intellij.ide.util.treeView.AbstractTreeStructure;
 import com.intellij.ide.util.treeView.NodeRenderer;
@@ -19,8 +19,8 @@ import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
+import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.PopupHandler;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.ContentFactory;
@@ -28,45 +28,70 @@ import com.intellij.ui.tree.AsyncTreeModel;
 import com.intellij.ui.tree.StructureTreeModel;
 import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.common.listener.TreePopupMenuListener;
+import com.redhat.devtools.intellij.common.tree.MutableModel;
 import com.redhat.devtools.intellij.common.tree.MutableModelSynchronizer;
-import com.redhat.devtools.intellij.knative.listener.KnTreeDoubleClickListener;
+import com.redhat.devtools.intellij.knative.Constants;
+import com.redhat.devtools.intellij.knative.tree.AbstractKnTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.KnNodeComparator;
-import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
-import org.jetbrains.annotations.NotNull;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import javax.swing.Icon;
 
-public class WindowToolFactory implements ToolWindowFactory {
-    @Override
-    public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
+public abstract class KnBaseWindowTool<T extends AbstractKnTreeStructure> {
+
+    protected void setTitleAndIcon(ToolWindow toolWindow, String title) {
+        Icon icon = IconLoader.findIcon("/images/knative-logo.svg", KnBaseWindowTool.class);
+        if (icon != null) {
+            toolWindow.setIcon(icon);
+        }
+        toolWindow.setStripeTitle(title);
+        toolWindow.setTitle(title);
+    }
+
+    protected Tree createTree(Project project, T structure, boolean isRootVisible) {
         try {
-            ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
-
-            KnTreeStructure structure = new KnTreeStructure(project);
-            StructureTreeModel<KnTreeStructure> model = buildModel(structure, project);
+            StructureTreeModel<T> model = buildModel(structure, project);
             model.setComparator(new KnNodeComparator<>());
-            new MutableModelSynchronizer<>(model, structure, structure);
+            new MutableModelSynchronizer<>(model, structure, (MutableModel) structure);
             Tree tree = new Tree(new AsyncTreeModel(model, project));
             tree.putClientProperty(Constants.STRUCTURE_PROPERTY, structure);
+            tree.setRootVisible(isRootVisible);
             tree.setCellRenderer(new NodeRenderer());
-            ActionManager actionManager = ActionManager.getInstance();
-            ActionGroup group = (ActionGroup) actionManager.getAction("com.redhat.devtools.intellij.knative.tree");
-            PopupHandler.installPopupHandler(tree, group, ActionPlaces.UNKNOWN, actionManager, new TreePopupMenuListener());
-            SimpleToolWindowPanel panel = new SimpleToolWindowPanel(true, true);
-            panel.setContent(new JBScrollPane(tree));
-
-            if (actionManager.isGroup("com.redhat.devtools.intellij.knativev.view.actionsToolbar")) {
-                ActionToolbar actionToolbar = actionManager.createActionToolbar(Constants.TOOLBAR_PLACE, (ActionGroup) actionManager.getAction("com.redhat.devtools.intellij.knativev.view.actionsToolbar"), true);
-                panel.setToolbar(actionToolbar.getComponent());
-            }
-
-            toolWindow.getContentManager().addContent(contentFactory.createContent(panel, "", false));
-
-            new KnTreeDoubleClickListener(tree);
+            return tree;
         } catch (IllegalAccessException | InvocationTargetException | InstantiationException | NoSuchMethodException e) {
             throw new RuntimeException((e));
         }
+    }
+
+    protected void addMenuToTree(Tree tree, String actionGroup) {
+        ActionManager actionManager = ActionManager.getInstance();
+        ActionGroup group = (ActionGroup) actionManager.getAction(actionGroup);
+        PopupHandler.installPopupHandler(tree, group, ActionPlaces.UNKNOWN, actionManager, new TreePopupMenuListener());
+    }
+
+    protected SimpleToolWindowPanel createPanelWithTree(Tree tree) {
+        SimpleToolWindowPanel panel = new SimpleToolWindowPanel(true, true);
+        panel.setContent(new JBScrollPane(tree));
+        return panel;
+    }
+
+    protected void addToolbarMenuToPanel(SimpleToolWindowPanel panel, String toolbarActionGroupId) {
+        ActionManager actionManager = ActionManager.getInstance();
+        if (actionManager.isGroup(toolbarActionGroupId)) {
+            ActionToolbar actionToolbar = actionManager.createActionToolbar(Constants.TOOLBAR_PLACE, (ActionGroup) actionManager.getAction(toolbarActionGroupId), true);
+            panel.setToolbar(actionToolbar.getComponent());
+        }
+    }
+
+    protected void createContent(ToolWindow toolWindow, Tree tree, String actionGroup, String toolbarActionGroup) {
+        ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
+
+        addMenuToTree(tree, actionGroup);
+        SimpleToolWindowPanel panel = createPanelWithTree(tree);
+        addToolbarMenuToPanel(panel, toolbarActionGroup);
+
+        toolWindow.getContentManager().addContent(contentFactory.createContent(panel, "", false));
+
     }
 
     /**
@@ -80,7 +105,7 @@ public class WindowToolFactory implements ToolWindowFactory {
      * @throws InstantiationException
      * @throws NoSuchMethodException
      */
-    private StructureTreeModel buildModel(KnTreeStructure structure, Project project) throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
+    protected StructureTreeModel buildModel(AbstractTreeStructure structure, Project project) throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
         try {
             Constructor<StructureTreeModel> constructor = StructureTreeModel.class.getConstructor(new Class[]{AbstractTreeStructure.class});
             return constructor.newInstance(structure);

@@ -43,7 +43,7 @@ public class KnTreeStructureTest extends BaseTest {
         super.setUp();
         knTreeStructure = mock(KnTreeStructure.class, org.mockito.Mockito.CALLS_REAL_METHODS);
 
-        Field rootField = KnTreeStructure.class.getDeclaredField("root");
+        Field rootField = AbstractKnTreeStructure.class.getDeclaredField("root");
         rootField.setAccessible(true);
         rootField.set(knTreeStructure, knRootNode);
 
@@ -208,7 +208,7 @@ public class KnTreeStructureTest extends BaseTest {
 
     @Test
     public void GetDescriptor_ElementIsKnRoot_LabelAndIconDescriptor() {
-        assertNodeDescriptor(knRootNode, LabelAndIconDescriptor.class);
+        assertNodeDescriptor(knRootNode, KnRootNodeDescriptor.class);
     }
 
     @Test

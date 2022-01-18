@@ -19,6 +19,8 @@ import com.redhat.devtools.intellij.knative.tree.KnEventingNode;
 import com.redhat.devtools.intellij.knative.tree.KnEventingSourcesNode;
 import com.redhat.devtools.intellij.knative.tree.KnEventingSubscriptionsNode;
 import com.redhat.devtools.intellij.knative.tree.KnEventingTriggersNode;
+import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
+import com.redhat.devtools.intellij.knative.tree.KnFunctionsTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.KnRevisionNode;
 import com.redhat.devtools.intellij.knative.tree.KnRootNode;
 import com.redhat.devtools.intellij.knative.tree.KnServiceNode;
@@ -27,6 +29,11 @@ import com.redhat.devtools.intellij.knative.tree.KnSinkNode;
 import com.redhat.devtools.intellij.knative.tree.KnSourceNode;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
+
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 
@@ -45,7 +52,9 @@ public class BaseTest {
     protected KnServiceNode knServiceNode;
     protected KnEventingNode knEventingNode;
     protected KnRevisionNode knRevisionNode;
+    protected KnFunctionNode knFunctionNode;
     protected KnTreeStructure knTreeStructure;
+    protected KnFunctionsTreeStructure knFunctionsTreeStructure;
     protected KnEventingBrokerNode knEventingBrokerNode;
     protected KnEventingChannelsNode knEventingChannelsNode;
     protected KnEventingSourcesNode knEventingSourcesNode;
@@ -65,16 +74,33 @@ public class BaseTest {
         knEventingNode = mock(KnEventingNode.class);
         knRevisionNode = mock(KnRevisionNode.class);
         knTreeStructure = mock(KnTreeStructure.class);
+        knFunctionsTreeStructure = mock(KnFunctionsTreeStructure.class);
         knEventingBrokerNode = mock(KnEventingBrokerNode.class);
         knEventingChannelsNode = mock(KnEventingChannelsNode.class);
         knEventingSourcesNode = mock(KnEventingSourcesNode.class);
         knEventingSubscriptionsNode = mock(KnEventingSubscriptionsNode.class);
         knEventingTriggersNode = mock(KnEventingTriggersNode.class);
         knSourceNode = mock(KnSourceNode.class);
-        knSinkNode = mock((KnSinkNode.class));
+        knSinkNode = mock(KnSinkNode.class);
+        knFunctionNode = mock(KnFunctionNode.class);
     }
 
     protected String load(String name) throws IOException {
-        return IOUtils.toString(BaseTest.class.getResource("/" + name), StandardCharsets.UTF_8);
+        return IOUtils.toString(getUrl(name), StandardCharsets.UTF_8);
+    }
+
+    protected Path getPath(String name) throws IOException {
+        try {
+            return Paths.get(getUrl(name).toURI());
+        } catch (URISyntaxException e) {
+            throw new IOException(e.getLocalizedMessage());
+        }
+    }
+    private URL getUrl(String name) throws IOException {
+        URL url = BaseTest.class.getResource("/" + name);
+        if (url == null) {
+            throw new IOException("File " + name + " not found");
+        }
+        return url;
     }
 }

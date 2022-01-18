@@ -15,7 +15,6 @@ import com.intellij.ui.components.JBScrollPane;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
 import java.util.Arrays;
 import javax.swing.Box;
 import javax.swing.JComponent;
@@ -28,18 +27,18 @@ import org.jetbrains.annotations.Nullable;
 public class DeleteDialog extends DialogWrapper{
     private JPanel myContentPanel;
 
-    public DeleteDialog(Component parent, String title, String mainDeleteText) {
+    public DeleteDialog(Component parent, String title, String mainDeleteText, String OKButtonText) {
         super(null, parent, false, DialogWrapper.IdeModalityType.IDE);
         this.myContentPanel = new JPanel(new BorderLayout());
 
         setTitle(title);
         fillContainer(mainDeleteText);
-        setOKButtonText("Delete");
+        setOKButtonText(OKButtonText);
         init();
     }
 
     public static void main(String[] args) {
-        DeleteDialog dialog = new DeleteDialog(null, "", "");
+        DeleteDialog dialog = new DeleteDialog(null, "", "", "");
         dialog.pack();
         dialog.show();
         System.exit(0);

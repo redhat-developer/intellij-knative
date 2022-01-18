@@ -15,6 +15,7 @@ import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.common.actions.StructureTreeAction;
 import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.tree.KnEventingNode;
+import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.KnRevisionNode;
 import com.redhat.devtools.intellij.knative.tree.KnRootNode;
 import com.redhat.devtools.intellij.knative.tree.KnServiceNode;
@@ -25,7 +26,12 @@ import javax.swing.tree.TreePath;
 
 public class RefreshAction extends StructureTreeAction {
     public RefreshAction() {
-        super(KnRootNode.class, KnServingNode.class, KnServiceNode.class, KnRevisionNode.class, KnEventingNode.class);
+        this(KnRootNode.class, KnServingNode.class, KnServiceNode.class, KnRevisionNode.class,
+                KnEventingNode.class, KnFunctionNode.class);
+    }
+
+    public RefreshAction(Class... filters) {
+        super(filters);
     }
 
     @Override
@@ -50,16 +56,21 @@ public class RefreshAction extends StructureTreeAction {
     @Override
     public void update(AnActionEvent e) {
         if (Constants.TOOLBAR_PLACE.equals(e.getPlace())) {
-            e.getPresentation().setVisible(true);
-            Tree t = getTree(e);
-            if (t != null) {
-                Object structure = t.getClientProperty(Constants.STRUCTURE_PROPERTY);
-                e.getPresentation().setEnabled(structure instanceof KnTreeStructure);
-            } else {
-                e.getPresentation().setEnabled(false);
-            }
-            return;
+            updateAction(e, KnTreeStructure.class);
+        } else {
+            super.update(e);
         }
-        super.update(e);
+    }
+
+    protected void updateAction(AnActionEvent e, Class structureClass) {
+        e.getPresentation().setVisible(true);
+        Tree t = getTree(e);
+        if (t != null) {
+            Object structure = t.getClientProperty(Constants.STRUCTURE_PROPERTY);
+            e.getPresentation().setEnabled(structureClass.isInstance(structure));
+        } else {
+            e.getPresentation().setEnabled(false);
+        }
+
     }
 }

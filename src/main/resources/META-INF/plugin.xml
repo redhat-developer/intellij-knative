@@ -29,14 +29,17 @@
     <depends optional="true" config-file="plugin-kubernetes.xml">com.intellij.kubernetes</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow id="Knative" anchor="left" factoryClass="com.redhat.devtools.intellij.knative.WindowToolFactory"/>
+        <toolWindow id="Knative" anchor="left" factoryClass="com.redhat.devtools.intellij.knative.ui.toolwindow.WindowToolFactory" />
+        <toolWindow id="KnativeFunction" anchor="left" factoryClass="com.redhat.devtools.intellij.knative.ui.toolwindow.FunctionsWindowToolFactory" />
         <fileDocumentSynchronizationVetoer id="com.redhat.devtools.intellij.knative.listener.KnSaveInEditorListener" implementation="com.redhat.devtools.intellij.knative.listener.KnSaveInEditorListener" order="first" />
+        <moduleBuilder builderClass="com.redhat.devtools.intellij.knative.ui.createFunc.FunctionModuleBuilder"/>
         <nonProjectFileWritingAccessExtension id="com.redhat.devtools.intellij.common.editor.AllowNonProjectEditing" implementation="com.redhat.devtools.intellij.common.editor.AllowNonProjectEditing" />
     </extensions>
 
     <actions>
         <group id="com.redhat.devtools.intellij.knative.tree" popup="true">
             <action id="com.redhat.devtools.intellij.knative.actions.CreateServiceAction" class="com.redhat.devtools.intellij.knative.actions.CreateServiceAction" text="New Service"/>
+
             <action id="com.redhat.devtools.intellij.knative.actions.OpenInEditorAction" class="com.redhat.devtools.intellij.knative.actions.OpenInEditorAction" text="Open in Editor"/>
             <action id="com.redhat.devtools.intellij.knative.actions.OpenInBrowserAction" class="com.redhat.devtools.intellij.knative.actions.OpenInBrowserAction" text="Open in Browser"/>
             <action id="com.redhat.devtools.intellij.knative.actions.DeleteAction" class="com.redhat.devtools.intellij.knative.actions.DeleteAction" text="Delete"
@@ -48,7 +51,27 @@
                     use-shortcut-of="Refresh"/>
         </group>
 
-        <group id="com.redhat.devtools.intellij.knativev.view.actionsToolbar">
+        <group id="com.redhat.devtools.intellij.knative.tree.functions" popup="true">
+            <action id="com.redhat.devtools.intellij.knative.actions.func.BuildAction"
+                    class="com.redhat.devtools.intellij.knative.actions.func.BuildAction"
+                    text="Build"/>
+            <action id="com.redhat.devtools.intellij.knative.actions.func.RunAction"
+                    class="com.redhat.devtools.intellij.knative.actions.func.RunAction"
+                    text="Run"/>
+            <action id="com.redhat.devtools.intellij.knative.actions.func.DeployAction"
+                    class="com.redhat.devtools.intellij.knative.actions.func.DeployAction"
+                    text="Deploy"/>
+            <action id="com.redhat.devtools.intellij.knative.actions.func.UndeployAction"
+                    class="com.redhat.devtools.intellij.knative.actions.func.UndeployAction"
+                    text="Undeploy"/>
+            <reference id="com.redhat.devtools.intellij.knative.refresh"/>
+        </group>
+
+        <group id="com.redhat.devtools.intellij.knative.view.actionsToolbar">
+            <reference id="com.redhat.devtools.intellij.knative.refresh"/>
+        </group>
+
+        <group id="com.redhat.devtools.intellij.knative.view.actionsFunctionToolbar">
             <reference id="com.redhat.devtools.intellij.knative.refresh"/>
         </group>
     </actions>
