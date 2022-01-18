@@ -40,6 +40,9 @@ public class UndeployAction extends DeleteAction {
 
     @Override
     public boolean isVisible(Object selected) {
-        return ((KnFunctionNode) selected).getFunction().isPushed();
+        if (selected instanceof KnFunctionNode) {
+            return ((KnFunctionNode) selected).getFunction().isPushed();
+        }
+        return false;
     }
 }
