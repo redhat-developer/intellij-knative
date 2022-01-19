@@ -52,6 +52,7 @@
         </group>
 
         <group id="com.redhat.devtools.intellij.knative.tree.functions" popup="true">
+            <reference id="com.redhat.devtools.intellij.knative.actions.OpenInBrowserAction"/>
             <action id="com.redhat.devtools.intellij.knative.actions.func.BuildAction"
                     class="com.redhat.devtools.intellij.knative.actions.func.BuildAction"
                     text="Build"/>

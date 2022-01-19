@@ -25,7 +25,6 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
-import io.fabric8.kubernetes.client.WatcherException;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 
 import java.io.File;
@@ -39,9 +38,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
-import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_TOOL_WINDOW_ID;
-
 
 import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_TOOL_WINDOW_ID;
 
