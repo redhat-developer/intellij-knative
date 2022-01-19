@@ -23,6 +23,7 @@ import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.kn.ServiceStatus;
 import com.redhat.devtools.intellij.knative.kn.ServiceTraffic;
+import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.KnRevisionNode;
 import com.redhat.devtools.intellij.knative.tree.KnServiceNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
@@ -37,7 +38,7 @@ import static com.redhat.devtools.intellij.knative.Constants.NOTIFICATION_ID;
 
 public class OpenInBrowserAction extends KnAction {
     public OpenInBrowserAction() {
-        super(KnServiceNode.class, KnRevisionNode.class);
+        super(KnServiceNode.class, KnRevisionNode.class, KnFunctionNode.class);
     }
 
     @Override
@@ -80,6 +81,8 @@ public class OpenInBrowserAction extends KnAction {
             }
         } else if (selected instanceof KnRevisionNode) {
             url = getRevisionURL((KnRevisionNode) selected, kncli);
+        } else if (selected instanceof KnFunctionNode) {
+            url = ((KnFunctionNode) selected).getFunction().getUrl();
         }
         return url;
     }
