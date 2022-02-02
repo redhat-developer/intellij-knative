@@ -62,6 +62,12 @@
             <action id="com.redhat.devtools.intellij.knative.actions.func.DeployAction"
                     class="com.redhat.devtools.intellij.knative.actions.func.DeployAction"
                     text="Deploy"/>
+            <action id="com.redhat.devtools.intellij.knative.actions.func.AddEnvAction"
+                    class="com.redhat.devtools.intellij.knative.actions.func.AddEnvAction"
+                    text="Add Envs"/>
+            <action id="com.redhat.devtools.intellij.knative.actions.func.RemoveEnvAction"
+                    class="com.redhat.devtools.intellij.knative.actions.func.RemoveEnvAction"
+                    text="Remove Env"/>
             <action id="com.redhat.devtools.intellij.knative.actions.func.UndeployAction"
                     class="com.redhat.devtools.intellij.knative.actions.func.UndeployAction"
                     text="Undeploy"/>
