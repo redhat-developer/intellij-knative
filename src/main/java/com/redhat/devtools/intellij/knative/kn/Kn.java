@@ -244,6 +244,22 @@ public interface Kn {
     void removeEnv(String path) throws IOException;
 
     /**
+     * Add volume to the function configuration
+     *
+     * @param path path where the function is stored
+     * @throws IOException if communication errored
+     */
+    void addVolume(String path) throws IOException;
+
+    /**
+     * Remove volume from the function configuration
+     *
+     * @param path path where the function is stored
+     * @throws IOException if communication errored
+     */
+    void removeVolume(String path) throws IOException;
+
+    /**
      * Set a watch on Service resource with label
      *
      * @param key     key label

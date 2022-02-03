@@ -8,15 +8,21 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
+
 package com.redhat.devtools.intellij.knative.actions.func;
 
 import com.redhat.devtools.intellij.knative.kn.Kn;
 
 import java.io.IOException;
 
-public class AddEnvAction extends AddConfigAction {
+public class RemoveVolumeAction extends RemoveConfigAction {
     @Override
-    public void doAddConfig(Kn kncli, String path) throws IOException {
-        kncli.addEnv(path);
+    public void doRemoveConfig(Kn kncli, String path) throws IOException {
+        kncli.removeVolume(path);
+    }
+
+    @Override
+    public String[] getSection() {
+        return new String[] { "volumes" };
     }
 }

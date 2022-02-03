@@ -10,21 +10,29 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.actions;
 
-import com.redhat.devtools.intellij.knative.actions.func.AddEnvAction;
+import com.redhat.devtools.intellij.knative.actions.func.RemoveVolumeAction;
 import org.junit.Test;
 
 import java.io.IOException;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
-public class AddEnvActionTest extends ActionTest {
+public class RemoveVolumeActionTest extends ActionTest {
+    @Test
+    public void DoRemoveConfig_RemoveEnvIsCalled() throws IOException {
+        RemoveVolumeAction action = new RemoveVolumeAction();
+        action.doRemoveConfig(kn, "path");
+        verify(kn, times(1)).removeVolume(anyString());
+    }
 
     @Test
-    public void AddConfig_AddEnvIsCalled() throws IOException {
-        AddEnvAction action = new AddEnvAction();
-        action.doAddConfig(kn, "path");
-        verify(kn, times(1)).addEnv(anyString());
+    public void GetSection_ReturnsEnv() throws IOException {
+        RemoveVolumeAction action = new RemoveVolumeAction();
+        String[] section = action.getSection();
+        assertEquals(1, section.length);
+        assertEquals("volumes", section[0]);
     }
 }

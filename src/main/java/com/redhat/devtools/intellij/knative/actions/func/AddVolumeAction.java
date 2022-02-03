@@ -8,15 +8,16 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
+
 package com.redhat.devtools.intellij.knative.actions.func;
 
 import com.redhat.devtools.intellij.knative.kn.Kn;
 
 import java.io.IOException;
 
-public class AddEnvAction extends AddConfigAction {
+public class AddVolumeAction extends AddConfigAction {
     @Override
     public void doAddConfig(Kn kncli, String path) throws IOException {
-        kncli.addEnv(path);
+        kncli.addVolume(path);
     }
 }

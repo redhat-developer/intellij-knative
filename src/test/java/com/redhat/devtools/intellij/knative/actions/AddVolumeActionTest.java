@@ -10,7 +10,7 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.actions;
 
-import com.redhat.devtools.intellij.knative.actions.func.AddEnvAction;
+import com.redhat.devtools.intellij.knative.actions.func.AddVolumeAction;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -19,12 +19,12 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
-public class AddEnvActionTest extends ActionTest {
-
+public class AddVolumeActionTest extends ActionTest {
     @Test
-    public void AddConfig_AddEnvIsCalled() throws IOException {
-        AddEnvAction action = new AddEnvAction();
+    public void AddConfig_AddVolumeIsCalled() throws IOException {
+        AddVolumeAction action = new AddVolumeAction();
         action.doAddConfig(kn, "path");
-        verify(kn, times(1)).addEnv(anyString());
+        verify(kn, times(1)).addVolume(anyString());
     }
 }
+

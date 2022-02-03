@@ -303,6 +303,16 @@ public class KnCli implements Kn {
     }
 
     @Override
+    public void addVolume(String path) throws IOException {
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, funcCommand, "config", "volumes", "add", "-p", path);
+    }
+
+    @Override
+    public void removeVolume(String path) throws IOException {
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, funcCommand, "config", "volumes", "remove", "-p", path);
+    }
+
+    @Override
     public Watch watchServiceWithLabel(String key, String value, Watcher<io.fabric8.knative.serving.v1.Service> watcher) throws IOException {
         try {
             return client.adapt(KnativeClient.class).services().inNamespace(getNamespace()).withLabel(key, value)
