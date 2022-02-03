@@ -15,6 +15,7 @@ import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
+import com.redhat.devtools.intellij.knative.utils.FuncUtils;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -59,24 +60,10 @@ public class DeployAction extends BuildAction {
         boolean visible = super.isVisible(selected);
         if (visible) {
             Kn kn = ((KnFunctionNode) selected).getRootNode().getKn();
-            try {
-                return isKnativeReady(kn).get(500, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                return false;
-            }
+            return FuncUtils.isKnativeReady(kn);
         }
         return false;
     }
 
-    private CompletableFuture<Boolean> isKnativeReady(Kn kn) {
-        CompletableFuture<Boolean> result = new CompletableFuture<>();
-        ExecHelper.submit(() -> {
-            try {
-                result.complete(kn.isKnativeServingAware() && kn.isKnativeEventingAware());
-            } catch (IOException e) {
-                result.complete(false);
-            }
-        });
-        return result;
-    }
+
 }

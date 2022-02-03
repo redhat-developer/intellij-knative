@@ -228,6 +228,22 @@ public interface Kn {
     void runFunc(String path) throws IOException;
 
     /**
+     * Add environment variable to the function configuration
+     *
+     * @param path path where the function is stored
+     * @throws IOException if communication errored
+     */
+    void addEnv(String path) throws IOException;
+
+    /**
+     * Remove environment variable from function configuration
+     *
+     * @param path path where the function is stored
+     * @throws IOException if communication errored
+     */
+    void removeEnv(String path) throws IOException;
+
+    /**
      * Set a watch on Service resource with label
      *
      * @param key     key label

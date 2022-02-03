@@ -229,7 +229,7 @@ public class KnSaveInEditorListenerTest extends FixtureBaseTest {
             }
 
             @Override
-            public <T> @Nullable T getUserData(@NotNull Key<T> key) {
+            public <T> T getUserData(@NotNull Key<T> key) {
                 return null;
             }
 
