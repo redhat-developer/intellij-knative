@@ -64,10 +64,10 @@
                     text="Deploy"/>
             <action id="com.redhat.devtools.intellij.knative.actions.func.AddEnvAction"
                     class="com.redhat.devtools.intellij.knative.actions.func.AddEnvAction"
-                    text="Add Envs"/>
+                    text="Add Environment Variable"/>
             <action id="com.redhat.devtools.intellij.knative.actions.func.RemoveEnvAction"
                     class="com.redhat.devtools.intellij.knative.actions.func.RemoveEnvAction"
-                    text="Remove Env"/>
+                    text="Remove Environment Variable"/>
             <action id="com.redhat.devtools.intellij.knative.actions.func.UndeployAction"
                     class="com.redhat.devtools.intellij.knative.actions.func.UndeployAction"
                     text="Undeploy"/>
