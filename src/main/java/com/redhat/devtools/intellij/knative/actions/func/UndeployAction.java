@@ -42,9 +42,10 @@ public class UndeployAction extends DeleteAction {
     private void deleteResources(Class type, Map<Class, List<ParentableNode>> resourcesByClass, Kn kncli) throws IOException {
         List<String> resources = resourcesByClass.get(type).stream().map(ParentableNode::getName).collect(Collectors.toList());
         if (type.equals(KnFunctionNode.class)) {
-            kncli.deleteFunctions(resources);
             notifyUndeploy(resources);
             listenToUndeployComplete(kncli, resources);
+            kncli.deleteFunctions(resources);
+
         }
     }
 
