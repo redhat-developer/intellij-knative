@@ -18,6 +18,8 @@ import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.WatcherException;
 import java.io.IOException;
+import java.util.function.BiConsumer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +48,28 @@ public class FunctionWatcher extends AbstractWatcher {
             @Override
             public void eventReceived(Action action, Service resource) {
                 scheduler.schedule(doExecute);
+            }
+
+            @Override
+            public void onClose(WatcherException cause) {
+            }
+        };
+    }
+
+    public Watch doWatch(BiConsumer<Watcher.Action, Service> doExecute) {
+        try {
+            return kn.watchServiceWithLabel(FUNCTON_LABEL_KEY, "true", getWatcher(doExecute));
+        } catch (IOException e) {
+            logger.warn(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
+
+    private Watcher<io.fabric8.knative.serving.v1.Service> getWatcher(BiConsumer<Watcher.Action, Service> doExecute) {
+        return new Watcher<io.fabric8.knative.serving.v1.Service>() {
+            @Override
+            public void eventReceived(Action action, Service resource) {
+                doExecute.accept(action, resource);
             }
 
             @Override
