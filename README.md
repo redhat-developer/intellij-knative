@@ -13,6 +13,50 @@ A JetBrains IntelliJ plugin for interacting with Knative. This plugin is current
 
 ## New and Noteworthy
 
+The new release supports Knative Functions, enabling the development and deployment of Functions directly from IntelliJ.
+
+### Create new function
+
+The native IntelliJ `New Project/Module` actions have been extended to enable the creation of new functions.  
+
+![](images/0.2.0/knative1.gif)
+
+### New Functions View
+
+A simplified view for Functions allows to easily build/run/configure/deploy your functions in few clicks. 
+It shows if the function has been deployed and available on cluster or only opened locally or both.
+
+![](images/0.2.0/knative2.png)
+
+### Build/Run/Deploy Function
+
+It is possible to build, deploy and run locally a function from the IDE. Textboxes and inputs will help through the entire workflow.
+
+![](images/0.2.0/knative3.gif)
+
+![](images/0.2.0/knative4.gif)
+
+![](images/0.2.0/knative5.gif)
+
+### Update Function Configuration
+
+A function can be updated manually by changing the `func.yaml` file through the IDE editor. The plugin also provides 
+`add`/`remove` actions to configure environment variables and volumes in a guided way.
+
+![](images/0.2.0/knative6.gif)
+
+### Open in browser
+
+Deployed Function can be opened in browser from the IDE.
+
+### Undeploy Function
+
+A deployed function can be undeployed. 
+
+## Previous releases
+
+### 0.1.0
+
 This first release only support knative serving.
 
 ### Create new service
@@ -54,7 +98,7 @@ To use the plugin, developers can deploy Knative into a Red Hat CodeReady Contai
 * OpenShift 4.x - [CodeReadyContainers](https://cloud.redhat.com/openshift/install/crc/installer-provisioned)
 * Kubernetes - [Minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/).
 
-The plugin also supports OpenShift running on Azure, AWS. 
+The plugin also supports OpenShift running on Azure, AWS.
 
 ## Knative Tutorial
 
@@ -64,20 +108,32 @@ To get started with Knative and learn how to easily deploy containers and manage
 
 ## Commands and features
 
-Development of the Knative Plugin is largely following development of the [kn CLI](https://github.com/knative/client) as well as 
+Development of the Knative Plugin is largely following development of the [kn CLI](https://github.com/knative/client) and 
+[func CLI](https://github.com/knative-sandbox/kn-plugin-func) as well as
 Knative serving and Knative eventing which are both under active development and potentially subject to drastic changes.
 
-Below you can find a list of the current actions supported by this plugin to interact with Knative. 
+Below you can find a list of the current actions supported by this plugin to interact with Knative.
 These are accessible via the context menu when right-clicking an item in the tree.
 
 #### Actions available
 
-   * `New Service` - Open a wizard with two tabs (simplified and editor) to create a new knative service (only available for Service).
-   * `Open in Editor` - Open the existing service/revision configuration in an editor.
-   * `Delete` - Delete the selected services/revisions.
-   * `Refresh` - Refresh the selected item
-   * `Open in Browser` - Open a browser using the service URL (only available for Service)
+##### Knative
 
+* `New Service` - Open a wizard with two tabs (simplified and editor) to create a new knative service (only available for Service).
+* `Open in Editor` - Open the existing service/revision configuration in an editor.
+* `Delete` - Delete the selected services/revisions.
+* `Refresh` - Refresh the selected item
+* `Open in Browser` - Open a browser using the service URL (only available for Service)
+
+##### Knative Function
+
+* `New Function` - Extend the native IntelliJ `new Project/Module` action to enable the creation of a new knative function.
+* `Build` - Build a function
+* `Run` - Run a function locally. This action is disabled if the function has not been built.
+* `Deploy` - Build and deploy a function to a cluster. The image built will be pushed to a registry. If the registry is private it will ask to authenticate
+* `Open in Browser` - Open a browser using the function URL
+* `Add/Remove Configuration` - Allow to update function configuration in a guided way (it supports environment variables and volumes)
+* `Undeploy` - Undeploy a function which has been deployed previously
 
 ##### Saving Process
 
@@ -88,8 +144,9 @@ and want to push the changes to the cluster, click on `Save All (CTRL + S)`. A p
 
 #### CLI Tools
 
-This plugin uses a CLI tool to interact with Kntive:
+This plugin uses two CLI tools to interact with Knative:
 * Knative CLI - [kn](https://github.com/knative/client)
+* Func CLI - [func](https://github.com/knative-sandbox/kn-plugin-func)
 
 > The plugin will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see an notification for the missing tool.
 

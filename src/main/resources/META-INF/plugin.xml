@@ -5,12 +5,16 @@
     <vendor email="developers@redhat.com" url="https://www.redhat.com">Red-Hat</vendor>
 
     <description><![CDATA[
-      <p>A plugin for working with Knative on a OpenShift or Kubernetes cluster. This plugin allows developers to view and deploy their applications in a serverles way. This extension is currently in Preview Mode.</p>
+      <p>A plugin for working with Knative on a OpenShift or Kubernetes cluster. This plugin allows developers to view and deploy their applications in a serverless way. This extension is currently in Preview Mode.</p>
       <p>To run the instance of a Kubernetes cluster locally, developers can use <a href="https://github.com/kubernetes/minikube">Minikube</a>.</p>
       <p>To run the instance of an OpenShift cluster locally, developers can use <a href="https://developers.redhat.com/products/crc/download/">CRC</a>.</p>
     ]]></description>
 
     <change-notes><![CDATA[
+      <p><b>0.2.0</b></p>
+      <p>Add support for Knative Functions</p>
+      <p>Extends native IntelliJ new Project/Module action to enable creation of Knative Function<p>
+      <p>Add actions to build, run, deploy, undeploy, open in browser a function</p>
       <p><b>0.1.0</b></p>
       <p>Initial release</p>
       <p>Allow to create, edit, delete and open in browser services and revisions</p>
