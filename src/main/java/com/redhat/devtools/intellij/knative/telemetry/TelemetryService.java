@@ -18,12 +18,10 @@ public class TelemetryService {
     public static final String NAME_PREFIX_BUILD_DEPLOY = "build_deploy-";
     public static final String NAME_PREFIX_MISC = "misc-";
     public static final String PROP_RESOURCE_KIND = "resource_kind";
-    public static final String PROP_RESOURCE_VERSION = "resource_version";
     public static final String PROP_RESOURCE_CRUD = "resource_crud";
     public static final String VALUE_RESOURCE_CRUD_CREATE = "create";
     public static final String VALUE_RESOURCE_CRUD_UPDATE = "update";
     public static final String VALUE_ABORTED = "aborted";
-    public static final String PROP_RESOURCE_RELATED = "resource_related";
     public static final String KUBERNETES_VERSION = "kubernetes_version";
     public static final String IS_OPENSHIFT = "is_openshift";
     public static final String OPENSHIFT_VERSION = "openshift_version";

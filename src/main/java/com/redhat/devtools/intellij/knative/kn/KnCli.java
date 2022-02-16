@@ -15,9 +15,13 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.intellij.openapi.project.Project;
+import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
+import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.NetworkUtils;
+import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import io.fabric8.knative.client.KnativeClient;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -40,6 +44,9 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_TOOL_WINDOW_ID;
+import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.IS_OPENSHIFT;
+import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.KUBERNETES_VERSION;
+import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.OPENSHIFT_VERSION;
 
 
 public class KnCli implements Kn {
@@ -62,6 +69,20 @@ public class KnCli implements Kn {
         }
         this.hasKnativeServing = false;
         this.hasKnativeEventing = false;
+        reportTelemetry();
+    }
+
+    private void reportTelemetry() {
+        TelemetryMessageBuilder.ActionMessage telemetry = TelemetryService.instance().action(TelemetryService.NAME_PREFIX_MISC + "login");
+        try {
+            ClusterInfo info = ClusterHelper.getClusterInfo(client);
+            telemetry.property(KUBERNETES_VERSION, info.getKubernetesVersion());
+            telemetry.property(IS_OPENSHIFT, Boolean.toString(info.isOpenshift()));
+            telemetry.property(OPENSHIFT_VERSION, info.getOpenshiftVersion());
+            telemetry.send();
+        } catch (RuntimeException e) {
+            telemetry.error(e).send();
+        }
     }
 
     @Override

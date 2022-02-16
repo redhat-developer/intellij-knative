@@ -24,6 +24,7 @@
     <depends>org.jetbrains.plugins.terminal</depends>
     <depends>com.intellij.modules.lang</depends>
     <depends>org.jetbrains.plugins.yaml</depends>
+    <depends>com.redhat.devtools.intellij.telemetry</depends>
     <depends>com.redhat.devtools.intellij.kubernetes</depends>
     <depends optional="true" config-file="plugin-json.xml">com.intellij.modules.json</depends>
     <depends optional="true" config-file="plugin-kubernetes.xml">com.intellij.kubernetes</depends>
