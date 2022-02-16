@@ -31,8 +31,10 @@ import com.intellij.ui.components.JBTabbedPane;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
+import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.utils.EditorHelper;
 import com.redhat.devtools.intellij.knative.utils.KnHelper;
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -67,6 +69,7 @@ import java.util.Collection;
 
 import static com.redhat.devtools.intellij.knative.Constants.YAML_FIRST_IMAGE_PATH;
 import static com.redhat.devtools.intellij.knative.Constants.YAML_NAME_PATH;
+import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymizeResource;
 
 public class CreateServiceDialog extends DialogWrapper {
     private final Logger logger = LoggerFactory.getLogger(CreateServiceDialog.class);
@@ -80,14 +83,16 @@ public class CreateServiceDialog extends DialogWrapper {
     private Runnable refreshFunction;
     private JTextField txtValueParam, txtImageParam;
     private DocumentListener txtNameParamListener, txtImageParamListener;
+    private TelemetryMessageBuilder.ActionMessage telemetry;
 
     private final static String DEFAULT_NAME_IN_SNIPPET = "add service name";
     private final static String DEFAULT_FIRST_IMAGE_IN_SNIPPET = "add image url";
 
-    public CreateServiceDialog(String title, Project project, String namespace, Runnable refreshFunction) {
+    public CreateServiceDialog(String title, Project project, String namespace, Runnable refreshFunction, TelemetryMessageBuilder.ActionMessage telemetry) {
         super(project, true);
         this.project = project;
         this.refreshFunction = refreshFunction;
+        this.telemetry = telemetry;
         setTitle(title);
         initEditor(namespace);
         buildStructure();
@@ -374,8 +379,14 @@ public class CreateServiceDialog extends DialogWrapper {
                     KnHelper.saveOnCluster(this.project, editor.getEditor().getDocument().getText(), true);
                     UIHelper.executeInUI(refreshFunction);
                     UIHelper.executeInUI(() -> super.doOKAction());
+                    telemetry
+                            .success()
+                            .send();
                 } catch (IOException | KubernetesClientException ex) {
                     UIHelper.executeInUI(() -> displayError(ex.getLocalizedMessage()));
+                    telemetry
+                            .error(ex.getLocalizedMessage())
+                            .send();
                 }
             });
         });

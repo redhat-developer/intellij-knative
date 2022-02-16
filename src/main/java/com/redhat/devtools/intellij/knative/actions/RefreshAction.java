@@ -13,7 +13,9 @@ package com.redhat.devtools.intellij.knative.actions;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.common.actions.StructureTreeAction;
+import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.Constants;
+import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.tree.KnEventingNode;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.KnRevisionNode;
@@ -21,8 +23,13 @@ import com.redhat.devtools.intellij.knative.tree.KnRootNode;
 import com.redhat.devtools.intellij.knative.tree.KnServiceNode;
 import com.redhat.devtools.intellij.knative.tree.KnServingNode;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
+import com.redhat.devtools.intellij.knative.tree.ParentableNode;
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 
 import javax.swing.tree.TreePath;
+
+import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_MISC;
+import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymizeResource;
 
 public class RefreshAction extends StructureTreeAction {
     public RefreshAction() {
@@ -36,12 +43,22 @@ public class RefreshAction extends StructureTreeAction {
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
+        TelemetryMessageBuilder.ActionMessage telemetry = TelemetryService.instance().action(NAME_PREFIX_MISC + "refresh");
         Tree tree = getTree(anActionEvent);
+        ParentableNode node = getElement(selected);
+        String name = node.getName();
+        String namespace = node.getRootNode().getKn().getNamespace();
         if (tree == null) {
+            ExecHelper.submit(() -> telemetry
+                    .result(anonymizeResource(name, namespace, "Unable to refresh tree starting from element " + name + ". Tree not found"))
+                    .send());
             return;
         }
         KnTreeStructure structure = (KnTreeStructure) tree.getClientProperty(Constants.STRUCTURE_PROPERTY);
         if (structure == null) {
+            ExecHelper.submit(() -> telemetry
+                    .result(anonymizeResource(name, namespace, "Unable to refresh tree starting from element " + name + ". Structure not found"))
+                    .send());
             return;
         }
         if (Constants.TOOLBAR_PLACE.equals(anActionEvent.getPlace())) {
@@ -50,7 +67,9 @@ public class RefreshAction extends StructureTreeAction {
             selected = StructureTreeAction.getElement(selected);
             structure.fireModified(selected);
         }
-
+        ExecHelper.submit(() -> telemetry
+                .result(anonymizeResource(name, namespace, "Tree refreshed starting from element " + name))
+                .send());
     }
 
     @Override

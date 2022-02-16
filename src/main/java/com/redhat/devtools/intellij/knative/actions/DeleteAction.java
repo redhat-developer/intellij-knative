@@ -15,12 +15,15 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.knative.kn.Kn;
+import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.KnRevisionNode;
 import com.redhat.devtools.intellij.knative.tree.KnServiceNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import com.redhat.devtools.intellij.knative.ui.DeleteDialog;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +34,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import javax.swing.tree.TreePath;
 
+import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_CRUD;
+import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_MISC;
+import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymizeResource;
+
 public class DeleteAction extends KnAction {
+    private TelemetryMessageBuilder.ActionMessage telemetry;
     public DeleteAction() {
         super(true, KnServiceNode.class, KnRevisionNode.class, KnFunctionNode.class);
     }
@@ -42,6 +50,7 @@ public class DeleteAction extends KnAction {
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath[] path, Object[] selected, Kn kncli) {
+        telemetry = TelemetryService.instance().action(NAME_PREFIX_CRUD + " " + getActionName(false));
         ParentableNode[] elements = Arrays.stream(selected).map(item -> getElement(item)).toArray(ParentableNode[]::new);
         String title, dialogText = "Are you sure you want to " + getActionName(false) + " ";
 
@@ -73,11 +82,18 @@ public class DeleteAction extends KnAction {
 
     public void executeDelete(Project project, Kn kncli, ParentableNode[] elements) {
         Map<Class, List<ParentableNode>> resourcesByClass = groupResourcesByClass(elements);
+        String namespace = kncli.getNamespace();
         for(Class type: resourcesByClass.keySet()) {
             try {
                 doDelete(project, kncli, type, resourcesByClass);
+                telemetry.property(TelemetryService.PROP_RESOURCE_KIND, type.getSimpleName())
+                        .success()
+                        .send();
             } catch (IOException e) {
                 UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Error"));
+                telemetry
+                        .error(anonymizeResource(null, namespace, e.getMessage()))
+                        .send();
             }
         }
     }
