@@ -19,31 +19,31 @@ The new release supports Knative Functions, enabling the development and deploym
 
 The native IntelliJ `New Project/Module` actions have been extended to enable the creation of new functions.  
 
-![](images/0.2.0/knative1.gif)
+![](images/1.0.0/knative1.gif)
 
 ### New Functions View
 
 A simplified view for Functions allows to easily build/run/configure/deploy your functions in few clicks. 
 It shows if the function has been deployed and available on cluster or only opened locally or both.
 
-![](images/0.2.0/knative2.png)
+![](images/1.0.0/knative2.png)
 
 ### Build/Run/Deploy Function
 
 It is possible to build, deploy and run locally a function from the IDE. Textboxes and inputs will help through the entire workflow.
 
-![](images/0.2.0/knative3.gif)
+![](images/1.0.0/knative3.gif)
 
-![](images/0.2.0/knative4.gif)
+![](images/1.0.0/knative4.gif)
 
-![](images/0.2.0/knative5.gif)
+![](images/1.0.0/knative5.gif)
 
 ### Update Function Configuration
 
 A function can be updated manually by changing the `func.yaml` file through the IDE editor. The plugin also provides 
 `add`/`remove` actions to configure environment variables and volumes in a guided way.
 
-![](images/0.2.0/knative6.gif)
+![](images/1.0.0/knative6.gif)
 
 ### Open in browser
 

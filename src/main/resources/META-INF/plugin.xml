@@ -11,7 +11,7 @@
     ]]></description>
 
     <change-notes><![CDATA[
-      <p><b>0.2.0</b></p>
+      <p><b>1.0.0</b></p>
       <p>Add support for Knative Functions</p>
       <p>Extends native IntelliJ new Project/Module action to enable creation of Knative Function<p>
       <p>Add actions to build, run, deploy, undeploy, open in browser a function</p>
