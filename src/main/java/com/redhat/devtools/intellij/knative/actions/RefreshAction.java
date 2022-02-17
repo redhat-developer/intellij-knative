@@ -45,27 +45,26 @@ public class RefreshAction extends StructureTreeAction {
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected) {
         TelemetryMessageBuilder.ActionMessage telemetry = TelemetryService.instance().action(NAME_PREFIX_MISC + "refresh");
         Tree tree = getTree(anActionEvent);
-        ParentableNode node = getElement(selected);
-        String name = node.getName();
-        String namespace = node.getRootNode().getKn().getNamespace();
         if (tree == null) {
             ExecHelper.submit(() -> telemetry
-                    .result(anonymizeResource(name, namespace, "Unable to refresh tree starting from element " + name + ". Tree not found"))
+                    .result("Unable to refresh tree. Tree not found")
                     .send());
             return;
         }
         KnTreeStructure structure = (KnTreeStructure) tree.getClientProperty(Constants.STRUCTURE_PROPERTY);
         if (structure == null) {
             ExecHelper.submit(() -> telemetry
-                    .result(anonymizeResource(name, namespace, "Unable to refresh tree starting from element " + name + ". Structure not found"))
+                    .result("Unable to refresh tree starting from element. Structure not found")
                     .send());
             return;
         }
+        ParentableNode node = getElement(selected);
+        String name = node.getName();
+        String namespace = node.getRootNode().getKn().getNamespace();
         if (Constants.TOOLBAR_PLACE.equals(anActionEvent.getPlace())) {
             structure.fireModified(structure.getRootElement());
         } else {
-            selected = StructureTreeAction.getElement(selected);
-            structure.fireModified(selected);
+            structure.fireModified(node);
         }
         ExecHelper.submit(() -> telemetry
                 .result(anonymizeResource(name, namespace, "Tree refreshed starting from element " + name))

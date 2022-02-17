@@ -19,6 +19,8 @@ import com.redhat.devtools.intellij.knative.kn.ServiceStatus;
 import com.redhat.devtools.intellij.knative.kn.ServiceTraffic;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import org.junit.Before;
 
 
@@ -35,6 +37,7 @@ public abstract class ActionTest extends FixtureBaseTest {
     protected ServiceTraffic serviceTraffic;
     protected Presentation presentation;
     protected TreeAction treeAction;
+    protected TelemetryMessageBuilder.ActionMessage telemetry;
 
 
     @Before
@@ -51,6 +54,7 @@ public abstract class ActionTest extends FixtureBaseTest {
         serviceStatus = mock(ServiceStatus.class);
         serviceTraffic = mock(ServiceTraffic.class);
         treeAction = mock(TreeAction.class);
+        telemetry = mock(TelemetryMessageBuilder.ActionMessage.class);
         presentation = new Presentation();
 
         when(path.getLastPathComponent()).thenReturn(knServiceNode);

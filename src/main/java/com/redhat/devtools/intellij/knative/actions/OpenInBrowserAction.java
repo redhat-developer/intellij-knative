@@ -68,14 +68,11 @@ public class OpenInBrowserAction extends KnAction {
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Kn kncli) {
         TelemetryMessageBuilder.ActionMessage telemetry = TelemetryService.instance().action(NAME_PREFIX_MISC + "open in browser");
         Object node = getElement(selected);
+        String name = ((ParentableNode<?>) node).getName();
+        String namespace = kncli.getNamespace();
 
         ExecHelper.submit(() -> {
             String url = getURL(node, kncli);
-            String name = "", namespace = "";
-            if (node instanceof ParentableNode) {
-                name = ((ParentableNode<?>) node).getName();
-                namespace = kncli.getNamespace();
-            }
             if (!Strings.isNullOrEmpty(url)) {
                 BrowserUtil.browse(url);
                 telemetry

@@ -86,14 +86,18 @@ public class DeleteAction extends KnAction {
         for(Class type: resourcesByClass.keySet()) {
             try {
                 doDelete(project, kncli, type, resourcesByClass);
-                telemetry.property(TelemetryService.PROP_RESOURCE_KIND, type.getSimpleName())
-                        .success()
-                        .send();
+                if (telemetry != null) { //used for testing
+                    telemetry.property(TelemetryService.PROP_RESOURCE_KIND, type.getSimpleName())
+                            .success()
+                            .send();
+                }
             } catch (IOException e) {
                 UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Error"));
-                telemetry
-                        .error(anonymizeResource(null, namespace, e.getMessage()))
-                        .send();
+                if (telemetry != null) { //used for testing
+                    telemetry
+                            .error(anonymizeResource(null, namespace, e.getMessage()))
+                            .send();
+                }
             }
         }
     }

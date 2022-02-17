@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.Constants;
@@ -60,9 +61,13 @@ public class DeployActionTest extends ActionTest {
         AnAction action = new DeployAction();
         AnActionEvent anActionEvent = createDeployActionEvent();
         when(function.getLocalPath()).thenReturn("");
-        action.actionPerformed(anActionEvent);
-        Thread.sleep(1000);
-        verify(kn, times(0)).deployFunc(anyString(), anyString(), anyString(), anyString());
+        try (MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
+            when(kn.getNamespace()).thenReturn("namespace");
+            treeHelperMockedStatic.when(() -> TreeHelper.getKn(any(Project.class))).thenReturn(kn);
+            action.actionPerformed(anActionEvent);
+            Thread.sleep(1000);
+            verify(kn, times(0)).deployFunc(anyString(), anyString(), anyString(), anyString());
+        }
     }
 
     @Test
