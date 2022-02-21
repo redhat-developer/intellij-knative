@@ -46,16 +46,16 @@ public class RefreshAction extends StructureTreeAction {
         TelemetryMessageBuilder.ActionMessage telemetry = TelemetryService.instance().action(NAME_PREFIX_MISC + "refresh");
         Tree tree = getTree(anActionEvent);
         if (tree == null) {
-            ExecHelper.submit(() -> telemetry
+            telemetry
                     .result("Unable to refresh tree. Tree not found")
-                    .send());
+                    .send();
             return;
         }
         KnTreeStructure structure = (KnTreeStructure) tree.getClientProperty(Constants.STRUCTURE_PROPERTY);
         if (structure == null) {
-            ExecHelper.submit(() -> telemetry
+            telemetry
                     .result("Unable to refresh tree starting from element. Structure not found")
-                    .send());
+                    .send();
             return;
         }
         ParentableNode node = getElement(selected);
@@ -66,9 +66,9 @@ public class RefreshAction extends StructureTreeAction {
         } else {
             structure.fireModified(node);
         }
-        ExecHelper.submit(() -> telemetry
+        telemetry
                 .result(anonymizeResource(name, namespace, "Tree refreshed starting from element " + name))
-                .send());
+                .send();
     }
 
     @Override

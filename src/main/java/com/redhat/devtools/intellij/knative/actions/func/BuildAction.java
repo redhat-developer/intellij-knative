@@ -64,9 +64,9 @@ public class BuildAction extends KnAction {
         Function function = ((KnFunctionNode) node).getFunction();
         String localPathFunc = function.getLocalPath();
         if (localPathFunc.isEmpty()) {
-            ExecHelper.submit(() -> this.telemetry
+            telemetry
                     .result(anonymizeResource(name, namespace, "Function " + name + "is not opened locally"))
-                    .send());
+                    .send();
             return;
         }
         // get image or registry in func.yaml
@@ -77,7 +77,7 @@ public class BuildAction extends KnAction {
             // ask input to user
             image = getImageFromUser(node.getName());
             if (image.isEmpty()) {
-                this.telemetry
+                telemetry
                         .result(anonymizeResource(name, namespace, "No image name or registry has been added."))
                         .send();
                 return;
@@ -85,7 +85,7 @@ public class BuildAction extends KnAction {
         }
 
         if (!isActionConfirmed(node.getName(), function.getNamespace(), namespace)) {
-            this.telemetry
+            telemetry
                     .result(anonymizeResource(name, namespace, "Action execution has been stopped by user."))
                     .send();
             return;
@@ -95,7 +95,7 @@ public class BuildAction extends KnAction {
         ExecHelper.submit(() -> {
             try {
                 doExecute(knCli, namespace, localPathFunc, registry, finalImage);
-                this.telemetry
+                telemetry
                         .result(anonymizeResource(name, namespace, getSuccessMessage(namespace, name)))
                         .send();
                 TreeHelper.refreshFuncTree(getEventProject(anActionEvent));

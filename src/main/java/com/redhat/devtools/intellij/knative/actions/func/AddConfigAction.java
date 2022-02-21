@@ -43,16 +43,16 @@ public abstract class AddConfigAction extends KnAction {
         String namespace = knCli.getNamespace();
         String localPathFunc = ((KnFunctionNode) node).getFunction().getLocalPath();
         if (localPathFunc.isEmpty()) {
-            ExecHelper.submit(() -> this.telemetry
+            telemetry
                     .result(anonymizeResource(name, namespace, "Function " + name + "is not opened locally"))
-                    .send());
+                    .send();
             return;
         }
 
         ExecHelper.submit(() -> {
             try {
                 doAddConfig(knCli, localPathFunc);
-                this.telemetry
+                telemetry
                         .result(anonymizeResource(name, namespace, getSuccessMessage(namespace, name)))
                         .send();
             } catch (IOException e) {

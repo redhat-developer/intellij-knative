@@ -82,7 +82,7 @@ public class EditorHelper {
             Editor openedEditor = FileEditorManager.getInstance(project).openTextEditor(new OpenFileDescriptor(project, editor.get().getFile()), true);
             updateVirtualFile(openedEditor.getDocument(), content);
         }
-        ExecHelper.submit(() -> telemetry.send());
+        telemetry.send();
     }
 
     private static VirtualFile createVirtualFile(Project project, String name, String content, boolean isWritable, ParentableNode<?> targetNode) throws IOException {

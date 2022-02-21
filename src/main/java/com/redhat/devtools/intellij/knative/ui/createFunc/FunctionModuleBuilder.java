@@ -132,12 +132,12 @@ public class FunctionModuleBuilder extends ModuleBuilder {
     }
 
     private void createFunction() throws IOException {
-        TelemetryMessageBuilder.ActionMessage telemetry = TelemetryService.instance().action(NAME_PREFIX_CRUD + " create func");
+        TelemetryMessageBuilder.ActionMessage telemetry = TelemetryService.instance().action(NAME_PREFIX_CRUD + "create func");
         Kn kn = getKn();
         if (kn == null) {
-            ExecHelper.submit(() -> telemetry
+            telemetry
                     .result("Kn cli is null")
-                    .send());
+                    .send();
             throw new IOException("Unable to create a function project. Function cli not available.");
         }
 

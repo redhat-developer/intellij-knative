@@ -7,5 +7,4 @@
     * action name
     * action duration time
     * action error message (in case of exception)
-    * action specific data if applicable (see details below)
 * when plugin is shut down

@@ -50,7 +50,7 @@ public class DeleteAction extends KnAction {
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath[] path, Object[] selected, Kn kncli) {
-        telemetry = TelemetryService.instance().action(NAME_PREFIX_CRUD + " " + getActionName(false));
+        telemetry = TelemetryService.instance().action(NAME_PREFIX_CRUD + getActionName(false));
         ParentableNode[] elements = Arrays.stream(selected).map(item -> getElement(item)).toArray(ParentableNode[]::new);
         String title, dialogText = "Are you sure you want to " + getActionName(false) + " ";
 
