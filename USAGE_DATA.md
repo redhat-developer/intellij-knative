@@ -7,4 +7,13 @@
     * action name
     * action duration time
     * action error message (in case of exception)
+    * action specific data if applicable (see details below)
+* when connecting to a cluster
+  * Kubernetes version
+  * flag for Kubernetes/OpenShift cluster
+  * OpenShift version
 * when plugin is shut down
+
+### Actions operating on tekton resources
+* resource kind
+* creation/update of a resource
