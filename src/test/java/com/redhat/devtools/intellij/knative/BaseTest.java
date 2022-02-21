@@ -34,6 +34,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 
@@ -62,6 +64,8 @@ public class BaseTest {
     protected KnEventingTriggersNode knEventingTriggersNode;
     protected KnSourceNode knSourceNode;
     protected KnSinkNode knSinkNode;
+    protected TelemetryMessageBuilder telemetryMessageBuilder;
+    protected TelemetryMessageBuilder.ActionMessage actionMessage;
 
     @Before
     public void setUp() throws Exception {
@@ -83,6 +87,8 @@ public class BaseTest {
         knSourceNode = mock(KnSourceNode.class);
         knSinkNode = mock(KnSinkNode.class);
         knFunctionNode = mock(KnFunctionNode.class);
+        telemetryMessageBuilder = mock(TelemetryMessageBuilder.class);
+        actionMessage = mock(TelemetryMessageBuilder.ActionMessage.class);
     }
 
     protected String load(String name) throws IOException {

@@ -23,6 +23,7 @@ import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.actions.KnAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.kn.Kn;
+import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
@@ -32,6 +33,8 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import javax.swing.tree.TreePath;
+
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,9 +42,14 @@ import org.slf4j.LoggerFactory;
 import static com.intellij.openapi.ui.Messages.CANCEL_BUTTON;
 import static com.intellij.openapi.ui.Messages.OK_BUTTON;
 import static com.redhat.devtools.intellij.knative.Constants.NOTIFICATION_ID;
+import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_BUILD_DEPLOY;
+import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_CRUD;
+import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymizeResource;
 
 public class BuildAction extends KnAction {
     private static final Logger logger = LoggerFactory.getLogger(BuildAction.class);
+
+    protected TelemetryMessageBuilder.ActionMessage telemetry;
 
     public BuildAction() {
         super(KnFunctionNode.class);
@@ -49,10 +57,16 @@ public class BuildAction extends KnAction {
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Kn knCli) {
+        telemetry = createTelemetry();
         ParentableNode node = getElement(selected);
+        String name = node.getName();
+        String namespace = knCli.getNamespace();
         Function function = ((KnFunctionNode) node).getFunction();
         String localPathFunc = function.getLocalPath();
         if (localPathFunc.isEmpty()) {
+            telemetry
+                    .result(anonymizeResource(name, namespace, "Function " + name + "is not opened locally"))
+                    .send();
             return;
         }
         // get image or registry in func.yaml
@@ -63,12 +77,17 @@ public class BuildAction extends KnAction {
             // ask input to user
             image = getImageFromUser(node.getName());
             if (image.isEmpty()) {
+                telemetry
+                        .result(anonymizeResource(name, namespace, "No image name or registry has been added."))
+                        .send();
                 return;
             }
         }
 
-        String namespace = node.getRootNode().getKn().getNamespace();
         if (!isActionConfirmed(node.getName(), function.getNamespace(), namespace)) {
+            telemetry
+                    .result(anonymizeResource(name, namespace, "Action execution has been stopped by user."))
+                    .send();
             return;
         }
 
@@ -76,6 +95,9 @@ public class BuildAction extends KnAction {
         ExecHelper.submit(() -> {
             try {
                 doExecute(knCli, namespace, localPathFunc, registry, finalImage);
+                telemetry
+                        .result(anonymizeResource(name, namespace, getSuccessMessage(namespace, name)))
+                        .send();
                 TreeHelper.refreshFuncTree(getEventProject(anActionEvent));
             } catch (IOException e) {
                 Notification notification = new Notification(NOTIFICATION_ID,
@@ -84,6 +106,9 @@ public class BuildAction extends KnAction {
                         NotificationType.ERROR);
                 Notifications.Bus.notify(notification);
                 logger.warn(e.getLocalizedMessage(), e);
+                telemetry
+                        .error(anonymizeResource(name, namespace, e.getLocalizedMessage()))
+                        .send();
             }
         });
     }
@@ -132,6 +157,14 @@ public class BuildAction extends KnAction {
             logger.warn(e.getLocalizedMessage(), e);
         }
         return Pair.empty();
+    }
+
+    protected TelemetryMessageBuilder.ActionMessage createTelemetry() {
+        return TelemetryService.instance().action(NAME_PREFIX_BUILD_DEPLOY + "build func");
+    }
+
+    protected String getSuccessMessage(String namespace, String name) {
+        return "Function " + name + " has been successfully built";
     }
 
     @Override

@@ -13,6 +13,10 @@ package com.redhat.devtools.intellij.knative.actions;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
+import com.intellij.openapi.project.Project;
+import com.intellij.ui.GroupedElementsRenderer;
+import com.intellij.ui.treeStructure.Tree;
+import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.actions.func.RunAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
@@ -49,9 +53,13 @@ public class RunActionTest extends ActionTest {
         AnAction action = new RunAction();
         AnActionEvent anActionEvent = createRunActionEvent();
         when(function.getLocalPath()).thenReturn("");
-        action.actionPerformed(anActionEvent);
-        Thread.sleep(1000);
-        verify(kn, times(0)).runFunc(anyString());
+        try (MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
+            when(kn.getNamespace()).thenReturn("namespace");
+            treeHelperMockedStatic.when(() -> TreeHelper.getKn(any(Project.class))).thenReturn(kn);
+            action.actionPerformed(anActionEvent);
+            Thread.sleep(1000);
+            verify(kn, times(0)).runFunc(anyString());
+        }
     }
 
     @Test

@@ -22,12 +22,20 @@ import com.redhat.devtools.intellij.common.utils.JSONHelper;
 import com.redhat.devtools.intellij.common.utils.StringHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.knative.kn.Kn;
+import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.tree.KnRevisionNode;
 import com.redhat.devtools.intellij.knative.tree.KnServiceNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 import java.io.IOException;
 import java.util.Map;
+
+import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_CRUD;
+import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.PROP_RESOURCE_CRUD;
+import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.VALUE_ABORTED;
+import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.VALUE_RESOURCE_CRUD_CREATE;
+import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.VALUE_RESOURCE_CRUD_UPDATE;
 
 public class KnHelper {
 
@@ -43,12 +51,17 @@ public class KnHelper {
     }
 
     public static boolean saveOnCluster(Project project, String yaml, boolean isCreate) throws IOException {
+        TelemetryMessageBuilder.ActionMessage telemetry = TelemetryService.instance().action(NAME_PREFIX_CRUD + "save to cluster");
         if (!isCreate && !isSaveConfirmed("Do you want to push the changes to the cluster?")) {
+            telemetry.result(VALUE_ABORTED)
+                    .send();
             return false;
         }
 
         Kn knCli = TreeHelper.getKn(project);
         if (knCli == null) {
+            telemetry.error("kn not found")
+                    .send();
             throw new IOException("Unable to save the resource to the cluster. Internal error, please retry or restart the IDE.");
         }
 
@@ -57,6 +70,8 @@ public class KnHelper {
         } else {
             save(knCli, yaml);
         }
+        telemetry.property(PROP_RESOURCE_CRUD, (isCreate ? VALUE_RESOURCE_CRUD_CREATE : VALUE_RESOURCE_CRUD_UPDATE))
+                .send();
         return true;
     }
 

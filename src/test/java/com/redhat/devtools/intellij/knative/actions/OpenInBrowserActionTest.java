@@ -14,9 +14,11 @@ import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
+import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.kn.ServiceStatus;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import java.io.IOException;
@@ -101,8 +103,12 @@ public class OpenInBrowserActionTest extends ActionTest {
                 return null;
             });
             try (MockedStatic<BrowserUtil> browserUtilMockedStatic = mockStatic(BrowserUtil.class)) {
-                action.actionPerformed(anActionEvent);
-                browserUtilMockedStatic.verify(() -> BrowserUtil.browse(anyString()), times(0));
+                try (MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
+                    when(kn.getNamespace()).thenReturn("namespace");
+                    treeHelperMockedStatic.when(() -> TreeHelper.getKn(any(Project.class))).thenReturn(kn);
+                    action.actionPerformed(anActionEvent);
+                    browserUtilMockedStatic.verify(() -> BrowserUtil.browse(anyString()), times(0));
+                }
             }
         }
     }
@@ -118,9 +124,13 @@ public class OpenInBrowserActionTest extends ActionTest {
                 return null;
             });
             try (MockedStatic<BrowserUtil> browserUtilMockedStatic = mockStatic(BrowserUtil.class)) {
-                action.actionPerformed(anActionEvent);
-                verify(serviceStatus, times(1)).getUrl();
-                browserUtilMockedStatic.verify(() -> BrowserUtil.browse(anyString()), times(1));
+                try (MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
+                    when(kn.getNamespace()).thenReturn("namespace");
+                    treeHelperMockedStatic.when(() -> TreeHelper.getKn(any(Project.class))).thenReturn(kn);
+                    action.actionPerformed(anActionEvent);
+                    verify(serviceStatus, times(1)).getUrl();
+                    browserUtilMockedStatic.verify(() -> BrowserUtil.browse(anyString()), times(1));
+                }
             }
         }
     }
@@ -140,9 +150,13 @@ public class OpenInBrowserActionTest extends ActionTest {
             try(MockedStatic<UIHelper> uiHelperMockedStatic = mockStatic(UIHelper.class)) {
                 uiHelperMockedStatic.when(() -> UIHelper.executeInUI(any(Supplier.class))).thenReturn(inputDialog);
                 try (MockedStatic<BrowserUtil> browserUtilMockedStatic = mockStatic(BrowserUtil.class)) {
-                    action.actionPerformed(anActionEvent);
-                    browserUtilMockedStatic.verify(() -> BrowserUtil.browse(anyString()), times(0));
-                    uiHelperMockedStatic.verify(() -> UIHelper.executeInUI(any(Supplier.class)), times(1));
+                    try (MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
+                        when(kn.getNamespace()).thenReturn("namespace");
+                        treeHelperMockedStatic.when(() -> TreeHelper.getKn(any(Project.class))).thenReturn(kn);
+                        action.actionPerformed(anActionEvent);
+                        browserUtilMockedStatic.verify(() -> BrowserUtil.browse(anyString()), times(0));
+                        uiHelperMockedStatic.verify(() -> UIHelper.executeInUI(any(Supplier.class)), times(1));
+                    }
                 }
             }
         }
@@ -182,15 +196,19 @@ public class OpenInBrowserActionTest extends ActionTest {
         when(serviceTraffic.getUrl()).thenReturn("url");
         try (MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
             try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-                execHelperMockedStatic.when(() -> ExecHelper.submit(any(Runnable.class))).then((Answer) invocation -> {
-                    ((Runnable) invocation.getArguments()[0]).run();
-                    return null;
-                });
-                try (MockedStatic<BrowserUtil> browserUtilMockedStatic = mockStatic(BrowserUtil.class)) {
-                    action.actionPerformed(anActionEvent);
-                    browserUtilMockedStatic.verify(() -> BrowserUtil.browse(anyString()), times(1));
+                try (MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
+                    when(kn.getNamespace()).thenReturn("namespace");
+                    treeHelperMockedStatic.when(() -> TreeHelper.getKn(any(Project.class))).thenReturn(kn);
+                    execHelperMockedStatic.when(() -> ExecHelper.submit(any(Runnable.class))).then((Answer) invocation -> {
+                        ((Runnable) invocation.getArguments()[0]).run();
+                        return null;
+                    });
+                    try (MockedStatic<BrowserUtil> browserUtilMockedStatic = mockStatic(BrowserUtil.class)) {
+                        action.actionPerformed(anActionEvent);
+                        browserUtilMockedStatic.verify(() -> BrowserUtil.browse(anyString()), times(1));
+                    }
+                    messagesMockedStatic.verify(() -> Messages.showInputDialog(anyString(), anyString(), any()), times(0));
                 }
-                messagesMockedStatic.verify(() -> Messages.showInputDialog(anyString(), anyString(), any()), times(0));
             }
 
         }
@@ -219,6 +237,8 @@ public class OpenInBrowserActionTest extends ActionTest {
 
     private AnActionEvent createOpenInBrowserActionEvent() {
         AnActionEvent anActionEvent = mock(AnActionEvent.class);
+        when(anActionEvent.getProject()).thenReturn(project);
+        when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(knTreeStructure);
         when(anActionEvent.getData(PlatformDataKeys.CONTEXT_COMPONENT)).thenReturn(tree);
         return anActionEvent;
     }

@@ -10,6 +10,8 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.actions;
 
+import com.intellij.openapi.project.Project;
+import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import java.io.IOException;
@@ -20,9 +22,11 @@ import org.mockito.MockedStatic;
 
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class DeleteActionTest extends ActionTest {
 

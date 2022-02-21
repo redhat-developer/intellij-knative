@@ -13,6 +13,7 @@ package com.redhat.devtools.intellij.knative.actions;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
+import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.actions.func.AddEnvAction;
@@ -20,6 +21,7 @@ import com.redhat.devtools.intellij.knative.actions.func.AddVolumeAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.utils.FuncUtils;
+import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedStatic;
@@ -52,8 +54,11 @@ public class AddConfigActionTest extends ActionTest {
         AnAction action = new AddEnvAction();
         when(function.getLocalPath()).thenReturn("");
         AnActionEvent anActionEvent = createAddConfigActionEvent();
-        action.actionPerformed(anActionEvent);
-        verify(kn, times(0)).addEnv(anyString());
+        try (MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
+            treeHelperMockedStatic.when(() -> TreeHelper.getKn(any(Project.class))).thenReturn(kn);
+            action.actionPerformed(anActionEvent);
+            verify(kn, times(0)).addEnv(anyString());
+        }
     }
 
     @Test
@@ -61,8 +66,11 @@ public class AddConfigActionTest extends ActionTest {
         AnAction action = new AddVolumeAction();
         when(function.getLocalPath()).thenReturn("");
         AnActionEvent anActionEvent = createAddConfigActionEvent();
-        action.actionPerformed(anActionEvent);
-        verify(kn, times(0)).addEnv(anyString());
+        try (MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
+            treeHelperMockedStatic.when(() -> TreeHelper.getKn(any(Project.class))).thenReturn(kn);
+            action.actionPerformed(anActionEvent);
+            verify(kn, times(0)).addEnv(anyString());
+        }
     }
 
     @Test
@@ -71,8 +79,11 @@ public class AddConfigActionTest extends ActionTest {
         when(function.getLocalPath()).thenReturn("path");
         AnActionEvent anActionEvent = createAddConfigActionEvent();
         try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            action.actionPerformed(anActionEvent);
-            execHelperMockedStatic.verify(() -> ExecHelper.submit(any(Runnable.class)));
+            try (MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
+                treeHelperMockedStatic.when(() -> TreeHelper.getKn(any(Project.class))).thenReturn(kn);
+                action.actionPerformed(anActionEvent);
+                execHelperMockedStatic.verify(() -> ExecHelper.submit(any(Runnable.class)));
+            }
         }
     }
 
@@ -82,8 +93,11 @@ public class AddConfigActionTest extends ActionTest {
         when(function.getLocalPath()).thenReturn("path");
         AnActionEvent anActionEvent = createAddConfigActionEvent();
         try(MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            action.actionPerformed(anActionEvent);
-            execHelperMockedStatic.verify(() -> ExecHelper.submit(any(Runnable.class)));
+            try (MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
+                treeHelperMockedStatic.when(() -> TreeHelper.getKn(any(Project.class))).thenReturn(kn);
+                action.actionPerformed(anActionEvent);
+                execHelperMockedStatic.verify(() -> ExecHelper.submit(any(Runnable.class)));
+            }
         }
     }
 

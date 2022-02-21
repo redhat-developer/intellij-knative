@@ -23,10 +23,13 @@ import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.kn.ServiceStatus;
 import com.redhat.devtools.intellij.knative.kn.ServiceTraffic;
+import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.KnRevisionNode;
 import com.redhat.devtools.intellij.knative.tree.KnServiceNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
+
 import java.io.IOException;
 import java.util.Optional;
 import javax.swing.tree.TreePath;
@@ -35,6 +38,8 @@ import javax.swing.tree.TreePath;
 import static com.intellij.openapi.ui.Messages.CANCEL_BUTTON;
 import static com.intellij.openapi.ui.Messages.OK_BUTTON;
 import static com.redhat.devtools.intellij.knative.Constants.NOTIFICATION_ID;
+import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_MISC;
+import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymizeResource;
 
 public class OpenInBrowserAction extends KnAction {
     public OpenInBrowserAction() {
@@ -61,13 +66,23 @@ public class OpenInBrowserAction extends KnAction {
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Kn kncli) {
+        TelemetryMessageBuilder.ActionMessage telemetry = TelemetryService.instance().action(NAME_PREFIX_MISC + "open in browser");
         Object node = getElement(selected);
+        String name = ((ParentableNode<?>) node).getName();
+        String namespace = kncli.getNamespace();
+
         ExecHelper.submit(() -> {
             String url = getURL(node, kncli);
             if (!Strings.isNullOrEmpty(url)) {
                 BrowserUtil.browse(url);
+                telemetry
+                    .result(anonymizeResource(name, namespace, "Function " + name + " from namespace " + namespace + " opened on browser"))
+                    .send();
             } else {
                 notifyFailingAction(selected, NotificationType.WARNING, "");
+                telemetry
+                        .error(anonymizeResource(name, namespace, "Unable to open function " + name + " from namespace " + namespace + " on browser"))
+                        .send();
             }
         });
     }

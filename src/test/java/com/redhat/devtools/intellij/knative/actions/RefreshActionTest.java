@@ -48,7 +48,6 @@ public class RefreshActionTest extends ActionTest {
         AnAction action = new RefreshAction();
         AnActionEvent anActionEvent = mock(AnActionEvent.class);
         when(anActionEvent.getData(PlatformDataKeys.CONTEXT_COMPONENT)).thenReturn(tree);
-
         action.actionPerformed(anActionEvent);
         verify(knTreeStructure, never()).fireModified(any());
     }
@@ -68,6 +67,11 @@ public class RefreshActionTest extends ActionTest {
         AnAction action = new RefreshAction();
         AnActionEvent anActionEvent = createRefreshActionEvent(knTreeStructure);
         try(MockedStatic<StructureTreeAction> structureTreeActionMockedStatic = mockStatic(StructureTreeAction.class)) {
+            when(kn.getNamespace()).thenReturn("namespace");
+            when(knRootNode.getKn()).thenReturn(kn);
+            when(knServiceNode.getRootNode()).thenReturn(knRootNode);
+            when(knServiceNode.getName()).thenReturn("name");
+            structureTreeActionMockedStatic.when(() -> StructureTreeAction.getElement(any())).thenReturn(knServiceNode);
             action.actionPerformed(anActionEvent);
             structureTreeActionMockedStatic.verify(() -> StructureTreeAction.getElement(any()), times(1));
             verify(knTreeStructure).fireModified(any());
@@ -128,6 +132,10 @@ public class RefreshActionTest extends ActionTest {
 
     public AnActionEvent createRefreshActionEvent(KnTreeStructure structureProperty) {
         AnActionEvent anActionEvent = mock(AnActionEvent.class);
+        when(kn.getNamespace()).thenReturn("namespace");
+        when(knRootNode.getKn()).thenReturn(kn);
+        when(knServiceNode.getRootNode()).thenReturn(knRootNode);
+        when(knServiceNode.getName()).thenReturn("name");
         when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(structureProperty);
         when(anActionEvent.getData(PlatformDataKeys.CONTEXT_COMPONENT)).thenReturn(tree);
         when(anActionEvent.getPresentation()).thenReturn(presentation);

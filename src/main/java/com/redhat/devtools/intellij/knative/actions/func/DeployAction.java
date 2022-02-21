@@ -14,8 +14,10 @@ import com.google.common.base.Strings;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.kn.Kn;
+import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.utils.FuncUtils;
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -26,6 +28,7 @@ import java.util.concurrent.TimeoutException;
 import static com.intellij.openapi.ui.Messages.CANCEL_BUTTON;
 import static com.intellij.openapi.ui.Messages.OK_BUTTON;
 import static com.intellij.openapi.ui.Messages.showOkCancelDialog;
+import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_BUILD_DEPLOY;
 
 public class DeployAction extends BuildAction {
 
@@ -53,6 +56,14 @@ public class DeployAction extends BuildAction {
                 "Deploy Function " + name,
                 OK_BUTTON, CANCEL_BUTTON, null);
         return result == Messages.OK;
+    }
+
+    protected TelemetryMessageBuilder.ActionMessage createTelemetry() {
+        return TelemetryService.instance().action(NAME_PREFIX_BUILD_DEPLOY + "deploy func");
+    }
+
+    protected String getSuccessMessage(String namespace, String name) {
+        return "Function " + name + " in namespace " + namespace + " has been successfully deployed";
     }
 
     @Override

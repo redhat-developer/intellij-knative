@@ -18,14 +18,19 @@ import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import com.redhat.devtools.intellij.knative.utils.FuncUtils;
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 
+import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymizeResource;
+
 public abstract class RemoveConfigAction extends KnAction {
     private static final Logger logger = LoggerFactory.getLogger(RemoveConfigAction.class);
+
+    protected TelemetryMessageBuilder.ActionMessage telemetry;
 
     public RemoveConfigAction() {
         super(KnFunctionNode.class);
@@ -33,22 +38,38 @@ public abstract class RemoveConfigAction extends KnAction {
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Kn knCli) {
+        telemetry = createTelemetry();
         ParentableNode node = getElement(selected);
+        String name = node.getName();
+        String namespace = knCli.getNamespace();
         String localPathFunc = ((KnFunctionNode) node).getFunction().getLocalPath();
         if (localPathFunc.isEmpty()) {
+            this.telemetry
+                    .result(anonymizeResource(name, namespace, "Function " + name + "is not opened locally"))
+                    .send();
             return;
         }
 
         ExecHelper.submit(() -> {
             try {
                 doRemoveConfig(knCli, localPathFunc);
+                this.telemetry
+                        .result(anonymizeResource(name, namespace, getSuccessMessage(namespace, name)))
+                        .send();
             } catch (IOException e) {
                 logger.warn(e.getLocalizedMessage(), e);
+                telemetry
+                        .error(anonymizeResource(name, namespace, e.getLocalizedMessage()))
+                        .send();
             }
         });
     }
 
     public abstract void doRemoveConfig(Kn kncli, String path) throws IOException;
+
+    public abstract String getSuccessMessage(String namespace, String name) throws IOException;
+
+    protected abstract TelemetryMessageBuilder.ActionMessage createTelemetry();
 
     @Override
     public boolean isVisible(Object selected) {
