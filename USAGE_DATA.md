@@ -14,6 +14,6 @@
   * OpenShift version
 * when plugin is shut down
 
-### Actions operating on tekton resources
+### Actions operating on knative resources
 * resource kind
 * creation/update of a resource
