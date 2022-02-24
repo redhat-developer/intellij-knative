@@ -58,13 +58,24 @@ public class RefreshAction extends StructureTreeAction {
                     .send();
             return;
         }
-        ParentableNode node = getElement(selected);
-        String name = node.getName();
-        String namespace = node.getRootNode().getKn().getNamespace();
+        Object node = getElement(selected);
         if (Constants.TOOLBAR_PLACE.equals(anActionEvent.getPlace())) {
             structure.fireModified(structure.getRootElement());
         } else {
             structure.fireModified(node);
+        }
+        sendTelemetry(telemetry, node);
+
+    }
+
+    private void sendTelemetry(TelemetryMessageBuilder.ActionMessage telemetry, Object node) {
+        String name = "", namespace = "";
+        if(node instanceof KnRootNode) {
+            name = "root";
+            namespace = ((KnRootNode) node).getKn().getNamespace();
+        } else if (node instanceof ParentableNode){
+            name = ((ParentableNode<?>) node).getName();
+            namespace = ((ParentableNode<?>) node).getRootNode().getKn().getNamespace();
         }
         telemetry
                 .result(anonymizeResource(name, namespace, "Tree refreshed starting from element " + name))
