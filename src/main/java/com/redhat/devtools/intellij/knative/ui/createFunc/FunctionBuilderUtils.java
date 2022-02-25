@@ -1,19 +1,3 @@
-package com.redhat.devtools.intellij.knative.ui.createFunc;
-
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
-import com.redhat.devtools.intellij.knative.kn.Kn;
-import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
-import com.redhat.devtools.intellij.knative.utils.TreeHelper;
-import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
-
-import java.io.File;
-import java.io.IOException;
-
-import static com.redhat.devtools.intellij.knative.Constants.RUNTIME_FUNCTION_KEY;
-import static com.redhat.devtools.intellij.knative.Constants.TEMPLATE_FUNCTION_KEY;
-import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_CRUD;
-
 /*******************************************************************************
  * Copyright (c) 2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
@@ -24,6 +8,19 @@ import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NA
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
+package com.redhat.devtools.intellij.knative.ui.createFunc;
+
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
+import com.redhat.devtools.intellij.knative.kn.Kn;
+import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
+import com.redhat.devtools.intellij.knative.utils.TreeHelper;
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
+
+import java.io.IOException;
+
+import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_CRUD;
+
 public class FunctionBuilderUtils {
 
     public static void createFunction(String path, String runtime, String template) throws IOException {
