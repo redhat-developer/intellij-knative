@@ -20,26 +20,17 @@ import com.intellij.openapi.module.ModuleType;
 import com.intellij.openapi.module.ModuleTypeId;
 import com.intellij.openapi.module.ModuleTypeManager;
 import com.intellij.openapi.module.ModuleWithNameAlreadyExists;
-import com.intellij.openapi.module.WebModuleType;
 import com.intellij.openapi.options.ConfigurationException;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.roots.ui.configuration.ModulesProvider;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.InvalidDataException;
-import com.redhat.devtools.intellij.common.utils.ExecHelper;
-import com.redhat.devtools.intellij.knative.kn.Kn;
-import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
-import com.redhat.devtools.intellij.knative.utils.TreeHelper;
-import java.io.File;
-import java.io.IOException;
-import javax.swing.Icon;
-
-import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import org.jdom.JDOMException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.Icon;
+import java.io.File;
+import java.io.IOException;
 
 import static com.redhat.devtools.intellij.knative.Constants.GO_MODULE_TYPE_ID;
 import static com.redhat.devtools.intellij.knative.Constants.GO_RUNTIME;
@@ -53,9 +44,6 @@ import static com.redhat.devtools.intellij.knative.Constants.RUST_RUNTIME;
 import static com.redhat.devtools.intellij.knative.Constants.SPRINGBOOT_RUNTIME;
 import static com.redhat.devtools.intellij.knative.Constants.TEMPLATE_FUNCTION_KEY;
 import static com.redhat.devtools.intellij.knative.Constants.TYPESCRIPT_RUNTIME;
-import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_CRUD;
-import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_MISC;
-import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymizeResource;
 
 public class FunctionModuleBuilder extends ModuleBuilder {
 
@@ -127,47 +115,11 @@ public class FunctionModuleBuilder extends ModuleBuilder {
 
     @Override
     public @NotNull Module createModule(@NotNull ModifiableModuleModel moduleModel) throws InvalidDataException, IOException, ModuleWithNameAlreadyExists, JDOMException, ConfigurationException {
-        createFunction();
-        return super.createModule(moduleModel);
-    }
-
-    private void createFunction() throws IOException {
-        TelemetryMessageBuilder.ActionMessage telemetry = TelemetryService.instance().action(NAME_PREFIX_CRUD + "create func");
-        Kn kn = getKn();
-        if (kn == null) {
-            telemetry
-                    .result("Kn cli is null")
-                    .send();
-            throw new IOException("Unable to create a function project. Function cli not available.");
-        }
-
         File moduleFile = new File(getContentEntryPath());
         String runtime = wizardContext.getUserData(RUNTIME_FUNCTION_KEY);
         String template = wizardContext.getUserData(TEMPLATE_FUNCTION_KEY);
-        CreateFuncModel model = new CreateFuncModel(moduleFile.getPath(), runtime, template);
-        try {
-            kn.createFunc(model);
-            telemetry
-                    .success()
-                    .send();
-        } catch (IOException e) {
-            telemetry
-                    .error(e.getLocalizedMessage())
-                    .send();
-            throw e;
-        }
-
-    }
-
-    private Kn getKn() {
-        Project[] projects = ProjectManager.getInstance().getOpenProjects();
-        for (Project project: projects) {
-            Kn kn = TreeHelper.getKn(project);
-            if (kn != null) {
-                return kn;
-            }
-        }
-        return null;
+        FunctionBuilderUtils.createFunction(moduleFile.getPath(), runtime, template);
+        return super.createModule(moduleModel);
     }
 
     @Override

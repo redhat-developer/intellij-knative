@@ -12,101 +12,34 @@ package com.redhat.devtools.intellij.knative.ui.createFunc;
 
 import com.intellij.ide.util.projectWizard.ModuleWizardStep;
 import com.intellij.ide.util.projectWizard.WizardContext;
-import com.intellij.openapi.ui.ComboBox;
-import com.intellij.ui.components.JBScrollPane;
-import com.intellij.util.ui.JBUI;
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.util.Arrays;
-import java.util.List;
-import javax.swing.Box;
-import javax.swing.JComboBox;
+
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import org.jetbrains.annotations.NotNull;
+import java.awt.BorderLayout;
 
-
-import static com.redhat.devtools.intellij.knative.Constants.GO_RUNTIME;
-import static com.redhat.devtools.intellij.knative.Constants.NODE_RUNTIME;
-import static com.redhat.devtools.intellij.knative.Constants.PYTHON_RUNTIME;
-import static com.redhat.devtools.intellij.knative.Constants.QUARKUS_RUNTIME;
 import static com.redhat.devtools.intellij.knative.Constants.RUNTIME_FUNCTION_KEY;
-import static com.redhat.devtools.intellij.knative.Constants.RUST_RUNTIME;
-import static com.redhat.devtools.intellij.knative.Constants.SPRINGBOOT_RUNTIME;
 import static com.redhat.devtools.intellij.knative.Constants.TEMPLATE_FUNCTION_KEY;
-import static com.redhat.devtools.intellij.knative.Constants.TYPESCRIPT_RUNTIME;
 
 public class CreateFunctionChooserStep extends ModuleWizardStep {
 
-    private JPanel contentPanel;
-    private JComboBox cmbRuntime, cmbTemplate;
-    private WizardContext context;
+    private final WizardContext context;
+    private final CreateFunctionChooserStepUI ui;
 
     public CreateFunctionChooserStep(WizardContext context) {
         this.context = context;
+        this.ui = new CreateFunctionChooserStepUI();
     }
 
     @Override
     public JComponent getComponent() {
-        contentPanel = new JPanel(new BorderLayout());
-        contentPanel.add(createBasicTabPanel());
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.add(ui.getComponent());
         return contentPanel;
-    }
-
-    private JScrollPane createBasicTabPanel() {
-        Box verticalBox = Box.createVerticalBox();
-
-        JPanel runtimeLabel = createLabelInFlowPanel("Runtime", "Function runtime language/framework");
-        verticalBox.add(runtimeLabel);
-
-        cmbRuntime = createComboBox(Arrays.asList(NODE_RUNTIME, GO_RUNTIME, PYTHON_RUNTIME, QUARKUS_RUNTIME, RUST_RUNTIME, SPRINGBOOT_RUNTIME, TYPESCRIPT_RUNTIME));
-        verticalBox.add(cmbRuntime);
-
-        JPanel imageLabel = createLabelInFlowPanel("Template", "Function template.");
-        verticalBox.add(imageLabel);
-
-        cmbTemplate = createComboBox(Arrays.asList("http", "events"));
-        verticalBox.add(cmbTemplate);
-
-        verticalBox.add(new JPanel(new BorderLayout())); // hack to push components to the top
-
-        JBScrollPane scroll = new JBScrollPane(verticalBox);
-        scroll.setBorder(JBUI.Borders.empty());
-
-        return scroll;
-    }
-
-    private JComboBox createComboBox(List<String> options) {
-        JComboBox comboBox = new ComboBox();
-        options.forEach(comboBox::addItem);
-        return comboBox;
-    }
-
-    private JPanel createLabelInFlowPanel(String name, String tooltip) {
-        JLabel label = new JLabel(name);
-        label.getFont().deriveFont(Font.BOLD);
-        addTooltip(label, tooltip);
-        return createComponentInFlowPanel(label);
-    }
-
-    private JPanel createComponentInFlowPanel(JComponent component) {
-        JPanel flowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        flowPanel.add(component);
-        return flowPanel;
-    }
-
-    private void addTooltip(@NotNull JComponent component, String textToDisplay) {
-        if (!textToDisplay.isEmpty()) {
-            component.setToolTipText(textToDisplay);
-        }
     }
 
     @Override
     public void updateDataModel() {
-        this.context.putUserData(RUNTIME_FUNCTION_KEY, cmbRuntime.getSelectedItem().toString());
-        this.context.putUserData(TEMPLATE_FUNCTION_KEY, cmbTemplate.getSelectedItem().toString());
+        this.context.putUserData(RUNTIME_FUNCTION_KEY, ui.getRuntime());
+        this.context.putUserData(TEMPLATE_FUNCTION_KEY, ui.getTemplate());
     }
 }

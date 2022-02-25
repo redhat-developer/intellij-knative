@@ -11,16 +11,13 @@
 package com.redhat.devtools.intellij.knative.ui.toolwindow;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.knative.listener.KnTreeDoubleClickListener;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionsTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
-import javax.swing.Icon;
 import org.jetbrains.annotations.NotNull;
-
 
 import static com.redhat.devtools.intellij.knative.Constants.FUNCTIONS_ACTION_GROUP_ID;
 import static com.redhat.devtools.intellij.knative.Constants.FUNCTIONS_TOOLBAR_ACTION_GROUP_ID;
