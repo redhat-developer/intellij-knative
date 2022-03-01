@@ -3,8 +3,8 @@
     "kn": {
       "version": "1.2.0",
       "versionCmd": "version",
-      "versionExtractRegExp": "Version: (v\\d+[\\.\\d+]*)\\s.*",
-      "versionMatchRegExpr": "0\\..*",
+      "versionExtractRegExp": "Version:\\s*v(\\d+[\\.\\d+]*)",
+      "versionMatchRegExpr": "1.2.0",
       "baseDir": "$HOME/.knative",
       "platforms": {
         "win": {
