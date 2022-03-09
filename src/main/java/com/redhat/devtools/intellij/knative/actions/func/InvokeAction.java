@@ -11,6 +11,7 @@
 package com.redhat.devtools.intellij.knative.actions.func;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.actions.KnAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.kn.Kn;
@@ -54,17 +55,19 @@ public class InvokeAction extends KnAction {
         dialog.show();
 
         if (dialog.isOK()) {
-            try {
-                knCli.invokeFunc(model);
-                telemetry
-                        .result(anonymizeResource(name, namespace, "Invoked function " + name))
-                        .send();
-            } catch (IOException e) {
-                logger.warn(e.getLocalizedMessage());
-                telemetry
-                        .error(anonymizeResource(name, namespace, e.getLocalizedMessage()))
-                        .send();
-            }
+            ExecHelper.submit(() -> {
+                try {
+                    knCli.invokeFunc(model);
+                    telemetry
+                            .result(anonymizeResource(name, namespace, "Invoked function " + name))
+                            .send();
+                } catch (IOException e) {
+                    logger.warn(e.getLocalizedMessage());
+                    telemetry
+                            .error(anonymizeResource(name, namespace, e.getLocalizedMessage()))
+                            .send();
+                }
+            });
         } else {
             telemetry
                     .result(anonymizeResource(name, namespace, "Invoked function " + name + " operation has been cancelled"))
