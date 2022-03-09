@@ -21,6 +21,7 @@ import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.NetworkUtils;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
+import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import io.fabric8.knative.client.KnativeClient;
 import io.fabric8.kubernetes.client.ConfigBuilder;
@@ -305,6 +306,48 @@ public class KnCli implements Kn {
             args.addAll(Arrays.asList("-n", namespace));
         }
         args.addAll(Arrays.asList("-p", path));
+        return args.toArray(new String[0]);
+    }
+
+    @Override
+    public void invokeFunc(InvokeModel model) throws IOException {
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, getInvokeArgs("invoke", model));
+    }
+
+    private String[] getInvokeArgs(String command, InvokeModel model) {
+        List<String> args = new ArrayList<>(Arrays.asList(funcCommand, command));
+        String target = model.getTarget();
+        args.addAll(Arrays.asList("-t", target));
+
+        if (target.equals("local")) {
+            args.addAll(Arrays.asList("-p", model.getPath()));
+        } else {
+            args.addAll(Arrays.asList("-n", model.getNamespace()));
+        }
+
+        if (model.getFile().isEmpty()) {
+            args.addAll(Arrays.asList("--data", model.getData()));
+        } else {
+            args.addAll(Arrays.asList("--file", model.getFile()));
+        }
+        args.addAll((Arrays.asList("--content-type", model.getContentType())));
+
+        if (!model.getID().isEmpty()) {
+            args.addAll(Arrays.asList("--id", model.getID()));
+        }
+
+        if (!model.getFormat().isEmpty()) {
+            args.addAll(Arrays.asList("-f", model.getFormat()));
+        }
+
+        if (!model.getSource().isEmpty()) {
+            args.addAll(Arrays.asList("--source", model.getSource()));
+        }
+
+        if (!model.getType().isEmpty()) {
+            args.addAll(Arrays.asList("--type", model.getType()));
+        }
+
         return args.toArray(new String[0]);
     }
 

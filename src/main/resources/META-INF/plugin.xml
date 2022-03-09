@@ -68,6 +68,9 @@
             <action id="com.redhat.devtools.intellij.knative.actions.func.DeployAction"
                     class="com.redhat.devtools.intellij.knative.actions.func.DeployAction"
                     text="Deploy"/>
+            <action id="com.redhat.devtools.intellij.knative.actions.func.InvokeAction"
+                    class="com.redhat.devtools.intellij.knative.actions.func.InvokeAction"
+                    text="Invoke"/>
             <group id="com.redhat.devtools.intellij.knative.actions.func.AddConfigAction"
                    text="Add Config"
                    popup="true">
