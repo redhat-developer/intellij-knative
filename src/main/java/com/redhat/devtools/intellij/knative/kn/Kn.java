@@ -18,6 +18,7 @@ import com.redhat.devtools.intellij.common.utils.ExecProcessHandler;
 import com.redhat.devtools.intellij.knative.func.FuncActionPipelineManager;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
+import com.redhat.devtools.intellij.knative.ui.repository.Repository;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
@@ -250,6 +251,30 @@ public interface Kn {
     void runFunc(String path, ConsoleView terminalExecutionConsole,
                  java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> processHandlerFunction,
                  ProcessListener processListener) throws IOException;
+
+    /**
+     * Create a new repository to retrieve new Function templates
+     *
+     * @param repository repository to be added
+     * @throws IOException if communication errored
+     */
+    void addRepo(Repository repository) throws IOException;
+
+    /**
+     * Remove a Function repository
+     *
+     * @param repository repository to be removed
+     * @throws IOException if communication errored
+     */
+    void removeRepo(Repository repository) throws IOException;
+
+    /**
+     * Return a list of Function repositories
+     *
+     * @return a list of Function repositories
+     * @throws IOException if communication errored
+     */
+    List<Repository> getRepos() throws IOException;
 
     /**
      * Add environment variable to the function configuration

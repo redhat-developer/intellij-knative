@@ -91,6 +91,9 @@
         </group>
 
         <group id="com.redhat.devtools.intellij.knative.tree.functions" popup="true">
+            <action id="com.redhat.devtools.intellij.knative.actions.func.RepositoryAction"
+                    class="com.redhat.devtools.intellij.knative.actions.func.RepositoryAction"
+                    text="Repository"/>
             <reference id="com.redhat.devtools.intellij.knative.actions.OpenInBrowserAction"/>
             <action id="com.redhat.devtools.intellij.knative.actions.func.BuildAction"
                     class="com.redhat.devtools.intellij.knative.actions.func.BuildAction"

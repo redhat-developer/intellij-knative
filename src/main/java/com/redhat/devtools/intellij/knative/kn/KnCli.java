@@ -28,6 +28,7 @@ import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.func.FuncActionPipelineManager;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
+import com.redhat.devtools.intellij.knative.ui.repository.Repository;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import io.fabric8.knative.client.KnativeClient;
 import io.fabric8.kubernetes.client.ConfigBuilder;
@@ -52,6 +53,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_TOOL_WINDOW_ID;
 import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.IS_OPENSHIFT;
@@ -394,6 +396,25 @@ public class KnCli implements Kn {
                         java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> processHandlerFunction,
                         ProcessListener processListener) throws IOException {
         ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, processHandlerFunction, processListener, funcCommand, "run", "-p", path, "-b=false");
+    }
+
+    @Override
+    public void addRepo(Repository repository) throws IOException {
+        ExecHelper.execute(funcCommand, envVars, "repository", "add", repository.getName(), repository.getUrl());
+    }
+
+    @Override
+    public void removeRepo(Repository repository) throws IOException {
+        ExecHelper.execute(funcCommand, envVars, "repository", "remove", repository.getName());
+    }
+
+    @Override
+    public List<Repository> getRepos() throws IOException {
+        String list = ExecHelper.execute(funcCommand, envVars, "repository", "list");
+        return Arrays.stream(list.split("\n"))
+                .filter(name -> !name.trim().equalsIgnoreCase("default") && !name.trim().isEmpty())
+                .map(Repository::new)
+                .collect(Collectors.toList());
     }
 
     @Override
