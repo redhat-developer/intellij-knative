@@ -69,7 +69,7 @@ public class KnCli implements Kn {
         }
         this.hasKnativeServing = false;
         this.hasKnativeEventing = false;
-        //reportTelemetry();
+        reportTelemetry();
     }
 
     private void reportTelemetry() {
