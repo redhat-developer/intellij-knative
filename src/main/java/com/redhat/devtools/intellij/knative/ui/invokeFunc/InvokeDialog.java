@@ -11,6 +11,8 @@
 package com.redhat.devtools.intellij.knative.ui.invokeFunc;
 
 import com.google.common.io.Files;
+import com.intellij.ide.ui.laf.darcula.ui.DarculaTextBorder;
+import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
@@ -37,6 +39,8 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileSystemView;
@@ -44,6 +48,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Insets;
 import java.io.File;
 
 public class InvokeDialog extends DialogWrapper {
@@ -202,14 +207,22 @@ public class InvokeDialog extends DialogWrapper {
         String defaultContentType = System.getenv("FUNC_CONTENT_TYPE") == null ?
                 MimeTypes.TEXT_PLAIN :
                 System.getenv("FUNC_CONTENT_TYPE");
-        txtTypesWithAutoCompletion = new TextFieldWithAutoCompletion<>(project,
+        txtTypesWithAutoCompletion = new TextFieldWithAutoCompletion(project,
                 new TextFieldWithAutoCompletion.StringsCompletionProvider(
                         MimeTypes.getMime().values(),
                         null),
                 true,
                 defaultContentType
-        );
-        //TODO vertically centralize text
+        ) {
+            @Override
+            protected EditorEx createEditor() {
+                EditorEx editor = super.createEditor();
+                CompoundBorder compoundBorder = BorderFactory.createCompoundBorder(new JTextField().getBorder(), JBUI.Borders.empty(7, 7, 3, 7));
+                editor.setBorder(compoundBorder);
+                editor.getContentSize().setSize(200, new JTextField().getHeight());
+                return editor;
+            }
+        };
 
         addComponentToContent(contentPanel, lblContentType, txtTypesWithAutoCompletion, null, 0);
     }
