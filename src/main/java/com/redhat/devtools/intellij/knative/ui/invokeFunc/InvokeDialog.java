@@ -192,12 +192,14 @@ public class InvokeDialog extends DialogWrapper {
     }
 
     private void addInstanceButtonListener(JRadioButton radioButton, String title, JPanel toBeShown, JPanel toBeHidden) {
-        radioButton.addActionListener(e -> {
-            titledBorderInvokeSection.setTitle(title);
-            toBeHidden.setVisible(false);
-            toBeShown.setVisible(true);
-            scrollPane.repaint();
-        });
+        if (radioButton != null) {
+            radioButton.addActionListener(e -> {
+                titledBorderInvokeSection.setTitle(title);
+                toBeHidden.setVisible(false);
+                toBeShown.setVisible(true);
+                scrollPane.repaint();
+            });
+        }
     }
 
     private void addContentTypeField() {
