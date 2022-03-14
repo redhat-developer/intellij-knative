@@ -69,6 +69,10 @@ task integrationTest(type: Test) {
     mustRunAfter test
 }
 
+runPluginVerifier {
+    ideVersions = [ideaVersion]
+}
+
 publishPlugin {
     token    = jetBrainsToken
     channels = [jetBrainsChannel]
