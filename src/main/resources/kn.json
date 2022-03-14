@@ -6,6 +6,7 @@
       "versionExtractRegExp": "Version:\\s*v(\\d+[\\.\\d+]*)",
       "versionMatchRegExpr": "1.2.0",
       "baseDir": "$HOME/.knative",
+      "silentMode": true,
       "platforms": {
         "win": {
           "url": "https://github.com/knative/client/releases/download/knative-v1.2.0/kn-windows-amd64.exe",
