@@ -311,17 +311,17 @@ public class KnCli implements Kn {
 
     @Override
     public void invokeFunc(InvokeModel model) throws IOException {
-        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, getInvokeArgs("invoke", model));
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, getInvokeArgs(model));
     }
 
-    private String[] getInvokeArgs(String command, InvokeModel model) {
-        List<String> args = new ArrayList<>(Arrays.asList(funcCommand, command));
+    private String[] getInvokeArgs(InvokeModel model) {
+        List<String> args = new ArrayList<>(Arrays.asList(funcCommand, "invoke"));
         String target = model.getTarget();
         args.addAll(Arrays.asList("-t", target));
 
-        if (target.equals("local")) {
-            args.addAll(Arrays.asList("-p", model.getPath()));
-        } else {
+        args.addAll(Arrays.asList("-p", model.getPath()));
+
+        if (target.equals("remote")) {
             args.addAll(Arrays.asList("-n", model.getNamespace()));
         }
 

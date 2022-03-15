@@ -47,6 +47,13 @@ public class InvokeAction extends KnAction {
         String namespace = knCli.getNamespace();
         Function function = ((KnFunctionNode) node).getFunction();
 
+        if (function.getLocalPath().isEmpty()) {
+            telemetry
+                    .result(anonymizeResource(name, namespace, "Function " + name + "is not opened locally"))
+                    .send();
+            return;
+        }
+
         InvokeModel model = new InvokeModel();
         model.setNamespace(namespace);
         model.setPath(function.getLocalPath());
@@ -73,11 +80,17 @@ public class InvokeAction extends KnAction {
                     .result(anonymizeResource(name, namespace, "Invoked function " + name + " operation has been cancelled"))
                     .send();
         }
-
-
     }
 
     protected TelemetryMessageBuilder.ActionMessage createTelemetry() {
         return TelemetryService.instance().action(NAME_PREFIX_MISC + "invoke func");
+    }
+
+    @Override
+    public boolean isVisible(Object selected) {
+        if (selected instanceof KnFunctionNode) {
+            return !((KnFunctionNode) selected).getFunction().getLocalPath().isEmpty();
+        }
+        return false;
     }
 }
