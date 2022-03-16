@@ -50,14 +50,17 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class InvokeDialog extends DialogWrapper {
     private final Logger logger = LoggerFactory.getLogger(InvokeDialog.class);
-    private JPanel wrapperPanel, contentPanel, panelPath, panelNamespace;
+    private JPanel wrapperPanel, contentPanel, panelPath, panelNamespace, panelURL;
     private JBScrollPane scrollPane;
     private Project project;
-    private JTextField txtDataParam, txtIDParam, txtSourceParam, txtTypeParam;
-    private JCheckBox chkSourceParam, chkTypeParam, chkFormatParam;
+    private JTextField txtDataParam, txtIDParam, txtURLParam, txtSourceParam, txtTypeParam;
+    private JCheckBox chkURLParam, chkSourceParam, chkTypeParam, chkFormatParam;
     private JRadioButton radioButtonInvokeLocal, radioButtonInvokeRemote;
     private TextFieldWithAutoCompletion<String> txtTypesWithAutoCompletion;
     private ComboBox<String> cmbDataType, cmbFormat;
@@ -135,24 +138,35 @@ public class InvokeDialog extends DialogWrapper {
             panelPath = addPathField();
         }
 
-        if (funcInstance == INSTANCE.REMOTE
-                || funcInstance == INSTANCE.LOCAL_REMOTE) {
+        boolean hasRemoteOption = funcInstance == INSTANCE.REMOTE || funcInstance == INSTANCE.LOCAL_REMOTE;
+        if (hasRemoteOption) {
             panelNamespace = addNamespaceField();
             panelNamespace.setVisible(funcInstance == INSTANCE.REMOTE);
         }
 
-        addInstanceButtonListener(radioButtonInvokeLocal,
-                "Invoke Local Function",
-                panelPath,
-                panelNamespace);
-        addInstanceButtonListener(radioButtonInvokeRemote,
-                "Invoke Remote Function",
-                panelNamespace,
-                panelPath);
-
         addDataField();
 
         addContentTypeField();
+
+        if (hasRemoteOption) {
+            chkURLParam = new JCheckBox("<html>Target this custom URL when invoking the function</html>");
+            txtURLParam = new JTextField(function.getUrl());
+            panelURL = addGroupedComponentsToContent(
+                    "URL",
+                    chkURLParam,
+                    txtURLParam
+            );
+            panelURL.setVisible(funcInstance == INSTANCE.REMOTE);
+        }
+
+        addInstanceButtonListener(radioButtonInvokeLocal,
+                "Invoke Local Function",
+                Collections.singletonList(panelPath),
+                Arrays.asList(panelNamespace, panelURL));
+        addInstanceButtonListener(radioButtonInvokeRemote,
+                "Invoke Remote Function",
+                Arrays.asList(panelNamespace, panelURL),
+                Collections.singletonList(panelPath));
 
         chkSourceParam = new JCheckBox("<html>Use a custom source value for the request data. (Env: $FUNC_SOURCE)" +
                 " (default \"/boson/fn\")</html>");
@@ -191,12 +205,12 @@ public class InvokeDialog extends DialogWrapper {
         );
     }
 
-    private void addInstanceButtonListener(JRadioButton radioButton, String title, JPanel toBeShown, JPanel toBeHidden) {
+    private void addInstanceButtonListener(JRadioButton radioButton, String title, List<JPanel> toBeShown, List<JPanel> toBeHidden) {
         if (radioButton != null) {
             radioButton.addActionListener(e -> {
                 titledBorderInvokeSection.setTitle(title);
-                toBeHidden.setVisible(false);
-                toBeShown.setVisible(true);
+                toBeHidden.forEach(panel -> panel.setVisible(false));
+                toBeShown.forEach(panel -> panel.setVisible(true));
                 scrollPane.repaint();
             });
         }
@@ -371,26 +385,27 @@ public class InvokeDialog extends DialogWrapper {
         return label;
     }
 
-    private void addGroupedComponentsToContent(String title, JCheckBox chkEnableComponent, JComponent componentCenter) {
-        JPanel panelSource = new JPanel();
-        panelSource.setLayout(new BoxLayout(panelSource, BoxLayout.Y_AXIS));
+    private JPanel addGroupedComponentsToContent(String title, JCheckBox chkEnableComponent, JComponent componentCenter) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         Border compoundBorderMargin = BorderFactory.createCompoundBorder(JBUI.Borders.emptyBottom(8), new MatteBorder(1, 1, 1, 1, new JTextField().getBackground()));
         Border compoundBorderMargin2 = BorderFactory.createCompoundBorder(compoundBorderMargin, JBUI.Borders.empty(5, 0));
         TitledBorder titledBorder = BorderFactory.createTitledBorder(compoundBorderMargin2, title);
-        panelSource.setBorder(titledBorder);
+        panel.setBorder(titledBorder);
 
         chkEnableComponent.setAlignmentX(Component.LEFT_ALIGNMENT);
         chkEnableComponent.setBorder(JBUI.Borders.emptyBottom(5));
-        panelSource.add(chkEnableComponent);
+        panel.add(chkEnableComponent);
 
         componentCenter.setAlignmentX(Component.LEFT_ALIGNMENT);
         componentCenter.setMaximumSize(ROW_DIMENSION);
         componentCenter.setEnabled(false);
-        panelSource.add(componentCenter);
+        panel.add(componentCenter);
 
         chkEnableComponent.addItemListener(e -> componentCenter.setEnabled(chkEnableComponent.isSelected()));
-        panelSource.setAlignmentX(Component.LEFT_ALIGNMENT);
-        contentPanel.add(panelSource);
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        contentPanel.add(panel);
+        return panel;
     }
 
     private JPanel addComponentToContent(JPanel parent, JComponent componentLeft, JComponent componentCenter, JComponent componentRight, int top) {
@@ -455,6 +470,8 @@ public class InvokeDialog extends DialogWrapper {
         if ((funcInstance.equals(INSTANCE.LOCAL_REMOTE) && radioButtonInvokeLocal.isSelected())
                 || funcInstance.equals(INSTANCE.LOCAL)) {
             model.setTarget("local");
+        } else if (chkURLParam.isSelected()) {
+            model.setTarget(txtURLParam.getText());
         } else {
             model.setTarget("remote");
         }
