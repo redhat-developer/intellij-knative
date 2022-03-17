@@ -48,8 +48,10 @@ public class RunAction extends KnAction {
             return;
         }
 
+
         ExecHelper.submit(() -> {
             try {
+                BuildAction.execute(getEventProject(anActionEvent), ((KnFunctionNode) node).getFunction(), knCli, telemetry);
                 knCli.runFunc(localPathFunc);
                 telemetry
                         .result(anonymizeResource(name, namespace, "Function " + name + " is running locally"))
