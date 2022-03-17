@@ -230,7 +230,7 @@ public class BuildActionTest extends ActionTest {
         when(model.getSelectionPath()).thenReturn(path3);
         when(model.getSelectionPaths()).thenReturn(new TreePath[] {path3});
         when(knFunctionNode.getFunction()).thenReturn(function);
-
+        when(function.getName()).thenReturn("name");
         when(function.getLocalPath()).thenReturn("path");
         pathFuncFile = mock(Path.class);
         File funcFile = mock(File.class);

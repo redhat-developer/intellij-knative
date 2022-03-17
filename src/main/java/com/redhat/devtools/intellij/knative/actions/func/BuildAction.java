@@ -131,6 +131,7 @@ public class BuildAction extends KnAction {
                         .send();
                 return null;
             }
+            return Pair.create(registry, image);
         }
         return dataToDeploy;
     }
