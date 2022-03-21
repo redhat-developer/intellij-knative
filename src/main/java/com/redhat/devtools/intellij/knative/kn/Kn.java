@@ -12,6 +12,7 @@ package com.redhat.devtools.intellij.knative.kn;
 
 import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
+import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
@@ -218,6 +219,14 @@ public interface Kn {
      */
     void deployFunc(String namespace, String path, String registry, String image) throws IOException;
 
+    /**
+     * Invokes the Function by sending a test request to the currently running
+     * Function instance, either locally or remote
+     *
+     * @param model model representing the function to be invoked
+     * @throws IOException if communication errored
+     */
+    void invokeFunc(InvokeModel model) throws IOException;
 
     /**
      * Run a function locally
