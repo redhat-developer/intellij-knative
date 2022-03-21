@@ -11,8 +11,6 @@
 package com.redhat.devtools.intellij.knative;
 
 import com.intellij.openapi.util.Key;
-import com.intellij.ui.JBColor;
-import java.awt.Color;
 
 public class Constants {
     public static final String STRUCTURE_PROPERTY = Constants.class.getPackage().getName() + ".structure";

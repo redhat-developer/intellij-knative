@@ -19,6 +19,7 @@ import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.NetworkUtils;
+import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
@@ -31,6 +32,8 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,6 +54,7 @@ import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.OP
 
 
 public class KnCli implements Kn {
+    private static final Logger LOGGER = LoggerFactory.getLogger(KnCli.class);
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper(new JsonFactory());
     private final Project project;
     private KubernetesClient client;
@@ -82,7 +86,17 @@ public class KnCli implements Kn {
             telemetry.property(OPENSHIFT_VERSION, info.getOpenshiftVersion());
             telemetry.send();
         } catch (RuntimeException e) {
-            telemetry.error(e).send();
+            // do not send telemetry when there is no context ( ie default kube URL as master URL )
+            try {
+                //workaround to not send null values
+                if (e.getMessage() != null) {
+                    telemetry.error(e).send();
+                } else {
+                    telemetry.error(e.toString()).send();
+                }
+            } catch (RuntimeException ex) {
+                LOGGER.warn(ex.getLocalizedMessage(), ex);
+            }
         }
     }
 
