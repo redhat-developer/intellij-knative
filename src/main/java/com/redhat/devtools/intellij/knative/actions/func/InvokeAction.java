@@ -69,7 +69,7 @@ public class InvokeAction extends KnAction {
                             .result(anonymizeResource(name, namespace, "Invoked function " + name))
                             .send();
                 } catch (IOException e) {
-                    logger.warn(e.getLocalizedMessage());
+                    logger.warn(e.getLocalizedMessage(), e);
                     telemetry
                             .error(anonymizeResource(name, namespace, e.getLocalizedMessage()))
                             .send();
