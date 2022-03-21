@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class AbstractKnTreeStructure extends AbstractTreeStructure implements MutableModel<Object> {
     private static Logger logger = LoggerFactory.getLogger(AbstractKnTreeStructure.class);
-    protected static final Icon CLUSTER_ICON = IconLoader.findIcon("/images/knative-logo.svg", AbstractKnTreeStructure.class);
+    protected static final Icon CLUSTER_ICON = IconLoader.findIcon("/images/ns.png", AbstractKnTreeStructure.class);
     protected Project project;
     protected KnRootNode root;
     protected final MutableModel<Object> mutableModelSupport = new MutableModelSupport<>();
