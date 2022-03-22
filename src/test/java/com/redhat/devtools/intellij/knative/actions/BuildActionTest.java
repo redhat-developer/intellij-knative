@@ -11,6 +11,7 @@
 package com.redhat.devtools.intellij.knative.actions;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
@@ -216,6 +217,38 @@ public class BuildActionTest extends ActionTest {
                     }
                 }
             }
+        }
+    }
+
+    @Test
+    public void Execute_ProjectIsNull_Nothing() {
+        try(MockedStatic<ActionManager> actionManagerStatic = mockStatic(ActionManager.class)) {
+            BuildAction.execute(null, function, kn, telemetry);
+            actionManagerStatic.verify(ActionManager::getInstance, times(0));
+        }
+    }
+
+    @Test
+    public void Execute_FunctionIsNull_Nothing() {
+        try(MockedStatic<ActionManager> actionManagerStatic = mockStatic(ActionManager.class)) {
+            BuildAction.execute(project, null, kn, telemetry);
+            actionManagerStatic.verify(ActionManager::getInstance, times(0));
+        }
+    }
+
+    @Test
+    public void Execute_KnIsNull_Nothing() {
+        try(MockedStatic<ActionManager> actionManagerStatic = mockStatic(ActionManager.class)) {
+            BuildAction.execute(project, function, null, telemetry);
+            actionManagerStatic.verify(ActionManager::getInstance, times(0));
+        }
+    }
+
+    @Test
+    public void Execute_TelemetryIsNull_Nothing() {
+        try(MockedStatic<ActionManager> actionManagerStatic = mockStatic(ActionManager.class)) {
+            BuildAction.execute(project, function, kn, null);
+            actionManagerStatic.verify(ActionManager::getInstance, times(0));
         }
     }
 
