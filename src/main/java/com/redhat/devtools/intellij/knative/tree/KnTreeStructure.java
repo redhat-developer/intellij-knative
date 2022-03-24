@@ -41,7 +41,11 @@ public class KnTreeStructure extends AbstractKnTreeStructure implements ConfigWa
 
     private static final Icon SERVICE_ICON = IconLoader.findIcon("/images/service.svg");
     private static final Icon REVISION_ICON = IconLoader.findIcon("/images/revision.svg");
-    private static final Icon SOURCE_ICON = IconLoader.findIcon("/images/source-generic.svg");
+    private static final Icon SOURCE_ICON = IconLoader.findIcon("/images/source.svg");
+    private static final Icon CHANNEL_ICON = IconLoader.findIcon("/images/channel.svg");
+    private static final Icon BROKER_ICON = IconLoader.findIcon("/images/broker.svg");
+    private static final Icon SUBSCRIPTION_ICON = IconLoader.findIcon("/images/subscription.svg");
+    private static final Icon TRIGGER_ICON = IconLoader.findIcon("/images/trigger.svg");
 
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private Config config;
@@ -203,22 +207,22 @@ public class KnTreeStructure extends AbstractKnTreeStructure implements ConfigWa
         }
 
         if (element instanceof KnEventingBrokerNode) {
-            return new LabelAndIconDescriptor<>(project, element, ((KnEventingBrokerNode) element).getName(), AllIcons.Nodes.Package, parentDescriptor);
+            return new LabelAndIconDescriptor<>(project, element, ((KnEventingBrokerNode) element).getName(), BROKER_ICON, parentDescriptor);
         }
 
         if (element instanceof KnEventingChannelsNode) {
-            return new LabelAndIconDescriptor<>(project, element, ((KnEventingChannelsNode) element).getName(), AllIcons.Nodes.Package, parentDescriptor);
+            return new LabelAndIconDescriptor<>(project, element, ((KnEventingChannelsNode) element).getName(), CHANNEL_ICON, parentDescriptor);
         }
         if (element instanceof KnEventingSourcesNode) {
-            return new LabelAndIconDescriptor<>(project, element, ((KnEventingSourcesNode) element).getName(), AllIcons.Nodes.Package, parentDescriptor);
+            return new LabelAndIconDescriptor<>(project, element, ((KnEventingSourcesNode) element).getName(), SOURCE_ICON, parentDescriptor);
         }
 
         if (element instanceof KnEventingSubscriptionsNode) {
-            return new LabelAndIconDescriptor<>(project, element, ((KnEventingSubscriptionsNode) element).getName(), AllIcons.Nodes.Package, parentDescriptor);
+            return new LabelAndIconDescriptor<>(project, element, ((KnEventingSubscriptionsNode) element).getName(), SUBSCRIPTION_ICON, parentDescriptor);
         }
 
         if (element instanceof KnEventingTriggersNode) {
-            return new LabelAndIconDescriptor<>(project, element, ((KnEventingTriggersNode) element).getName(), AllIcons.Nodes.Package, parentDescriptor);
+            return new LabelAndIconDescriptor<>(project, element, ((KnEventingTriggersNode) element).getName(), TRIGGER_ICON, parentDescriptor);
         }
 
         if (element instanceof KnSourceNode) {
