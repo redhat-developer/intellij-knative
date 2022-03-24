@@ -22,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class KnFunctionDescriptor extends PresentableNodeDescriptor<IKnFunctionNode> {
-    private static final Icon SERVICE_ICON = IconLoader.findIcon("/images/service.svg");
+    private static final Icon SERVICE_ICON = IconLoader.findIcon("/images/function.svg");
     private final IKnFunctionNode node;
 
     protected KnFunctionDescriptor(Project project, IKnFunctionNode node, @Nullable NodeDescriptor parentDescriptor) {
