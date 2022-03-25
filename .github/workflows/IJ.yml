@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        IJ: [IU-2019.3, IU-2020.1, IU-2020.2, IU-2020.3, IU-2021.1, IU-2021.2, IU-2021.3]
+        IJ: [IU-2019.3.1, IU-2020.1.1, IU-2020.2.1, IU-2020.3.1, IU-2021.1, IU-2021.2, IU-2021.3]
 
     steps:
       - uses: actions/checkout@v2
@@ -26,4 +26,11 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build -PideaVersion=${{ matrix.IJ }}
-
+      - name: Verify with Gradle
+        run: ./gradlew runPluginVerifier -PideaVersion=${{ matrix.IJ }}
+      - name: Upload report
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: verifier-report
+          path: build/reports/pluginVerifier

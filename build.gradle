@@ -16,7 +16,7 @@ repositories {
     maven { url 'https://repository.jboss.org' }
 }
 
-def versionsMap = ['IU-2019.3':'193.5233.144','IU-2020.1':'201.6668.99', 'IU-2020.2':'202.6397.93', 'IU-2020.3':'203.5981.152', 'IU-2021.1':'211.6693.108', 'IU-2021.2':'212.4746.57', 'IU-2021.3':'213.5744.122']
+def versionsMap = ['IU-2019.3':'193.5233.144', 'IU-2019.3.1':'193.5662.31', 'IU-2020.1':'201.6668.99', 'IU-2020.1.1':'201.7223.18', 'IU-2020.2':'202.6397.93', 'IU-2020.2.1':'202.6948.69', 'IU-2020.3':'203.5981.152', 'IU-2020.3.1':'203.6682.164', 'IU-2021.1':'211.6693.108', 'IU-2021.2':'212.4746.57', 'IU-2021.3':'213.5744.122']
 
 intellij {
     version = ideaVersion
@@ -67,6 +67,10 @@ task integrationTest(type: Test) {
     classpath = sourceSets.integrationTest.runtimeClasspath
     outputs.upToDateWhen { false }
     mustRunAfter test
+}
+
+runPluginVerifier {
+    ideVersions = [ideaVersion]
 }
 
 publishPlugin {
