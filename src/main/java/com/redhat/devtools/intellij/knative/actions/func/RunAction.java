@@ -11,6 +11,7 @@
 package com.redhat.devtools.intellij.knative.actions.func;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.actions.KnAction;
 import com.redhat.devtools.intellij.knative.kn.Kn;
@@ -51,8 +52,10 @@ public class RunAction extends KnAction {
 
         ExecHelper.submit(() -> {
             try {
-                BuildAction.execute(getEventProject(anActionEvent), ((KnFunctionNode) node).getFunction(), knCli, telemetry);
-                knCli.runFunc(localPathFunc);
+                CommonTerminalExecutionConsole terminalExecutionConsole = knCli.createTerminalTabToReuse();
+                BuildAction.execute(getEventProject(anActionEvent), ((KnFunctionNode) node).getFunction(),
+                        knCli, terminalExecutionConsole, telemetry);
+                knCli.runFunc(localPathFunc, terminalExecutionConsole);
                 telemetry
                         .result(anonymizeResource(name, namespace, "Function " + name + " is running locally"))
                         .send();

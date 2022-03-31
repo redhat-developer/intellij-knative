@@ -67,7 +67,7 @@ public class BuildActionTest extends ActionTest {
             when(kn.getNamespace()).thenReturn("namespace");
             treeHelperMockedStatic.when(() -> TreeHelper.getKn(any(Project.class))).thenReturn(kn);
             action.actionPerformed(anActionEvent);
-            verify(kn, times(0)).buildFunc(anyString(), anyString(), anyString());
+            verify(kn, times(0)).buildFunc(anyString(), anyString(), anyString(), any());
         }
     }
 
@@ -85,7 +85,7 @@ public class BuildActionTest extends ActionTest {
                     yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("test");
                     action.actionPerformed(anActionEvent);
                     Thread.sleep(1000);
-                    verify(kn, times(1)).buildFunc("path", "", "test");
+                    verify(kn, times(1)).buildFunc("path", "", "test", any());
                 }
             }
         }
@@ -107,7 +107,7 @@ public class BuildActionTest extends ActionTest {
                     yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("test").thenReturn("");
                     action.actionPerformed(anActionEvent);
                     Thread.sleep(1000);
-                    verify(kn, times(1)).buildFunc("path", "test", "");
+                    verify(kn, times(1)).buildFunc("path", "test", "", any());
                 }
             }
         }
@@ -135,7 +135,7 @@ public class BuildActionTest extends ActionTest {
                         yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("");
                         action.actionPerformed(anActionEvent);
                         Thread.sleep(1000);
-                        verify(kn, times(1)).buildFunc("path", "", "image");
+                        verify(kn, times(1)).buildFunc("path", "", "image", any());
                     }
                 }
             }
@@ -159,7 +159,7 @@ public class BuildActionTest extends ActionTest {
                         pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
                         action.actionPerformed(anActionEvent);
                         Thread.sleep(1000);
-                        verify(kn, times(1)).buildFunc("path", null, "image");
+                        verify(kn, times(1)).buildFunc("path", null, "image", any());
                     }
                 }
 
@@ -185,7 +185,7 @@ public class BuildActionTest extends ActionTest {
                         yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenThrow(new IOException("error"));
                         action.actionPerformed(anActionEvent);
                         Thread.sleep(1000);
-                        verify(kn, times(0)).buildFunc("path", "", "image");
+                        verify(kn, times(0)).buildFunc("path", "", "image", any());
                     }
                 }
             }
@@ -213,7 +213,7 @@ public class BuildActionTest extends ActionTest {
                         yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("");
                         action.actionPerformed(anActionEvent);
                         Thread.sleep(1000);
-                        verify(kn, times(0)).buildFunc("path", "", "image");
+                        verify(kn, times(0)).buildFunc("path", "", "image", any());
                     }
                 }
             }
@@ -223,7 +223,7 @@ public class BuildActionTest extends ActionTest {
     @Test
     public void Execute_ProjectIsNull_Nothing() {
         try(MockedStatic<ActionManager> actionManagerStatic = mockStatic(ActionManager.class)) {
-            BuildAction.execute(null, function, kn, telemetry);
+            BuildAction.execute(null, function, kn, null, telemetry);
             actionManagerStatic.verify(ActionManager::getInstance, times(0));
         }
     }
@@ -231,7 +231,7 @@ public class BuildActionTest extends ActionTest {
     @Test
     public void Execute_FunctionIsNull_Nothing() {
         try(MockedStatic<ActionManager> actionManagerStatic = mockStatic(ActionManager.class)) {
-            BuildAction.execute(project, null, kn, telemetry);
+            BuildAction.execute(project, null, kn, null, telemetry);
             actionManagerStatic.verify(ActionManager::getInstance, times(0));
         }
     }
@@ -239,7 +239,7 @@ public class BuildActionTest extends ActionTest {
     @Test
     public void Execute_KnIsNull_Nothing() {
         try(MockedStatic<ActionManager> actionManagerStatic = mockStatic(ActionManager.class)) {
-            BuildAction.execute(project, function, null, telemetry);
+            BuildAction.execute(project, function, null, null, telemetry);
             actionManagerStatic.verify(ActionManager::getInstance, times(0));
         }
     }
@@ -247,7 +247,7 @@ public class BuildActionTest extends ActionTest {
     @Test
     public void Execute_TelemetryIsNull_Nothing() {
         try(MockedStatic<ActionManager> actionManagerStatic = mockStatic(ActionManager.class)) {
-            BuildAction.execute(project, function, kn, null);
+            BuildAction.execute(project, function, kn, null, null);
             actionManagerStatic.verify(ActionManager::getInstance, times(0));
         }
     }

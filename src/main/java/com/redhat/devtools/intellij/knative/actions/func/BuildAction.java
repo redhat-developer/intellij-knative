@@ -20,6 +20,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.InputValidator;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Pair;
+import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.actions.KnAction;
@@ -55,7 +56,8 @@ public class BuildAction extends KnAction {
         super(KnFunctionNode.class);
     }
 
-    public static void execute(Project project, Function function, Kn knCli, TelemetryMessageBuilder.ActionMessage telemetry) {
+    public static void execute(Project project, Function function, Kn knCli,
+                               CommonTerminalExecutionConsole terminalExecutionConsole, TelemetryMessageBuilder.ActionMessage telemetry) {
         if (project == null
                 || function == null
                 || knCli == null
@@ -69,7 +71,7 @@ public class BuildAction extends KnAction {
         }
 
         buildAction.doExecuteAction(project, function, registryAndImage.getFirst(),
-                registryAndImage.getSecond(), knCli, telemetry);
+                registryAndImage.getSecond(), knCli, terminalExecutionConsole, telemetry);
     }
 
     @Override
@@ -85,7 +87,7 @@ public class BuildAction extends KnAction {
 
         ExecHelper.submit(() -> {
             doExecuteAction(getEventProject(anActionEvent), function, registryAndImage.getFirst(),
-                    registryAndImage.getSecond(), knCli, telemetry);
+                    registryAndImage.getSecond(), knCli, null, telemetry);
         });
     }
 
@@ -147,12 +149,13 @@ public class BuildAction extends KnAction {
     }
 
     private void doExecuteAction(Project project, Function function, String registry, String image,
-                                 Kn knCli, TelemetryMessageBuilder.ActionMessage telemetry) {
+                                 Kn knCli, CommonTerminalExecutionConsole terminalExecutionConsole,
+                                 TelemetryMessageBuilder.ActionMessage telemetry) {
         String name = function.getName();
         String namespace = knCli.getNamespace();
         String localPathFunc = function.getLocalPath();
         try {
-            doExecute(knCli, namespace, localPathFunc, registry, image);
+            doExecute(terminalExecutionConsole, knCli, namespace, localPathFunc, registry, image);
             telemetry
                     .result(anonymizeResource(name, namespace, getSuccessMessage(namespace, name)))
                     .send();
@@ -170,8 +173,8 @@ public class BuildAction extends KnAction {
         }
     }
 
-    protected void doExecute(Kn knCli, String namespace, String localPathFunc, String registry, String image) throws IOException {
-        knCli.buildFunc(localPathFunc, registry, image);
+    protected void doExecute(CommonTerminalExecutionConsole terminalExecutionConsole, Kn knCli, String namespace, String localPathFunc, String registry, String image) throws IOException {
+        knCli.buildFunc(localPathFunc, registry, image, terminalExecutionConsole);
     }
 
     protected boolean isActionConfirmed(String name, String funcNamespace, String activeNamespace) {

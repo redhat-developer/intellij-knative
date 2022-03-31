@@ -412,7 +412,7 @@ public class KnCliTest extends BaseTest {
     @Test
     public void BuildFunc_RegistryIsInsertedButNoImage_BuildIsCalled() throws IOException {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            kn.buildFunc("path", "registry", "");
+            kn.buildFunc("path", "registry", "", null);
             execHelperMockedStatic.verify(() ->
                     ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), anyString(), eq("build"), eq("-r"), eq("registry"), eq("-p"), eq("path")));
         }
@@ -421,7 +421,7 @@ public class KnCliTest extends BaseTest {
     @Test
     public void BuildFunc_ImageIsInserted_BuildIsCalled() throws IOException {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            kn.buildFunc("path", "registry", "image");
+            kn.buildFunc("path", "registry", "image", null);
             execHelperMockedStatic.verify(() ->
                     ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), anyString(), eq("build"), eq("-i"), eq("image"), eq("-p"), eq("path")));
         }
@@ -431,7 +431,7 @@ public class KnCliTest extends BaseTest {
     public void BuildFunc_ClientFails_Throws() {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             execHelperMockedStatic.when(() -> ExecHelper.executeWithTerminal(any(), anyString())).thenThrow(new IOException("error"));
-            kn.buildFunc("", "", "");
+            kn.buildFunc("", "", "", null);
         } catch (IOException e) {
             assertEquals("error", e.getLocalizedMessage());
         }
@@ -468,7 +468,7 @@ public class KnCliTest extends BaseTest {
     @Test
     public void RunFunc_PathIsInserted_RunIsCalled() throws IOException {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            kn.runFunc("path");
+            kn.runFunc("path", null);
             execHelperMockedStatic.verify(() ->
                     ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), anyString(), eq("run"), eq("-p"), eq("path")));
         }
@@ -478,7 +478,7 @@ public class KnCliTest extends BaseTest {
     public void RunFunc_ClientFails_Throws() {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             execHelperMockedStatic.when(() -> ExecHelper.executeWithTerminal(any(), anyString())).thenThrow(new IOException("error"));
-            kn.runFunc("");
+            kn.runFunc("", null);
         } catch (IOException e) {
             assertEquals("error", e.getLocalizedMessage());
         }

@@ -17,6 +17,7 @@ import com.google.common.base.Strings;
 import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
+import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.NetworkUtils;
 import com.redhat.devtools.intellij.knative.Constants;
@@ -300,8 +301,8 @@ public class KnCli implements Kn {
     }
 
     @Override
-    public void buildFunc(String path, String registry, String image) throws IOException {
-        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, getBuildDeployArgs("build", "", path, registry, image));
+    public void buildFunc(String path, String registry, String image, CommonTerminalExecutionConsole terminalExecutionConsole) throws IOException {
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, getBuildDeployArgs("build", "", path, registry, image));
     }
 
     @Override
@@ -366,8 +367,8 @@ public class KnCli implements Kn {
     }
 
     @Override
-    public void runFunc(String path) throws IOException {
-        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars,funcCommand, "run", "-p", path);
+    public void runFunc(String path, CommonTerminalExecutionConsole terminalExecutionConsole) throws IOException {
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, funcCommand, "run", "-p", path);
     }
 
     @Override
@@ -398,5 +399,10 @@ public class KnCli implements Kn {
         } catch (Exception e) {
             throw new IOException(e);
         }
+    }
+
+    @Override
+    public CommonTerminalExecutionConsole createTerminalTabToReuse() {
+        return ExecHelper.createTerminalTabForReuse(project, KNATIVE_TOOL_WINDOW_ID);
     }
 }
