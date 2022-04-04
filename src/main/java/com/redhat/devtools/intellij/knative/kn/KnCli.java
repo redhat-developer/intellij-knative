@@ -301,12 +301,12 @@ public class KnCli implements Kn {
 
     @Override
     public void buildFunc(String path, String registry, String image) throws IOException {
-        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, getBuildDeployArgs("build", "", path, registry, image));
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, getBuildDeployArgs("build", "", path, registry, image));
     }
 
     @Override
     public void deployFunc(String namespace, String path, String registry, String image) throws IOException {
-        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, getBuildDeployArgs("deploy", namespace, path, registry, image));
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, getBuildDeployArgs("deploy", namespace, path, registry, image));
     }
 
     private String[] getBuildDeployArgs(String command, String namespace, String path, String registry, String image) {
@@ -325,7 +325,7 @@ public class KnCli implements Kn {
 
     @Override
     public void invokeFunc(InvokeModel model) throws IOException {
-        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, getInvokeArgs(model));
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, getInvokeArgs(model));
     }
 
     private String[] getInvokeArgs(InvokeModel model) {
@@ -367,27 +367,27 @@ public class KnCli implements Kn {
 
     @Override
     public void runFunc(String path) throws IOException {
-        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, funcCommand, "run", "-p", path);
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars,funcCommand, "run", "-p", path);
     }
 
     @Override
     public void addEnv(String path) throws IOException {
-        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, funcCommand, "config", "envs", "add", "-p", path);
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars,funcCommand, "config", "envs", "add", "-p", path);
     }
 
     @Override
     public void removeEnv(String path) throws IOException {
-        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, funcCommand, "config", "envs", "remove", "-p", path);
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars,funcCommand, "config", "envs", "remove", "-p", path);
     }
 
     @Override
     public void addVolume(String path) throws IOException {
-        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, funcCommand, "config", "volumes", "add", "-p", path);
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars,funcCommand, "config", "volumes", "add", "-p", path);
     }
 
     @Override
     public void removeVolume(String path) throws IOException {
-        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, funcCommand, "config", "volumes", "remove", "-p", path);
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars,funcCommand, "config", "volumes", "remove", "-p", path);
     }
 
     @Override
