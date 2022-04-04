@@ -414,7 +414,7 @@ public class KnCliTest extends BaseTest {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.buildFunc("path", "registry", "");
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.executeWithTerminal(any(), anyString(), anyString(), eq("build"), eq("-r"), eq("registry"), eq("-p"), eq("path")));
+                    ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), anyString(), eq("build"), eq("-r"), eq("registry"), eq("-p"), eq("path")));
         }
     }
 
@@ -423,7 +423,7 @@ public class KnCliTest extends BaseTest {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.buildFunc("path", "registry", "image");
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.executeWithTerminal(any(), anyString(), anyString(), eq("build"), eq("-i"), eq("image"), eq("-p"), eq("path")));
+                    ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), anyString(), eq("build"), eq("-i"), eq("image"), eq("-p"), eq("path")));
         }
     }
 
@@ -442,7 +442,7 @@ public class KnCliTest extends BaseTest {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.deployFunc("namespace", "path", "registry", "");
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.executeWithTerminal(any(), anyString(), anyString(), eq("deploy"), eq("-r"), eq("registry"), eq("-n"), eq("namespace"), eq("-p"), eq("path")));
+                    ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), anyString(), eq("deploy"), eq("-r"), eq("registry"), eq("-n"), eq("namespace"), eq("-p"), eq("path")));
         }
     }
 
@@ -451,7 +451,7 @@ public class KnCliTest extends BaseTest {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.deployFunc("namespace", "path", "registry", "image");
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.executeWithTerminal(any(), anyString(), anyString(), eq("deploy"), eq("-i"), eq("image"), eq("-n"), eq("namespace"), eq("-p"), eq("path")));
+                    ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), anyString(), eq("deploy"), eq("-i"), eq("image"), eq("-n"), eq("namespace"), eq("-p"), eq("path")));
         }
     }
 
@@ -470,7 +470,7 @@ public class KnCliTest extends BaseTest {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.runFunc("path");
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.executeWithTerminal(any(), anyString(), anyString(), eq("run"), eq("-p"), eq("path")));
+                    ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), anyString(), eq("run"), eq("-p"), eq("path")));
         }
     }
 
