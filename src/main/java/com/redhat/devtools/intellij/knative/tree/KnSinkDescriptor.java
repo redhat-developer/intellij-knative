@@ -25,7 +25,7 @@ import javax.swing.Icon;
 public class KnSinkDescriptor extends PresentableNodeDescriptor<KnSinkNode> {
     private static final Icon BROKER_ICON = IconLoader.findIcon("/images/broker.svg");
     private static final Icon CHANNEL_ICON = IconLoader.findIcon("/images/channel.svg");
-    private static final Icon SERVICE_ICON = IconLoader.findIcon("/images/generictool.svg");
+    private static final Icon SERVICE_ICON = IconLoader.findIcon("/images/service.svg");
     private static final Icon LINK_ICON = IconLoader.findIcon("/images/link.svg");
 
     private final KnSinkNode node;
