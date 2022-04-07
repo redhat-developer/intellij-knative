@@ -79,7 +79,7 @@ public class InvokeAction extends KnAction {
                             .send();
                 } catch (IOException e) {
                     Notification notification = new Notification(NOTIFICATION_ID,
-                            "Error",
+                            "Invoking function " + name + " failed",
                             e.getLocalizedMessage(),
                             NotificationType.ERROR);
                     Notifications.Bus.notify(notification);
