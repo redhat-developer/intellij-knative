@@ -68,10 +68,10 @@ public class InvokeAction extends KnAction {
         if (dialog.isOK()) {
             ExecHelper.submit(() -> {
                 try {
-                    knCli.invokeFunc(model);
+                    String id = knCli.invokeFunc(model);
                     Notification notification = new Notification(NOTIFICATION_ID,
                             "Invoked successfully",
-                            "Function " + name + " has been successfully invoked!",
+                            "Function " + name + " has been successfully invoked with execution id " + id + " !",
                             NotificationType.INFORMATION);
                     Notifications.Bus.notify(notification);
                     telemetry

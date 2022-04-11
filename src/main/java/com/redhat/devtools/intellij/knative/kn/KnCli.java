@@ -12,6 +12,7 @@ package com.redhat.devtools.intellij.knative.kn;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.intellij.openapi.project.Project;
@@ -324,8 +325,12 @@ public class KnCli implements Kn {
     }
 
     @Override
-    public void invokeFunc(InvokeModel model) throws IOException {
-        ExecHelper.execute(funcCommand, envVars, getInvokeArgs(model));
+    public String invokeFunc(InvokeModel model) throws IOException {
+        String json = ExecHelper.execute(funcCommand, envVars, getInvokeArgs(model));
+        if (json != null && JSON_MAPPER.readTree(json).has("ID")) {
+            return JSON_MAPPER.readTree(json).get("ID").asText();
+        }
+        return "";
     }
 
     private String[] getInvokeArgs(InvokeModel model) {
