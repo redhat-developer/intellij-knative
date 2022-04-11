@@ -330,7 +330,7 @@ public class KnCli implements Kn {
         if (json != null && JSON_MAPPER.readTree(json).has("ID")) {
             return JSON_MAPPER.readTree(json).get("ID").asText();
         }
-        return "";
+        throw new IOException("Failed to retrieve invoke execution ID. Invocation didn't complete successfully");
     }
 
     private String[] getInvokeArgs(InvokeModel model) {
