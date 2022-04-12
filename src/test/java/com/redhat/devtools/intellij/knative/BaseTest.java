@@ -29,18 +29,16 @@ import com.redhat.devtools.intellij.knative.tree.KnSinkNode;
 import com.redhat.devtools.intellij.knative.tree.KnSourceNode;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
-
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.mockito.Mockito.mock;
 

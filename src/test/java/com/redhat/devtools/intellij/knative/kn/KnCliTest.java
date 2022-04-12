@@ -10,18 +10,18 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.kn;
 
+import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.BaseTest;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
 import io.fabric8.kubernetes.api.model.RootPaths;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import java.io.File;
-import java.nio.file.Paths;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
@@ -32,7 +32,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -411,19 +410,23 @@ public class KnCliTest extends BaseTest {
 
     @Test
     public void BuildFunc_RegistryIsInsertedButNoImage_BuildIsCalled() throws IOException {
+        CommonTerminalExecutionConsole commonTerminalExecutionConsole = mock(CommonTerminalExecutionConsole.class);
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            kn.buildFunc("path", "registry", "", null);
+            kn.buildFunc("path", "registry", "", commonTerminalExecutionConsole);
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), anyString(), eq("build"), eq("-r"), eq("registry"), eq("-p"), eq("path")));
+                    ExecHelper.executeWithTerminal(eq(null), anyString(), anyMap(),
+                            any(CommonTerminalExecutionConsole.class), anyString(), eq("build"), eq("-r"), eq("registry"), eq("-p"), eq("path")));
         }
     }
 
     @Test
     public void BuildFunc_ImageIsInserted_BuildIsCalled() throws IOException {
+        CommonTerminalExecutionConsole commonTerminalExecutionConsole = mock(CommonTerminalExecutionConsole.class);
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            kn.buildFunc("path", "registry", "image", null);
+            kn.buildFunc("path", "registry", "image", commonTerminalExecutionConsole);
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), anyString(), eq("build"), eq("-i"), eq("image"), eq("-p"), eq("path")));
+                    ExecHelper.executeWithTerminal(eq(null), anyString(), anyMap(),
+                            any(CommonTerminalExecutionConsole.class), anyString(), eq("build"), eq("-i"), eq("image"), eq("-p"), eq("path")));
         }
     }
 
@@ -467,10 +470,12 @@ public class KnCliTest extends BaseTest {
 
     @Test
     public void RunFunc_PathIsInserted_RunIsCalled() throws IOException {
+        CommonTerminalExecutionConsole commonTerminalExecutionConsole = mock(CommonTerminalExecutionConsole.class);
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            kn.runFunc("path", null);
+            kn.runFunc("path", commonTerminalExecutionConsole);
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), anyString(), eq("run"), eq("-p"), eq("path")));
+                    ExecHelper.executeWithTerminal(eq(null), anyString(), anyMap(),
+                            any(CommonTerminalExecutionConsole.class), anyString(), eq("run"), eq("-p"), eq("path")));
         }
     }
 

@@ -22,21 +22,22 @@ import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.actions.func.BuildAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
+
+import javax.swing.tree.TreePath;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import javax.swing.tree.TreePath;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.MockedConstruction;
-import org.mockito.MockedStatic;
-
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
@@ -85,7 +86,7 @@ public class BuildActionTest extends ActionTest {
                     yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("test");
                     action.actionPerformed(anActionEvent);
                     Thread.sleep(1000);
-                    verify(kn, times(1)).buildFunc("path", "", "test", any());
+                    verify(kn, times(1)).buildFunc(eq("path"), eq(""), eq("test"), eq(null));
                 }
             }
         }
@@ -107,7 +108,7 @@ public class BuildActionTest extends ActionTest {
                     yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("test").thenReturn("");
                     action.actionPerformed(anActionEvent);
                     Thread.sleep(1000);
-                    verify(kn, times(1)).buildFunc("path", "test", "", any());
+                    verify(kn, times(1)).buildFunc(eq("path"), eq("test"), eq(""), eq(null));
                 }
             }
         }
@@ -135,7 +136,7 @@ public class BuildActionTest extends ActionTest {
                         yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("");
                         action.actionPerformed(anActionEvent);
                         Thread.sleep(1000);
-                        verify(kn, times(1)).buildFunc("path", "", "image", any());
+                        verify(kn, times(1)).buildFunc(eq("path"), eq(""), eq("image"), eq(null));
                     }
                 }
             }
@@ -159,7 +160,7 @@ public class BuildActionTest extends ActionTest {
                         pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
                         action.actionPerformed(anActionEvent);
                         Thread.sleep(1000);
-                        verify(kn, times(1)).buildFunc("path", null, "image", any());
+                        verify(kn, times(1)).buildFunc(eq("path"), eq(null), eq("image"), eq(null));
                     }
                 }
 
@@ -185,7 +186,7 @@ public class BuildActionTest extends ActionTest {
                         yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenThrow(new IOException("error"));
                         action.actionPerformed(anActionEvent);
                         Thread.sleep(1000);
-                        verify(kn, times(0)).buildFunc("path", "", "image", any());
+                        verify(kn, times(0)).buildFunc(eq("path"), eq(""), eq("image"), eq(null));
                     }
                 }
             }
@@ -213,7 +214,7 @@ public class BuildActionTest extends ActionTest {
                         yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("");
                         action.actionPerformed(anActionEvent);
                         Thread.sleep(1000);
-                        verify(kn, times(0)).buildFunc("path", "", "image", any());
+                        verify(kn, times(0)).buildFunc(eq("path"), eq(""), eq("image"), eq(null));
                     }
                 }
             }
