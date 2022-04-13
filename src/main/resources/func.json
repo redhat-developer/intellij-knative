@@ -1,25 +1,30 @@
 {
   "tools": {
     "func": {
-      "version": "0.23.0",
+      "version": "0.23.1",
       "versionCmd": "version",
       "versionExtractRegExp": "v(\\d+[\\.\\d+]*)",
-      "versionMatchRegExpr": "0.23.0",
+      "versionMatchRegExpr": "0.23.1",
       "baseDir": "$HOME/.knative",
       "silentMode": true,
       "platforms": {
         "win": {
-          "url": "https://github.com/knative-sandbox/kn-plugin-func/releases/download/v0.23.0/func_windows_amd64.exe",
+          "url": "https://github.com/knative-sandbox/kn-plugin-func/releases/download/v0.23.1/func_windows_amd64.exe",
           "cmdFileName": "func_windows_amd64.exe",
           "dlFileName": "func_windows_amd64.exe"
         },
         "osx": {
-          "url": "https://github.com/knative-sandbox/kn-plugin-func/releases/download/v0.23.0/func_darwin_amd64",
+          "url": "https://github.com/knative-sandbox/kn-plugin-func/releases/download/v0.23.1/func_darwin_amd64",
           "cmdFileName": "func_darwin_amd64",
           "dlFileName": "func_darwin_amd64"
         },
+        "osx-arm64": {
+          "url": "https://github.com/knative-sandbox/kn-plugin-func/releases/download/v0.23.1/func_darwin_arm64",
+          "cmdFileName": "func_darwin_arm64",
+          "dlFileName": "func_darwin_arm64"
+        },
         "lnx": {
-          "url": "https://github.com/knative-sandbox/kn-plugin-func/releases/download/v0.23.0/func_linux_amd64",
+          "url": "https://github.com/knative-sandbox/kn-plugin-func/releases/download/v0.23.1/func_linux_amd64",
           "cmdFileName": "func_linux_amd64",
           "dlFileName": "func_linux_amd64"
         }
