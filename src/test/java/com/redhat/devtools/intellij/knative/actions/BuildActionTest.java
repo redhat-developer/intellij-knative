@@ -224,7 +224,7 @@ public class BuildActionTest extends ActionTest {
     @Test
     public void Execute_ProjectIsNull_Nothing() {
         try(MockedStatic<ActionManager> actionManagerStatic = mockStatic(ActionManager.class)) {
-            BuildAction.execute(null, function, kn, null, telemetry);
+            BuildAction.execute(null, function, kn, null, "caller");
             actionManagerStatic.verify(ActionManager::getInstance, times(0));
         }
     }
@@ -232,7 +232,7 @@ public class BuildActionTest extends ActionTest {
     @Test
     public void Execute_FunctionIsNull_Nothing() {
         try(MockedStatic<ActionManager> actionManagerStatic = mockStatic(ActionManager.class)) {
-            BuildAction.execute(project, null, kn, null, telemetry);
+            BuildAction.execute(project, null, kn, null, "caller");
             actionManagerStatic.verify(ActionManager::getInstance, times(0));
         }
     }
@@ -240,15 +240,15 @@ public class BuildActionTest extends ActionTest {
     @Test
     public void Execute_KnIsNull_Nothing() {
         try(MockedStatic<ActionManager> actionManagerStatic = mockStatic(ActionManager.class)) {
-            BuildAction.execute(project, function, null, null, telemetry);
+            BuildAction.execute(project, function, null, null, "caller");
             actionManagerStatic.verify(ActionManager::getInstance, times(0));
         }
     }
 
     @Test
-    public void Execute_TelemetryIsNull_Nothing() {
+    public void Execute_CallerIsEmpty_Nothing() {
         try(MockedStatic<ActionManager> actionManagerStatic = mockStatic(ActionManager.class)) {
-            BuildAction.execute(project, function, kn, null, null);
+            BuildAction.execute(project, function, kn, null, "");
             actionManagerStatic.verify(ActionManager::getInstance, times(0));
         }
     }

@@ -46,6 +46,7 @@ import static com.intellij.openapi.ui.Messages.CANCEL_BUTTON;
 import static com.intellij.openapi.ui.Messages.OK_BUTTON;
 import static com.redhat.devtools.intellij.knative.Constants.NOTIFICATION_ID;
 import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_BUILD_DEPLOY;
+import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.PROP_CALLER_ACTION;
 import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymizeResource;
 
 public class BuildAction extends KnAction {
@@ -57,13 +58,15 @@ public class BuildAction extends KnAction {
     }
 
     public static void execute(Project project, Function function, Kn knCli,
-                               CommonTerminalExecutionConsole terminalExecutionConsole, TelemetryMessageBuilder.ActionMessage telemetry) {
+                               CommonTerminalExecutionConsole terminalExecutionConsole, String caller) {
         if (project == null
                 || function == null
                 || knCli == null
-                || telemetry == null) {
+                || caller.isEmpty()) {
             return;
         }
+        TelemetryMessageBuilder.ActionMessage telemetry = createTelemetryBuild();
+        telemetry.property(PROP_CALLER_ACTION, caller);
         BuildAction buildAction = (BuildAction) ActionManager.getInstance().getAction(ID);
         Pair<String, String> registryAndImage = buildAction.confirmAndGetRegistryImage(function, knCli, telemetry);
         if (registryAndImage == null) {
@@ -220,6 +223,10 @@ public class BuildAction extends KnAction {
     }
 
     protected TelemetryMessageBuilder.ActionMessage createTelemetry() {
+        return createTelemetryBuild();
+    }
+
+    private static TelemetryMessageBuilder.ActionMessage createTelemetryBuild() {
         return TelemetryService.instance().action(NAME_PREFIX_BUILD_DEPLOY + "build func");
     }
 
