@@ -26,6 +26,7 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 
 import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_MISC;
+import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.PROP_CALLER_ACTION;
 import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymizeResource;
 
 public class RunAction extends KnAction {
@@ -52,6 +53,7 @@ public class RunAction extends KnAction {
 
         ExecHelper.submit(() -> {
             try {
+                telemetry.property(PROP_CALLER_ACTION, "run func");
                 CommonTerminalExecutionConsole terminalExecutionConsole = knCli.createTerminalTabToReuse();
                 BuildAction.execute(getEventProject(anActionEvent), ((KnFunctionNode) node).getFunction(),
                         knCli, terminalExecutionConsole, telemetry);

@@ -26,6 +26,8 @@ public class TelemetryService {
     public static final String IS_OPENSHIFT = "is_openshift";
     public static final String OPENSHIFT_VERSION = "openshift_version";
 
+    public static final String PROP_CALLER_ACTION = "caller_action";
+
     private static final TelemetryService INSTANCE = new TelemetryService();
 
     private final Lazy<TelemetryMessageBuilder> builder = new Lazy<>(() -> new TelemetryMessageBuilder(TelemetryService.class.getClassLoader()));
