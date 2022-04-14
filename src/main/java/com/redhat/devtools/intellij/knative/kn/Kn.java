@@ -11,6 +11,7 @@
 package com.redhat.devtools.intellij.knative.kn;
 
 import com.intellij.openapi.project.Project;
+import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
 import io.fabric8.kubernetes.client.Watch;
@@ -204,9 +205,10 @@ public interface Kn {
      * @param path     path where the source code is stored
      * @param registry registry to use
      * @param image    image name. This option takes precedence over registry which can be omitted
+     * @param terminalExecutionConsole terminal tab to be used to run the command. If null a new tab will be created
      * @throws IOException if communication errored
      */
-    void buildFunc(String path, String registry, String image) throws IOException;
+    void buildFunc(String path, String registry, String image, CommonTerminalExecutionConsole terminalExecutionConsole) throws IOException;
 
     /**
      * Deploy a function from path
@@ -233,9 +235,10 @@ public interface Kn {
      * Run a function locally
      *
      * @param path path where the function is stored
+     * @param terminalExecutionConsole terminal tab to be used to run the command. If null a new tab will be created
      * @throws IOException if communication errored
      */
-    void runFunc(String path) throws IOException;
+    void runFunc(String path, CommonTerminalExecutionConsole terminalExecutionConsole) throws IOException;
 
     /**
      * Add environment variable to the function configuration
@@ -280,4 +283,10 @@ public interface Kn {
      */
     Watch watchServiceWithLabel(String key, String value, Watcher<io.fabric8.knative.serving.v1.Service> watcher) throws IOException;
 
+    /**
+     * Create a terminal console to be used to run multiple commands in same tab
+     *
+     * @return a terminal console
+     */
+    CommonTerminalExecutionConsole createTerminalTabToReuse();
 }

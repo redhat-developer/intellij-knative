@@ -14,10 +14,13 @@ import com.google.common.base.Strings;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
+import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.InputValidator;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Pair;
+import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.actions.KnAction;
@@ -43,78 +46,138 @@ import static com.intellij.openapi.ui.Messages.CANCEL_BUTTON;
 import static com.intellij.openapi.ui.Messages.OK_BUTTON;
 import static com.redhat.devtools.intellij.knative.Constants.NOTIFICATION_ID;
 import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_BUILD_DEPLOY;
-import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_CRUD;
+import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.PROP_CALLER_ACTION;
 import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymizeResource;
 
 public class BuildAction extends KnAction {
     private static final Logger logger = LoggerFactory.getLogger(BuildAction.class);
-
-    protected TelemetryMessageBuilder.ActionMessage telemetry;
+    private static final String ID = "com.redhat.devtools.intellij.knative.actions.func.BuildAction";
 
     public BuildAction() {
         super(KnFunctionNode.class);
     }
 
+    public static void execute(Project project, Function function, Kn knCli,
+                               CommonTerminalExecutionConsole terminalExecutionConsole, String caller) {
+        if (project == null
+                || function == null
+                || knCli == null
+                || caller.isEmpty()) {
+            return;
+        }
+        TelemetryMessageBuilder.ActionMessage telemetry = createTelemetryBuild();
+        telemetry.property(PROP_CALLER_ACTION, caller);
+        BuildAction buildAction = (BuildAction) ActionManager.getInstance().getAction(ID);
+        Pair<String, String> registryAndImage = buildAction.confirmAndGetRegistryImage(function, knCli, telemetry);
+        if (registryAndImage == null) {
+            return;
+        }
+
+        buildAction.doExecuteAction(project, function, registryAndImage.getFirst(),
+                registryAndImage.getSecond(), knCli, terminalExecutionConsole, telemetry);
+    }
+
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Kn knCli) {
-        telemetry = createTelemetry();
         ParentableNode node = getElement(selected);
-        String name = node.getName();
-        String namespace = knCli.getNamespace();
         Function function = ((KnFunctionNode) node).getFunction();
+        TelemetryMessageBuilder.ActionMessage telemetry = createTelemetry();
+
+        Pair<String, String> registryAndImage = confirmAndGetRegistryImage(function, knCli, telemetry);
+        if (registryAndImage == null) {
+            return;
+        }
+
+        ExecHelper.submit(() -> {
+            doExecuteAction(getEventProject(anActionEvent), function, registryAndImage.getFirst(),
+                    registryAndImage.getSecond(), knCli, null, telemetry);
+        });
+    }
+
+    private Pair<String, String> confirmAndGetRegistryImage(Function function, Kn knCli, TelemetryMessageBuilder.ActionMessage telemetry) {
+        String namespace = knCli.getNamespace();
+        if (!isLocalFunction(function, namespace, telemetry)) {
+            return null;
+        }
+
+        Pair<String, String> registryAndImage = getRegistryAndImage(function, knCli, telemetry);
+        if (registryAndImage == null) {
+            return null;
+        }
+
+        if (!isExecutionConfirmed(function, namespace, telemetry)) {
+            return null;
+        }
+        return registryAndImage;
+    }
+
+    private boolean isLocalFunction(Function function, String namespace, TelemetryMessageBuilder.ActionMessage telemetry) {
+        String name = function.getName();
         String localPathFunc = function.getLocalPath();
         if (localPathFunc.isEmpty()) {
             telemetry
                     .result(anonymizeResource(name, namespace, "Function " + name + "is not opened locally"))
                     .send();
-            return;
+            return false;
         }
-        // get image or registry in func.yaml
-        Pair<String, String> dataToDeploy = getDataToDeploy(Paths.get(localPathFunc), knCli);
+        return true;
+    }
+
+    private Pair<String, String> getRegistryAndImage(Function function, Kn knCli, TelemetryMessageBuilder.ActionMessage telemetry) {
+        Pair<String, String> dataToDeploy = getDataToDeploy(Paths.get(function.getLocalPath()), knCli);
         String registry = dataToDeploy.getFirst();
         String image = dataToDeploy.getSecond();
         if (Strings.isNullOrEmpty(image) && Strings.isNullOrEmpty(registry)) {
             // ask input to user
-            image = getImageFromUser(node.getName());
+            image = getImageFromUser(function.getName());
             if (image.isEmpty()) {
                 telemetry
-                        .result(anonymizeResource(name, namespace, "No image name or registry has been added."))
+                        .result(anonymizeResource(function.getName(), knCli.getNamespace(), "No image name or registry has been added."))
                         .send();
-                return;
+                return null;
             }
+            return Pair.create(registry, image);
         }
-
-        if (!isActionConfirmed(node.getName(), function.getNamespace(), namespace)) {
-            telemetry
-                    .result(anonymizeResource(name, namespace, "Action execution has been stopped by user."))
-                    .send();
-            return;
-        }
-
-        String finalImage = image;
-        ExecHelper.submit(() -> {
-            try {
-                doExecute(knCli, namespace, localPathFunc, registry, finalImage);
-                telemetry
-                        .result(anonymizeResource(name, namespace, getSuccessMessage(namespace, name)))
-                        .send();
-                TreeHelper.refreshFuncTree(getEventProject(anActionEvent));
-            } catch (IOException e) {
-                Notification notification = new Notification(NOTIFICATION_ID,
-                        "Error",
-                        e.getLocalizedMessage(),
-                        NotificationType.ERROR);
-                Notifications.Bus.notify(notification);
-                logger.warn(e.getLocalizedMessage(), e);
-                telemetry
-                        .error(anonymizeResource(name, namespace, e.getLocalizedMessage()))
-                        .send();
-            }
-        });
+        return dataToDeploy;
     }
 
-    protected void doExecute(Kn knCli, String namespace, String localPathFunc, String registry, String image) throws IOException {
-        knCli.buildFunc(localPathFunc, registry, image);
+    private boolean isExecutionConfirmed(Function function, String namespace, TelemetryMessageBuilder.ActionMessage telemetry) {
+        if (!isActionConfirmed(function.getName(), function.getNamespace(), namespace)) {
+            telemetry
+                    .result(anonymizeResource(function.getName(), namespace, "Build action execution has been stopped by user."))
+                    .send();
+            return false;
+        }
+        return true;
+    }
+
+    private void doExecuteAction(Project project, Function function, String registry, String image,
+                                 Kn knCli, CommonTerminalExecutionConsole terminalExecutionConsole,
+                                 TelemetryMessageBuilder.ActionMessage telemetry) {
+        String name = function.getName();
+        String namespace = knCli.getNamespace();
+        String localPathFunc = function.getLocalPath();
+        try {
+            doExecute(terminalExecutionConsole, knCli, namespace, localPathFunc, registry, image);
+            telemetry
+                    .result(anonymizeResource(name, namespace, getSuccessMessage(namespace, name)))
+                    .send();
+            TreeHelper.refreshFuncTree(project);
+        } catch (IOException e) {
+            Notification notification = new Notification(NOTIFICATION_ID,
+                    "Error",
+                    e.getLocalizedMessage(),
+                    NotificationType.ERROR);
+            Notifications.Bus.notify(notification);
+            logger.warn(e.getLocalizedMessage(), e);
+            telemetry
+                    .error(anonymizeResource(name, namespace, e.getLocalizedMessage()))
+                    .send();
+        }
+    }
+
+    protected void doExecute(CommonTerminalExecutionConsole terminalExecutionConsole, Kn knCli, String namespace, String localPathFunc, String registry, String image) throws IOException {
+        knCli.buildFunc(localPathFunc, registry, image, terminalExecutionConsole);
     }
 
     protected boolean isActionConfirmed(String name, String funcNamespace, String activeNamespace) {
@@ -160,6 +223,10 @@ public class BuildAction extends KnAction {
     }
 
     protected TelemetryMessageBuilder.ActionMessage createTelemetry() {
+        return createTelemetryBuild();
+    }
+
+    private static TelemetryMessageBuilder.ActionMessage createTelemetryBuild() {
         return TelemetryService.instance().action(NAME_PREFIX_BUILD_DEPLOY + "build func");
     }
 
