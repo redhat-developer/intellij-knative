@@ -13,6 +13,7 @@ package com.redhat.devtools.intellij.knative.kn;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.BaseTest;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
+import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
 import io.fabric8.kubernetes.api.model.RootPaths;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
@@ -462,6 +463,49 @@ public class KnCliTest extends BaseTest {
             kn.deployFunc("", "", "", "");
         } catch (IOException e) {
             assertEquals("error", e.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void InvokeFunc_ResultIsNull_Throw() {
+        InvokeModel model = new InvokeModel();
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.execute(anyString(), anyMap(), any())).thenReturn(null);
+            kn.invokeFunc(model);
+        } catch (IOException e) {
+            assertTrue(e.getLocalizedMessage().startsWith("Failed to retrieve invoke execution ID."));
+        }
+    }
+
+    @Test
+    public void InvokeFunc_ResultIsEmpty_Throw() {
+        InvokeModel model = new InvokeModel();
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.execute(anyString(), anyMap(), any())).thenReturn("");
+            kn.invokeFunc(model);
+        } catch (IOException e) {
+            assertTrue(e.getLocalizedMessage().startsWith("Failed to retrieve invoke execution ID."));
+        }
+    }
+
+    @Test
+    public void InvokeFunc_ResultNotHaveID_Throw() {
+        InvokeModel model = new InvokeModel();
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.execute(anyString(), anyMap(), any())).thenReturn("{\"content\":\"test\"}");
+            kn.invokeFunc(model);
+        } catch (IOException e) {
+            assertTrue(e.getLocalizedMessage().startsWith("Failed to retrieve invoke execution ID."));
+        }
+    }
+
+    @Test
+    public void InvokeFunc_ResultHaveID_ID() throws IOException {
+        InvokeModel model = new InvokeModel();
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.execute(anyString(), anyMap(), any())).thenReturn("{\"ID\":\"test\"}");
+            String id = kn.invokeFunc(model);
+            assertEquals("test", id);
         }
     }
 

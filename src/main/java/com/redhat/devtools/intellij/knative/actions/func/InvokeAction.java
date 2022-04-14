@@ -10,6 +10,9 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.actions.func;
 
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.actions.KnAction;
@@ -28,6 +31,7 @@ import javax.swing.tree.TreePath;
 
 import java.io.IOException;
 
+import static com.redhat.devtools.intellij.knative.Constants.NOTIFICATION_ID;
 import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_MISC;
 import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymizeResource;
 
@@ -64,11 +68,21 @@ public class InvokeAction extends KnAction {
         if (dialog.isOK()) {
             ExecHelper.submit(() -> {
                 try {
-                    knCli.invokeFunc(model);
+                    String id = knCli.invokeFunc(model);
+                    Notification notification = new Notification(NOTIFICATION_ID,
+                            "Invoked successfully",
+                            "Function " + name + " has been successfully invoked with execution id " + id + " !",
+                            NotificationType.INFORMATION);
+                    Notifications.Bus.notify(notification);
                     telemetry
                             .result(anonymizeResource(name, namespace, "Invoked function " + name))
                             .send();
                 } catch (IOException e) {
+                    Notification notification = new Notification(NOTIFICATION_ID,
+                            "Invoking function " + name + " failed",
+                            e.getLocalizedMessage(),
+                            NotificationType.ERROR);
+                    Notifications.Bus.notify(notification);
                     logger.warn(e.getLocalizedMessage(), e);
                     telemetry
                             .error(anonymizeResource(name, namespace, e.getLocalizedMessage()))

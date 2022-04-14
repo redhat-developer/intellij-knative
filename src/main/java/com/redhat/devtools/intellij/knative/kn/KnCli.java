@@ -12,6 +12,7 @@ package com.redhat.devtools.intellij.knative.kn;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.intellij.openapi.project.Project;
@@ -324,12 +325,16 @@ public class KnCli implements Kn {
     }
 
     @Override
-    public void invokeFunc(InvokeModel model) throws IOException {
-        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, getInvokeArgs(model));
+    public String invokeFunc(InvokeModel model) throws IOException {
+        String json = ExecHelper.execute(funcCommand, envVars, getInvokeArgs(model));
+        if (json != null && JSON_MAPPER.readTree(json).has("ID")) {
+            return JSON_MAPPER.readTree(json).get("ID").asText();
+        }
+        throw new IOException("Failed to retrieve invoke execution ID. Invocation didn't complete successfully");
     }
 
     private String[] getInvokeArgs(InvokeModel model) {
-        List<String> args = new ArrayList<>(Arrays.asList(funcCommand, "invoke"));
+        List<String> args = new ArrayList<>(Collections.singletonList("invoke"));
         String target = model.getTarget();
         args.addAll(Arrays.asList("-t", target));
 

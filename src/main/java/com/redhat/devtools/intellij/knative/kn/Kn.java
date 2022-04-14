@@ -224,9 +224,10 @@ public interface Kn {
      * Function instance, either locally or remote
      *
      * @param model model representing the function to be invoked
+     * @return id generated for invoke call made
      * @throws IOException if communication errored
      */
-    void invokeFunc(InvokeModel model) throws IOException;
+    String invokeFunc(InvokeModel model) throws IOException;
 
     /**
      * Run a function locally
