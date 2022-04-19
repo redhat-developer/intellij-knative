@@ -13,20 +13,26 @@ A JetBrains IntelliJ plugin for interacting with Knative. This plugin is current
 
 ## New and Noteworthy
 
-The plugin works by using `kn` CLI 1.3.1 and `func` CLI 0.23.1
+The plugin works by using `kn` CLI 1.3.1 and `func` CLI 0.23.1. 
 
 ### Invoke fuction
 
 It is possible to invoke a local/remote function directly from the IDE
 
+![](images/1.1.0/knative1.gif)
+
 ### Create new function enabled in all JetBrains IDE
 
-The `New Function` action have been extended to all JetBrains IDE
+The `New Function` action have been extended to all JetBrains IDEs
 
 ### Discovering existing CLIs and downloading missing ones have been improved
 
 The CLIs needed for the plugin to work are now downloaded on background without freezing the IDE. 
-It also enhanced the way already-installed CLIs are discovered.
+It has also been enhanced the way already-installed CLIs are discovered.
+
+### Known issues discovered by using `func` CLI 0.23.1
+
+To overcome a visualization issue during the execution of the deploy command, this is run with the `-v` verbose flag [#974](https://github.com/knative-sandbox/kn-plugin-func/issues/974)
 
 ## Previous releases
 

@@ -13,8 +13,8 @@
     <change-notes><![CDATA[
       <p><b>1.1.0</b></p>
       <p>Add support for invoking Knative Functions</p>
-      <p>Extends new Knative Function action to all JetBrains IDE<p>
-      <p>CLIs are now downloaded on background without freezing the IDE.</p>
+      <p>Extends new Knative Function action to all JetBrains IDEs<p>
+      <p>CLIs are now downloaded on background without freezing the IDE</p>
       <p>The discovery of already-installed CLIs have been improved</p>
       <p>CLI </p>
       <p><b>1.0.0</b></p>

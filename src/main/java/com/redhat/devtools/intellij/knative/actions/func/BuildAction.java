@@ -22,6 +22,7 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Pair;
 import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
+import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.actions.KnAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
@@ -100,12 +101,13 @@ public class BuildAction extends KnAction {
             return null;
         }
 
-        Pair<String, String> registryAndImage = getRegistryAndImage(function, knCli, telemetry);
+        Pair<String, String> registryAndImage = UIHelper.executeInUI(() -> getRegistryAndImage(function, knCli, telemetry));
         if (registryAndImage == null) {
             return null;
         }
 
-        if (!isExecutionConfirmed(function, namespace, telemetry)) {
+        boolean executionConfirmed = UIHelper.executeInUI(() -> isExecutionConfirmed(function, namespace, telemetry));
+        if (!executionConfirmed) {
             return null;
         }
         return registryAndImage;
