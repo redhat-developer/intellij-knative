@@ -62,9 +62,11 @@ public class KnCli implements Kn {
     private KubernetesClient client;
     private final String knCommand, funcCommand;
     private Map<String, String> envVars;
+    private boolean isOpenshift;
     private boolean hasKnativeServing, hasKnativeEventing;
 
     public KnCli(Project project, String knCommand, String funcCommand) {
+        this.isOpenshift = false;
         this.knCommand = knCommand;
         this.funcCommand = funcCommand;
         this.project = project;
@@ -83,6 +85,7 @@ public class KnCli implements Kn {
         TelemetryMessageBuilder.ActionMessage telemetry = TelemetryService.instance().action(TelemetryService.NAME_PREFIX_MISC + "login");
         try {
             ClusterInfo info = ClusterHelper.getClusterInfo(client);
+            isOpenshift = info.isOpenshift();
             telemetry.property(KUBERNETES_VERSION, info.getKubernetesVersion());
             telemetry.property(IS_OPENSHIFT, Boolean.toString(info.isOpenshift()));
             telemetry.property(OPENSHIFT_VERSION, info.getOpenshiftVersion());
@@ -313,9 +316,11 @@ public class KnCli implements Kn {
 
     private String[] getBuildDeployArgs(String command, String namespace, String path, String registry, String image, boolean verbose) {
         List<String> args = new ArrayList<>(Arrays.asList(funcCommand, command));
-        if (image.isEmpty()) {
+        if (!Strings.isNullOrEmpty(registry) || isOpenshift) {
+            registry = registry == null ? "" : registry;
             args.addAll(Arrays.asList("-r", registry));
-        } else {
+        }
+        if (!image.isEmpty()){
             args.addAll(Arrays.asList("-i", image));
         }
         if (!namespace.isEmpty()) {
