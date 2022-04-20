@@ -69,7 +69,7 @@ public class BuildAction extends KnAction {
         TelemetryMessageBuilder.ActionMessage telemetry = createTelemetryBuild();
         telemetry.property(PROP_CALLER_ACTION, caller);
         BuildAction buildAction = (BuildAction) ActionManager.getInstance().getAction(ID);
-        Pair<String, String> registryAndImage = buildAction.confirmAndGetRegistryImage(function, knCli, telemetry);
+        Pair<String, String> registryAndImage = UIHelper.executeInUI(() -> buildAction.confirmAndGetRegistryImage(function, knCli, telemetry));
         if (registryAndImage == null) {
             return;
         }
@@ -89,10 +89,8 @@ public class BuildAction extends KnAction {
             return;
         }
 
-        ExecHelper.submit(() -> {
-            doExecuteAction(getEventProject(anActionEvent), function, registryAndImage.getFirst(),
-                    registryAndImage.getSecond(), knCli, null, telemetry);
-        });
+        ExecHelper.submit(() -> doExecuteAction(getEventProject(anActionEvent), function, registryAndImage.getFirst(),
+                registryAndImage.getSecond(), knCli, null, telemetry));
     }
 
     private Pair<String, String> confirmAndGetRegistryImage(Function function, Kn knCli, TelemetryMessageBuilder.ActionMessage telemetry) {
@@ -101,13 +99,12 @@ public class BuildAction extends KnAction {
             return null;
         }
 
-        Pair<String, String> registryAndImage = UIHelper.executeInUI(() -> getRegistryAndImage(function, knCli, telemetry));
+        Pair<String, String> registryAndImage = getRegistryAndImage(function, knCli, telemetry);
         if (registryAndImage == null) {
             return null;
         }
 
-        boolean executionConfirmed = UIHelper.executeInUI(() -> isExecutionConfirmed(function, namespace, telemetry));
-        if (!executionConfirmed) {
+        if (!isExecutionConfirmed(function, namespace, telemetry)) {
             return null;
         }
         return registryAndImage;
