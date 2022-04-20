@@ -12,7 +12,6 @@ package com.redhat.devtools.intellij.knative.kn;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.intellij.openapi.project.Project;
@@ -21,7 +20,6 @@ import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
 import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.NetworkUtils;
-import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
@@ -34,6 +32,7 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
+import io.fabric8.openshift.client.OpenShiftClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,11 +61,9 @@ public class KnCli implements Kn {
     private KubernetesClient client;
     private final String knCommand, funcCommand;
     private Map<String, String> envVars;
-    private boolean isOpenshift;
     private boolean hasKnativeServing, hasKnativeEventing;
 
     public KnCli(Project project, String knCommand, String funcCommand) {
-        this.isOpenshift = false;
         this.knCommand = knCommand;
         this.funcCommand = funcCommand;
         this.project = project;
@@ -85,7 +82,6 @@ public class KnCli implements Kn {
         TelemetryMessageBuilder.ActionMessage telemetry = TelemetryService.instance().action(TelemetryService.NAME_PREFIX_MISC + "login");
         try {
             ClusterInfo info = ClusterHelper.getClusterInfo(client);
-            isOpenshift = info.isOpenshift();
             telemetry.property(KUBERNETES_VERSION, info.getKubernetesVersion());
             telemetry.property(IS_OPENSHIFT, Boolean.toString(info.isOpenshift()));
             telemetry.property(OPENSHIFT_VERSION, info.getOpenshiftVersion());
@@ -320,7 +316,7 @@ public class KnCli implements Kn {
             args.addAll(Arrays.asList("-r", registry));
         } else {
             args.addAll(Arrays.asList("-i", image));
-            if (isOpenshift) {
+            if (client.isAdaptable(OpenShiftClient.class)) {
                 args.addAll(Arrays.asList("-r", ""));
             }
         }
