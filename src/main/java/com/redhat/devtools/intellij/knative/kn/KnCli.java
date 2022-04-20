@@ -316,12 +316,13 @@ public class KnCli implements Kn {
 
     private String[] getBuildDeployArgs(String command, String namespace, String path, String registry, String image, boolean verbose) {
         List<String> args = new ArrayList<>(Arrays.asList(funcCommand, command));
-        if (!Strings.isNullOrEmpty(registry) || isOpenshift) {
-            registry = registry == null ? "" : registry;
+        if (image.isEmpty()) {
             args.addAll(Arrays.asList("-r", registry));
-        }
-        if (!image.isEmpty()){
+        } else {
             args.addAll(Arrays.asList("-i", image));
+            if (isOpenshift) {
+                args.addAll(Arrays.asList("-r", ""));
+            }
         }
         if (!namespace.isEmpty()) {
             args.addAll(Arrays.asList("-n", namespace));
