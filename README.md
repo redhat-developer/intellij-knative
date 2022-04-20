@@ -13,17 +13,42 @@ A JetBrains IntelliJ plugin for interacting with Knative. This plugin is current
 
 ## New and Noteworthy
 
+The plugin works by using `kn` CLI 1.3.1 and `func` CLI 0.23.1. 
+
+### Invoke fuction
+
+It is possible to invoke a local/remote function directly from the IDE
+
+![](images/1.1.0/knative1.gif)
+
+### Create new function enabled in all JetBrains IDE
+
+The `New Function` action have been extended to all JetBrains IDEs
+
+### Discovering existing CLIs and downloading missing ones have been improved
+
+The CLIs needed for the plugin to work are now downloaded on background without freezing the IDE. 
+It has also been enhanced the way already-installed CLIs are discovered.
+
+### Known issues discovered by using `func` CLI 0.23.1
+
+To overcome a visualization issue during the execution of the deploy command, this is run with the `-v` verbose flag [#974](https://github.com/knative-sandbox/kn-plugin-func/issues/974)
+
+## Previous releases
+
+### 1.0.0
+
 The new release supports Knative Functions, enabling the development and deployment of Functions directly from IntelliJ.
 
 ### Create new function
 
-The native IntelliJ `New Project/Module` actions have been extended to enable the creation of new functions.  
+The native IntelliJ `New Project/Module` actions have been extended to enable the creation of new functions.
 
 ![](images/1.0.0/knative1.gif)
 
 ### New Functions View
 
-A simplified view for Functions allows to easily build/run/configure/deploy your functions in few clicks. 
+A simplified view for Functions allows to easily build/run/configure/deploy your functions in few clicks.
 It shows if the function has been deployed and available on cluster or only opened locally or both.
 
 ![](images/1.0.0/knative2.png)
@@ -40,7 +65,7 @@ It is possible to build, deploy and run locally a function from the IDE. Textbox
 
 ### Update Function Configuration
 
-A function can be updated manually by changing the `func.yaml` file through the IDE editor. The plugin also provides 
+A function can be updated manually by changing the `func.yaml` file through the IDE editor. The plugin also provides
 `add`/`remove` actions to configure environment variables and volumes in a guided way.
 
 ![](images/1.0.0/knative6.gif)
@@ -51,9 +76,7 @@ Deployed Function can be opened in browser from the IDE.
 
 ### Undeploy Function
 
-A deployed function can be undeployed. 
-
-## Previous releases
+A deployed function can be undeployed.
 
 ### 0.1.0
 

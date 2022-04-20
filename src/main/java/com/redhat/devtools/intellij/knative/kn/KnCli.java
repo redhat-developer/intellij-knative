@@ -303,15 +303,15 @@ public class KnCli implements Kn {
 
     @Override
     public void buildFunc(String path, String registry, String image, CommonTerminalExecutionConsole terminalExecutionConsole) throws IOException {
-        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, getBuildDeployArgs("build", "", path, registry, image));
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, getBuildDeployArgs("build", "", path, registry, image, false));
     }
 
     @Override
     public void deployFunc(String namespace, String path, String registry, String image) throws IOException {
-        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, getBuildDeployArgs("deploy", namespace, path, registry, image));
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, getBuildDeployArgs("deploy", namespace, path, registry, image, true));
     }
 
-    private String[] getBuildDeployArgs(String command, String namespace, String path, String registry, String image) {
+    private String[] getBuildDeployArgs(String command, String namespace, String path, String registry, String image, boolean verbose) {
         List<String> args = new ArrayList<>(Arrays.asList(funcCommand, command));
         if (image.isEmpty()) {
             args.addAll(Arrays.asList("-r", registry));
@@ -322,6 +322,9 @@ public class KnCli implements Kn {
             args.addAll(Arrays.asList("-n", namespace));
         }
         args.addAll(Arrays.asList("-p", path));
+        if (verbose) {
+            args.addAll(Collections.singletonList("-v"));
+        }
         return args.toArray(new String[0]);
     }
 

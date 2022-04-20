@@ -22,6 +22,7 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Pair;
 import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
+import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.actions.KnAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
@@ -68,7 +69,7 @@ public class BuildAction extends KnAction {
         TelemetryMessageBuilder.ActionMessage telemetry = createTelemetryBuild();
         telemetry.property(PROP_CALLER_ACTION, caller);
         BuildAction buildAction = (BuildAction) ActionManager.getInstance().getAction(ID);
-        Pair<String, String> registryAndImage = buildAction.confirmAndGetRegistryImage(function, knCli, telemetry);
+        Pair<String, String> registryAndImage = UIHelper.executeInUI(() -> buildAction.confirmAndGetRegistryImage(function, knCli, telemetry));
         if (registryAndImage == null) {
             return;
         }
@@ -88,10 +89,8 @@ public class BuildAction extends KnAction {
             return;
         }
 
-        ExecHelper.submit(() -> {
-            doExecuteAction(getEventProject(anActionEvent), function, registryAndImage.getFirst(),
-                    registryAndImage.getSecond(), knCli, null, telemetry);
-        });
+        ExecHelper.submit(() -> doExecuteAction(getEventProject(anActionEvent), function, registryAndImage.getFirst(),
+                registryAndImage.getSecond(), knCli, null, telemetry));
     }
 
     private Pair<String, String> confirmAndGetRegistryImage(Function function, Kn knCli, TelemetryMessageBuilder.ActionMessage telemetry) {

@@ -73,13 +73,4 @@ public class RunAction extends KnAction {
     public boolean isVisible(Object selected) {
         return selected instanceof KnFunctionNode && !((KnFunctionNode) selected).getFunction().getLocalPath().isEmpty();
     }
-
-    @Override
-    public boolean isEnabled(Object selected) {
-        if (selected instanceof KnFunctionNode) {
-            String image = ((KnFunctionNode) selected).getFunction().getImage();
-            return image != null && !image.isEmpty();
-        }
-        return false;
-    }
 }
