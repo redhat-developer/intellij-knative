@@ -49,10 +49,9 @@ public class DeployAction extends BuildAction {
             if (!funcNamespace.equalsIgnoreCase(activeNamespace)) {
                 message = "Function namespace (declared in func.yaml) is different from the current active namespace. \n";
             }
-            message += "Deploy function " + name + " to namespace " + funcNamespace + "?";
-        } else {
-            message += "Deploy function " + name + " to namespace " + activeNamespace + "?";
         }
+        message += "Deploy function " + name + " to namespace " + activeNamespace + "?";
+
         int result = showOkCancelDialog(message,
                 "Deploy Function " + name,
                 OK_BUTTON, CANCEL_BUTTON, null);
