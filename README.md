@@ -1,4 +1,4 @@
-# IntelliJ Knative
+# IntelliJ plugin for Knative & Serverless Functons
 [plugin-repo]: https://plugins.jetbrains.com/plugin/16476-knative-by-red-hat
 [plugin-version-svg]: https://img.shields.io/jetbrains/plugin/v/16476-knative-by-red-hat.svg
 [plugin-downloads-svg]: https://img.shields.io/jetbrains/plugin/d/16476-knative-by-red-hat.svg
@@ -9,7 +9,7 @@
 
 ## Overview
 
-A JetBrains IntelliJ plugin for interacting with Knative. This plugin is currently in Preview Mode.
+A JetBrains IntelliJ plugin for interacting with Knative & Serverless Functions. This plugin is currently in Preview Mode.
 
 ## New and Noteworthy
 
