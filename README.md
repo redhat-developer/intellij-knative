@@ -1,4 +1,4 @@
-# IntelliJ plugin for Knative & Serverless Functons
+# IntelliJ plugin for Knative & Serverless Functions
 [plugin-repo]: https://plugins.jetbrains.com/plugin/16476-knative-by-red-hat
 [plugin-version-svg]: https://img.shields.io/jetbrains/plugin/v/16476-knative-by-red-hat.svg
 [plugin-downloads-svg]: https://img.shields.io/jetbrains/plugin/d/16476-knative-by-red-hat.svg
