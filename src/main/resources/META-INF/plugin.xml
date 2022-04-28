@@ -1,6 +1,6 @@
 <idea-plugin>
     <id>com.redhat.devtools.intellij.knative</id>
-    <name>Knative By Red Hat</name>
+    <name>Knative &amp; Serverless Functions By Red Hat</name>
     <version>1.0</version>
     <vendor email="developers@redhat.com" url="https://www.redhat.com">Red-Hat</vendor>
 
