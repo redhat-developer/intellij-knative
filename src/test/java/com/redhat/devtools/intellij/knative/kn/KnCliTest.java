@@ -10,6 +10,8 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.kn;
 
+import com.intellij.execution.process.ProcessListener;
+import com.intellij.terminal.TerminalExecutionConsole;
 import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.BaseTest;
@@ -411,23 +413,29 @@ public class KnCliTest extends BaseTest {
 
     @Test
     public void BuildFunc_RegistryIsInsertedButNoImage_BuildIsCalled() throws IOException {
-        CommonTerminalExecutionConsole commonTerminalExecutionConsole = mock(CommonTerminalExecutionConsole.class);
+        TerminalExecutionConsole terminalExecutionConsole = mock(TerminalExecutionConsole.class);
+        ProcessListener processListener = mock(ProcessListener.class);
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            kn.buildFunc("path", "registry", "", commonTerminalExecutionConsole, null);
+            kn.buildFunc("path", "registry", "", terminalExecutionConsole, processListener);
             execHelperMockedStatic.verify(() ->
                     ExecHelper.executeWithTerminal(eq(null), anyString(), anyMap(),
-                            any(CommonTerminalExecutionConsole.class), anyString(), eq("build"), eq("-r"), eq("registry"), eq("-p"), eq("path")));
+                            any(TerminalExecutionConsole.class), any(ProcessListener.class), anyString(),
+                            eq("build"), eq("-r"), eq("registry"), eq("-p"), eq("path"),
+                            eq("-v")));
         }
     }
 
     @Test
     public void BuildFunc_ImageIsInserted_BuildIsCalled() throws IOException {
-        CommonTerminalExecutionConsole commonTerminalExecutionConsole = mock(CommonTerminalExecutionConsole.class);
+        TerminalExecutionConsole terminalExecutionConsole = mock(TerminalExecutionConsole.class);
+        ProcessListener processListener = mock(ProcessListener.class);
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            kn.buildFunc("path", "registry", "image", commonTerminalExecutionConsole, null);
+            kn.buildFunc("path", "registry", "image", terminalExecutionConsole, processListener);
             execHelperMockedStatic.verify(() ->
                     ExecHelper.executeWithTerminal(eq(null), anyString(), anyMap(),
-                            any(CommonTerminalExecutionConsole.class), anyString(), eq("build"), eq("-i"), eq("image"), eq("-p"), eq("path")));
+                            any(TerminalExecutionConsole.class), any(ProcessListener.class), anyString(),
+                            eq("build"), eq("-i"), eq("image"), eq("-p"), eq("path"),
+                            eq("-v")));
         }
     }
 

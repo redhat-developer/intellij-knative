@@ -20,6 +20,7 @@ import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.actions.func.DeployAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
+import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import java.io.File;
 import java.io.IOException;
@@ -103,16 +104,19 @@ public class DeployActionTest extends ActionTest {
             try (MockedStatic<Paths> pathsMockedStatic = mockStatic(Paths.class)) {
                 try (MockedStatic<YAMLHelper> yamlHelperMockedStatic = mockStatic(YAMLHelper.class)) {
                     try(MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
-                        treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
-                        pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
-                        when(kn.getFuncFileURL(any())).thenReturn(mock(URL.class));
-                        yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
-                        yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("image: test");
-                        yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("test");
-                        messagesMockedStatic.when(() -> Messages.showOkCancelDialog(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.CANCEL);
-                        action.actionPerformed(anActionEvent);
-                        Thread.sleep(1000);
-                        verify(kn, times(0)).deployFunc("namespace", "path", "", "test");
+                        try (MockedStatic<TelemetryService> telemetryServiceMockedStatic = mockStatic((TelemetryService.class))) {
+                            treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+                            pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
+                            when(kn.getFuncFileURL(any())).thenReturn(mock(URL.class));
+                            yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
+                            yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("image: test");
+                            yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("test");
+                            messagesMockedStatic.when(() -> Messages.showOkCancelDialog(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.CANCEL);
+                            mockTelemetry(telemetryServiceMockedStatic);
+                            action.actionPerformed(anActionEvent);
+                            Thread.sleep(1000);
+                            verify(kn, times(0)).deployFunc("namespace", "path", "", "test");
+                        }
                     }
                 }
             }

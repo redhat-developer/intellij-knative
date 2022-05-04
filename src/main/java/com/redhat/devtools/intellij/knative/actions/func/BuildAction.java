@@ -89,6 +89,10 @@ public class BuildAction extends KnAction {
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Kn knCli) {
+        actionPerformed(anActionEvent, selected, knCli, true);
+    }
+
+    public void actionPerformed(AnActionEvent anActionEvent, Object selected, Kn knCli, boolean isBuild) {
         ParentableNode node = getElement(selected);
         Function function = ((KnFunctionNode) node).getFunction();
         TelemetryMessageBuilder.ActionMessage telemetry = createTelemetry();
@@ -99,11 +103,19 @@ public class BuildAction extends KnAction {
         }
 
         Project project = getEventProject(anActionEvent);
-        BuildFuncHandler buildFuncHandler = createBuildFuncHandler(project, function);
-        ProcessListener processListener = createBuildProcessListener(knCli, buildFuncHandler, function);
+        ConsoleView terminalExecutionConsole = null;
+        ProcessListener processListener = null;
+        if (isBuild) {
+            BuildFuncHandler buildFuncHandler = createBuildFuncHandler(project, function);
+            processListener = createBuildProcessListener(knCli, buildFuncHandler, function);
+            terminalExecutionConsole = buildFuncHandler.getTerminalExecutionConsole();
+        }
+
+        ConsoleView finalTerminalExecutionConsole = terminalExecutionConsole;
+        ProcessListener finalProcessListener = processListener;
         ExecHelper.submit(() -> doExecuteAction(project, function, registryAndImage.getFirst(),
-                registryAndImage.getSecond(), knCli, buildFuncHandler.getTerminalExecutionConsole(),
-                processListener, telemetry));
+                registryAndImage.getSecond(), knCli, finalTerminalExecutionConsole,
+                finalProcessListener, telemetry));
     }
 
     private BuildFuncHandler createBuildFuncHandler(Project project, Function function) {
