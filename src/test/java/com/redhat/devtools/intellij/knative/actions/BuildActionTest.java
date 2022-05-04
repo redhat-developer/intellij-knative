@@ -68,7 +68,7 @@ public class BuildActionTest extends ActionTest {
             when(kn.getNamespace()).thenReturn("namespace");
             treeHelperMockedStatic.when(() -> TreeHelper.getKn(any(Project.class))).thenReturn(kn);
             action.actionPerformed(anActionEvent);
-            verify(kn, times(0)).buildFunc(anyString(), anyString(), anyString(), any());
+            verify(kn, times(0)).buildFunc(anyString(), anyString(), anyString(), any(), any());
         }
     }
 
@@ -86,7 +86,7 @@ public class BuildActionTest extends ActionTest {
                     yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("test");
                     action.actionPerformed(anActionEvent);
                     Thread.sleep(1000);
-                    verify(kn, times(1)).buildFunc(eq("path"), eq(""), eq("test"), eq(null));
+                    verify(kn, times(1)).buildFunc(eq("path"), eq(""), eq("test"), eq(null), eq(null));
                 }
             }
         }
@@ -108,7 +108,7 @@ public class BuildActionTest extends ActionTest {
                     yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("test").thenReturn("");
                     action.actionPerformed(anActionEvent);
                     Thread.sleep(1000);
-                    verify(kn, times(1)).buildFunc(eq("path"), eq("test"), eq(""), eq(null));
+                    verify(kn, times(1)).buildFunc(eq("path"), eq("test"), eq(""), eq(null), eq(null));
                 }
             }
         }
@@ -136,7 +136,7 @@ public class BuildActionTest extends ActionTest {
                         yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("");
                         action.actionPerformed(anActionEvent);
                         Thread.sleep(1000);
-                        verify(kn, times(1)).buildFunc(eq("path"), eq(""), eq("image"), eq(null));
+                        verify(kn, times(1)).buildFunc(eq("path"), eq(""), eq("image"), eq(null), eq(null));
                     }
                 }
             }
@@ -160,7 +160,7 @@ public class BuildActionTest extends ActionTest {
                         pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
                         action.actionPerformed(anActionEvent);
                         Thread.sleep(1000);
-                        verify(kn, times(1)).buildFunc(eq("path"), eq(null), eq("image"), eq(null));
+                        verify(kn, times(1)).buildFunc(eq("path"), eq(null), eq("image"), eq(null), eq(null));
                     }
                 }
 
@@ -186,7 +186,7 @@ public class BuildActionTest extends ActionTest {
                         yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenThrow(new IOException("error"));
                         action.actionPerformed(anActionEvent);
                         Thread.sleep(1000);
-                        verify(kn, times(0)).buildFunc(eq("path"), eq(""), eq("image"), eq(null));
+                        verify(kn, times(0)).buildFunc(eq("path"), eq(""), eq("image"), eq(null),eq(null));
                     }
                 }
             }
@@ -214,7 +214,7 @@ public class BuildActionTest extends ActionTest {
                         yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("");
                         action.actionPerformed(anActionEvent);
                         Thread.sleep(1000);
-                        verify(kn, times(0)).buildFunc(eq("path"), eq(""), eq("image"), eq(null));
+                        verify(kn, times(0)).buildFunc(eq("path"), eq(""), eq("image"), eq(null), eq(null));
                     }
                 }
             }

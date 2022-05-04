@@ -41,6 +41,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Knative" anchor="left" factoryClass="com.redhat.devtools.intellij.knative.ui.toolwindow.WindowToolFactory" />
         <toolWindow id="KnativeFunction" anchor="left" factoryClass="com.redhat.devtools.intellij.knative.ui.toolwindow.FunctionsWindowToolFactory" />
+        <toolWindow id="BuildFunc" anchor="bottom" factoryClass="com.redhat.devtools.intellij.knative.ui.buildFunc.BuildFuncWindowToolFactory" canCloseContents="false" />
         <fileDocumentSynchronizationVetoer id="com.redhat.devtools.intellij.knative.listener.KnSaveInEditorListener" implementation="com.redhat.devtools.intellij.knative.listener.KnSaveInEditorListener" order="first" />
         <moduleBuilder builderClass="com.redhat.devtools.intellij.knative.ui.createFunc.FunctionModuleBuilder"/>
         <nonProjectFileWritingAccessExtension id="com.redhat.devtools.intellij.common.editor.AllowNonProjectEditing" implementation="com.redhat.devtools.intellij.common.editor.AllowNonProjectEditing" />

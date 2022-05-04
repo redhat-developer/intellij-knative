@@ -24,6 +24,7 @@ public class Constants {
     public static final String KNATIVE_TOOL_WINDOW_ID = "Knative";
     public static final String KNATIVE_FUNC_TOOL_WINDOW_ID = "KnativeFunction";
     public static final String KNATIVE_LOCAL_FUNC_TOOL_WINDOW_ID = "KnativeLocalFunction";
+    public static final String BUILDFUNC_TOOLWINDOW_ID = "BuildFunc";
 
     public static final String[] YAML_NAME_PATH = new String[] { "metadata", "name" };
     public static final String[] YAML_FIRST_IMAGE_PATH = new String[] { "spec", "template", "spec", "containers[0]", "image" };

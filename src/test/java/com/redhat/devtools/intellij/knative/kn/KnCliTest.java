@@ -413,7 +413,7 @@ public class KnCliTest extends BaseTest {
     public void BuildFunc_RegistryIsInsertedButNoImage_BuildIsCalled() throws IOException {
         CommonTerminalExecutionConsole commonTerminalExecutionConsole = mock(CommonTerminalExecutionConsole.class);
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            kn.buildFunc("path", "registry", "", commonTerminalExecutionConsole);
+            kn.buildFunc("path", "registry", "", commonTerminalExecutionConsole, null);
             execHelperMockedStatic.verify(() ->
                     ExecHelper.executeWithTerminal(eq(null), anyString(), anyMap(),
                             any(CommonTerminalExecutionConsole.class), anyString(), eq("build"), eq("-r"), eq("registry"), eq("-p"), eq("path")));
@@ -424,7 +424,7 @@ public class KnCliTest extends BaseTest {
     public void BuildFunc_ImageIsInserted_BuildIsCalled() throws IOException {
         CommonTerminalExecutionConsole commonTerminalExecutionConsole = mock(CommonTerminalExecutionConsole.class);
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            kn.buildFunc("path", "registry", "image", commonTerminalExecutionConsole);
+            kn.buildFunc("path", "registry", "image", commonTerminalExecutionConsole, null);
             execHelperMockedStatic.verify(() ->
                     ExecHelper.executeWithTerminal(eq(null), anyString(), anyMap(),
                             any(CommonTerminalExecutionConsole.class), anyString(), eq("build"), eq("-i"), eq("image"), eq("-p"), eq("path")));
@@ -435,7 +435,7 @@ public class KnCliTest extends BaseTest {
     public void BuildFunc_ClientFails_Throws() {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             execHelperMockedStatic.when(() -> ExecHelper.executeWithTerminal(any(), anyString())).thenThrow(new IOException("error"));
-            kn.buildFunc("", "", "", null);
+            kn.buildFunc("", "", "", null, null);
         } catch (IOException e) {
             assertEquals("error", e.getLocalizedMessage());
         }

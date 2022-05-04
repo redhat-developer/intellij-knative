@@ -11,6 +11,8 @@
 package com.redhat.devtools.intellij.knative.actions.func;
 
 import com.google.common.base.Strings;
+import com.intellij.execution.process.ProcessListener;
+import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
@@ -38,7 +40,8 @@ public class DeployAction extends BuildAction {
     }
 
     @Override
-    protected void doExecute(CommonTerminalExecutionConsole terminalExecutionConsole, Kn knCli, String namespace, String localPathFunc, String registry, String image) throws IOException {
+    protected void doExecute(ConsoleView terminalExecutionConsole, ProcessListener processListener,
+                             Kn knCli, String namespace, String localPathFunc, String registry, String image) throws IOException {
         knCli.deployFunc(namespace, localPathFunc, registry, image);
     }
 
