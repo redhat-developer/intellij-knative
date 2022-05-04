@@ -13,6 +13,7 @@ package com.redhat.devtools.intellij.knative.ui.buildFunc;
 import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessListener;
+import com.intellij.execution.ui.ConsoleView;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Divider;
@@ -42,45 +43,65 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreePath;
 import java.awt.BorderLayout;
-import java.awt.Color;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.intellij.ide.plugins.PluginManagerConfigurable.SEARCH_FIELD_BORDER_COLOR;
 import static com.intellij.ui.AnimatedIcon.ANIMATION_IN_RENDERER_ALLOWED;
+import static com.redhat.devtools.intellij.knative.Constants.BUILDFUNC_CONTENT_NAME;
 
 public class BuildFuncPanel extends ContentImpl {
 
     private ToolWindow toolWindow;
-    private Map<String, TerminalExecutionConsole> funcXTerminal;
+    private List<BuildFuncHandler> buildFuncHandlers;
     private JPanel terminalPanel;
     private DefaultTreeModel treeModel;
     private Tree tree;
 
     public BuildFuncPanel(ToolWindow toolWindow) {
-        super(null, "Build Output", true);
+        super(null, BUILDFUNC_CONTENT_NAME, true);
         this.toolWindow = toolWindow;
-        this.funcXTerminal = new HashMap<>();
+        this.buildFuncHandlers = new ArrayList<>();
         setComponent(createMainPanel());
     }
 
-    public BuildFuncExec createViewBuildFunc(Project project, Function function) {
-        if (funcXTerminal.containsKey(function.getName())) {
-            funcXTerminal.get(function.getName()).dispose();
-            removeNode(function.getName());
-        }
-        final Icon[] nodeicon = {new AnimatedIcon.FS()};
+    public BuildFuncHandler createBuildFuncHandler(Project project, Function function) {
+        ensureToolWindowOpened();
+        ensureOldHandlerIsDisposed(function);
+
+        final Icon[] nodeIcon = {new AnimatedIcon.FS()};
         final String[] location = {"running ..."};
-        BuildFuncExec buildFuncExec = new BuildFuncExec(function.getName());
+        BuildFuncHandler buildFuncHandler = initBuildFuncHandler(project, function, nodeIcon, location);
+        buildFuncHandlers.add(buildFuncHandler);
+
+        drawBuildFuncHandler(project, buildFuncHandler, nodeIcon, location);
+
+        return buildFuncHandler;
+    }
+
+    private void drawBuildFuncHandler(Project project, BuildFuncHandler buildFuncHandler, Icon[] nodeIcon, String[] location) {
+        addBuildFuncTreeNode(project, buildFuncHandler, nodeIcon, location);
+        updateTerminalPanel(buildFuncHandler.getTerminalExecutionConsole());
+    }
+
+    private void addBuildFuncTreeNode(Project project, BuildFuncHandler buildFuncHandler, Icon[] nodeIcon, String[] location) {
         DefaultMutableTreeNode buildNode = new DefaultMutableTreeNode(
                 new LabelAndIconDescriptor(project,
-                        buildFuncExec,
-                        () -> "Build " + function.getName() + ":",
+                        buildFuncHandler,
+                        () -> "Build " + buildFuncHandler.getFuncName() + ":",
                         () -> location[0],
-                        () -> nodeicon[0],
+                        () -> nodeIcon[0],
                         null));
         treeModel.insertNodeInto(buildNode, (MutableTreeNode) treeModel.getRoot(), 0);
+        tree.invalidate();
+        tree.expandPath(new TreePath(((DefaultMutableTreeNode)treeModel.getRoot()).getPath()));
+    }
 
+    private BuildFuncHandler initBuildFuncHandler(Project project, Function function, Icon[] nodeicon, String[] location) {
+        BuildFuncHandler buildFuncHandler = new BuildFuncHandler(function.getName());
         TerminalExecutionConsole commonTerminalExecutionConsole = new TerminalExecutionConsole(project, null);
         ProcessListener processListener = new ProcessAdapter() {
             @Override
@@ -95,27 +116,42 @@ public class BuildFuncPanel extends ContentImpl {
                     nodeicon[0] = AllIcons.General.BalloonError;
                     location[0] = "failed";
                 }
-                buildFuncExec.setEndTime();
+                buildFuncHandler.setEndTime();
             }
         };
-        funcXTerminal.put(function.getName(), commonTerminalExecutionConsole);
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.add(commonTerminalExecutionConsole.getComponent(), BorderLayout.CENTER);
-        updateTerminalPanel(panel);
+        buildFuncHandler.setProcessListener(processListener);
+        buildFuncHandler.setTerminalExecutionConsole(commonTerminalExecutionConsole);
+        return buildFuncHandler;
+    }
 
+    private void ensureOldHandlerIsDisposed(Function function) {
+        Optional<BuildFuncHandler> buildFuncHandler = buildFuncHandlers.stream()
+                .filter(buildFunc -> buildFunc.getFuncName().equals(function.getName()))
+                .findFirst();
+        if (buildFuncHandler.isPresent()) {
+            buildFuncHandler.get().dispose();
+            removeNode(function.getName());
+            buildFuncHandlers.remove(buildFuncHandler.get());
+        }
+    }
 
-        tree.invalidate();
-        tree.expandPath(new TreePath(((DefaultMutableTreeNode)treeModel.getRoot()).getPath()));
-        buildFuncExec.setProcessListener(processListener);
-        buildFuncExec.setTerminalExecutionConsole(commonTerminalExecutionConsole);
-        return buildFuncExec;
+    private void ensureToolWindowOpened() {
+        if (toolWindow.isVisible()
+                && toolWindow.isActive()
+                && toolWindow.isAvailable()) {
+            return;
+        }
+        toolWindow.setToHideOnEmptyContent(true);
+        toolWindow.setAvailable(true, null);
+        toolWindow.activate(null);
+        toolWindow.show(null);
     }
 
     private void removeNode(String name) {
         int children = treeModel.getChildCount(treeModel.getRoot());
         for (int i = 0; i<children; i++) {
             DefaultMutableTreeNode child = (DefaultMutableTreeNode) treeModel.getChild(treeModel.getRoot(), i);
-            String nodeName = ((BuildFuncExec)((LabelAndIconDescriptor)child.getUserObject()).getElement()).getFuncName();
+            String nodeName = ((BuildFuncHandler)((LabelAndIconDescriptor)child.getUserObject()).getElement()).getFuncName();
             if (nodeName.equals(name)) {
                 treeModel.removeNodeFromParent(child);
                 break;
@@ -149,18 +185,15 @@ public class BuildFuncPanel extends ContentImpl {
         updateTerminalPanel(infoMessage);
     }
 
+    private void updateTerminalPanel(ConsoleView console) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(console.getComponent(), BorderLayout.CENTER);
+        updateTerminalPanel(panel);
+    }
+
     private void updateTerminalPanel(JComponent component) {
         terminalPanel.removeAll();
         terminalPanel.add(component, BorderLayout.CENTER);
-        terminalPanel.revalidate();
-        terminalPanel.repaint();
-    }
-
-    private void updateTerminalPanel(TerminalExecutionConsole console) {
-        terminalPanel.removeAll();
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.add(console.getComponent(), BorderLayout.CENTER);
-        terminalPanel.add(console.getComponent(), BorderLayout.CENTER);
         terminalPanel.revalidate();
         terminalPanel.repaint();
     }
@@ -186,43 +219,43 @@ public class BuildFuncPanel extends ContentImpl {
             Object node = TreeUtil.getUserObject(value);
 
             if (node instanceof LabelAndIconDescriptor) {
-                String funcName = ((BuildFuncExec)((LabelAndIconDescriptor<?>) node).getElement()).getFuncName();
-                if (selected && funcXTerminal.containsKey(funcName)) {
-                    updateTerminalPanel(funcXTerminal.get(funcName));
+                BuildFuncHandler buildFuncHandler = ((BuildFuncHandler)((LabelAndIconDescriptor<?>) node).getElement());
+                if (selected) {
+                    updateTerminalPanel(buildFuncHandler.getTerminalExecutionConsole());
                 }
 
                 ((LabelAndIconDescriptor) node).update();
                 return createLabel(((LabelAndIconDescriptor) node).getPresentation().getPresentableText(),
                         ((LabelAndIconDescriptor) node).getPresentation().getLocationString(),
                         ((LabelAndIconDescriptor) node).getIcon(),
-                        (BuildFuncExec) ((LabelAndIconDescriptor<?>) node).getElement()
+                        (BuildFuncHandler) ((LabelAndIconDescriptor<?>) node).getElement()
                 );
             }
             return null;
         };
     }
 
-    private JComponent createLabel(String name, String location, Icon icon, BuildFuncExec buildFuncExec) {
+    private JComponent createLabel(String name, String location, Icon icon, BuildFuncHandler buildFuncHandler) {
         JPanel buildInfo = new JPanel(new BorderLayout());
         String label = "<html><span style=\"font-weight: bold;\">" + name + "</span> ";
         if (location != null && !location.isEmpty() ) {
             label += location;
         }
-        label += "</html>";
+        label += "</html> ";
         buildInfo.add(new JLabel(label, icon, SwingConstants.LEFT), BorderLayout.CENTER);
 
-        JLabel lblDuration = new JLabel(getDuration(buildFuncExec));
+        JLabel lblDuration = new JLabel(getDuration(buildFuncHandler));
         lblDuration.setForeground(JBColor.GRAY);
         buildInfo.add(lblDuration, BorderLayout.EAST);
         return buildInfo;
     }
 
-    public String getDuration(BuildFuncExec buildFuncExec) {
+    public String getDuration(BuildFuncHandler buildFuncHandler) {
         long duration;
-        if (buildFuncExec.getEndTime() != -1) {
-            duration = buildFuncExec.getEndTime() - buildFuncExec.getStartTime();
+        if (buildFuncHandler.getEndTime() != -1) {
+            duration = buildFuncHandler.getEndTime() - buildFuncHandler.getStartTime();
         } else {
-            duration = System.currentTimeMillis() - buildFuncExec.getStartTime();
+            duration = System.currentTimeMillis() - buildFuncHandler.getStartTime();
         }
 
         String durationText = StringUtil.formatDurationApproximate(duration);

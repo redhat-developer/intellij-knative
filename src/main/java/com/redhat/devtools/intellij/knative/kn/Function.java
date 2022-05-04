@@ -22,6 +22,7 @@ public class Function {
     private String url;
     private boolean isReady;
     private boolean isPushed;
+    private boolean isBuilding;
     private String localPath;
 
     public Function(String name, String namespace, String runtime, String url, String image, boolean isReady, boolean isPushed, String localPath) {
@@ -32,6 +33,7 @@ public class Function {
         this.image = image;
         this.isReady = isReady;
         this.isPushed = isPushed;
+        this.isBuilding = false;
         this.localPath = localPath;
     }
 
@@ -75,5 +77,13 @@ public class Function {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public boolean isBuilding() {
+        return isBuilding;
+    }
+
+    public void setBuilding(boolean building) {
+        isBuilding = building;
     }
 }

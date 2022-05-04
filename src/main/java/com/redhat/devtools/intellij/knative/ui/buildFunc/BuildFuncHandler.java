@@ -13,7 +13,7 @@ package com.redhat.devtools.intellij.knative.ui.buildFunc;
 import com.intellij.execution.process.ProcessListener;
 import com.intellij.terminal.TerminalExecutionConsole;
 
-public class BuildFuncExec {
+public class BuildFuncHandler {
 
     private String funcName;
     private TerminalExecutionConsole terminalExecutionConsole;
@@ -21,7 +21,7 @@ public class BuildFuncExec {
     private long startTime;
     private long endTime;
 
-    public BuildFuncExec(String funcName){
+    public BuildFuncHandler(String funcName){
         this.funcName = funcName;
         this.startTime = System.currentTimeMillis();
         this.endTime = -1;
@@ -57,5 +57,11 @@ public class BuildFuncExec {
 
     public void setEndTime() {
         this.endTime = System.currentTimeMillis();
+    }
+
+    public void dispose() {
+        if (terminalExecutionConsole != null) {
+            terminalExecutionConsole.dispose();
+        }
     }
 }

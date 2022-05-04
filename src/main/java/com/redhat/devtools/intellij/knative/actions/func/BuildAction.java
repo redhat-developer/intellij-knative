@@ -26,8 +26,6 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
-import com.intellij.terminal.TerminalExecutionConsole;
-import com.intellij.ui.content.Content;
 import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
@@ -38,24 +36,23 @@ import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
-import com.redhat.devtools.intellij.knative.ui.buildFunc.BuildFuncExec;
+import com.redhat.devtools.intellij.knative.ui.buildFunc.BuildFuncHandler;
 import com.redhat.devtools.intellij.knative.ui.buildFunc.BuildFuncPanel;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
-
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import javax.swing.tree.TreePath;
-
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.tree.TreePath;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static com.intellij.openapi.ui.Messages.CANCEL_BUTTON;
 import static com.intellij.openapi.ui.Messages.OK_BUTTON;
+import static com.redhat.devtools.intellij.knative.Constants.BUILDFUNC_CONTENT_NAME;
 import static com.redhat.devtools.intellij.knative.Constants.BUILDFUNC_TOOLWINDOW_ID;
 import static com.redhat.devtools.intellij.knative.Constants.NOTIFICATION_ID;
 import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_BUILD_DEPLOY;
@@ -102,20 +99,29 @@ public class BuildAction extends KnAction {
         }
 
         Project project = getEventProject(anActionEvent);
+        BuildFuncHandler buildFuncHandler = createBuildFuncHandler(project, function);
+        ProcessListener processListener = createBuildProcessListener(knCli, buildFuncHandler, function);
+        ExecHelper.submit(() -> doExecuteAction(project, function, registryAndImage.getFirst(),
+                registryAndImage.getSecond(), knCli, buildFuncHandler.getTerminalExecutionConsole(),
+                processListener, telemetry));
+    }
+
+    private BuildFuncHandler createBuildFuncHandler(Project project, Function function) {
         ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(BUILDFUNC_TOOLWINDOW_ID);
-        BuildFuncPanel content = (BuildFuncPanel) toolWindow.getContentManager().findContent("Build Output");
-        BuildFuncExec buildFuncExec = content.createViewBuildFunc(project, function);
-        ProcessListener processListener = new ProcessAdapter() {
+        BuildFuncPanel buildOutputPanel = (BuildFuncPanel) toolWindow.getContentManager().findContent(BUILDFUNC_CONTENT_NAME);
+        return buildOutputPanel.createBuildFuncHandler(project, function);
+    }
+
+    private ProcessListener createBuildProcessListener(Kn knCli, BuildFuncHandler buildFuncHandler, Function function) {
+        return new ProcessAdapter() {
             @Override
             public void processTerminated(@NotNull ProcessEvent event) {
+                function.setBuilding(false);
                 Pair<String, String> dataToDeploy = getDataToDeploy(Paths.get(function.getLocalPath()), knCli);
                 function.setImage(dataToDeploy.getSecond());
-                buildFuncExec.getProcessListener().processTerminated(event);
+                buildFuncHandler.getProcessListener().processTerminated(event);
             }
         };
-        ExecHelper.submit(() -> doExecuteAction(project, function, registryAndImage.getFirst(),
-                registryAndImage.getSecond(), knCli, buildFuncExec.getTerminalExecutionConsole(),
-                processListener, telemetry));
     }
 
     private Pair<String, String> confirmAndGetRegistryImage(Function function, Kn knCli, TelemetryMessageBuilder.ActionMessage telemetry) {
@@ -182,6 +188,7 @@ public class BuildAction extends KnAction {
         String namespace = knCli.getNamespace();
         String localPathFunc = function.getLocalPath();
         try {
+            function.setBuilding(true);
             doExecute(terminalExecutionConsole, processListener, knCli, namespace, localPathFunc, registry, image);
             telemetry
                     .result(anonymizeResource(name, namespace, getSuccessMessage(namespace, name)))
@@ -256,6 +263,14 @@ public class BuildAction extends KnAction {
 
     protected String getSuccessMessage(String namespace, String name) {
         return "Function " + name + " has been successfully built";
+    }
+
+    @Override
+    public boolean isEnabled(Object selected) {
+        if (selected instanceof KnFunctionNode) {
+            return !((KnFunctionNode) selected).getFunction().isBuilding();
+        }
+        return false;
     }
 
     @Override
