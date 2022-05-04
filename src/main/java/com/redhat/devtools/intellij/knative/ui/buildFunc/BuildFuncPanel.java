@@ -45,9 +45,11 @@ import javax.swing.tree.TreePath;
 import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.Comparator;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.intellij.ide.plugins.PluginManagerConfigurable.SEARCH_FIELD_BORDER_COLOR;
 import static com.intellij.ui.AnimatedIcon.ANIMATION_IN_RENDERER_ALLOWED;
@@ -57,6 +59,7 @@ public class BuildFuncPanel extends ContentImpl {
 
     private final ToolWindow toolWindow;
     private final Map<String, List<BuildFuncHandler>> funcPerHandlers;
+
     private JPanel terminalPanel;
     private DefaultTreeModel buildTreeModel;
     private Tree buildTree;
