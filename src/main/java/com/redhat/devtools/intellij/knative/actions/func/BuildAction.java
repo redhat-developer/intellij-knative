@@ -53,6 +53,7 @@ import java.nio.file.Paths;
 import static com.intellij.openapi.ui.Messages.CANCEL_BUTTON;
 import static com.intellij.openapi.ui.Messages.OK_BUTTON;
 import static com.redhat.devtools.intellij.knative.Constants.BUILDFUNC_CONTENT_NAME;
+
 import static com.redhat.devtools.intellij.knative.Constants.BUILDFUNC_TOOLWINDOW_ID;
 import static com.redhat.devtools.intellij.knative.Constants.NOTIFICATION_ID;
 import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_BUILD_DEPLOY;

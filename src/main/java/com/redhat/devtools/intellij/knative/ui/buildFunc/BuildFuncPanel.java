@@ -228,6 +228,7 @@ public class BuildFuncPanel extends ContentImpl {
 
     private OnePixelSplitter createSplitter() {
         return new OnePixelSplitter(false, (float) 0.40) {
+
             protected Divider createDivider() {
                 Divider divider = super.createDivider();
                 divider.setBackground(SEARCH_FIELD_BORDER_COLOR);

@@ -15,8 +15,6 @@ import com.intellij.execution.process.ProcessListener;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
-import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
-import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
@@ -25,10 +23,6 @@ import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuild
 
 import javax.swing.tree.TreePath;
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import static com.intellij.openapi.ui.Messages.CANCEL_BUTTON;
 import static com.intellij.openapi.ui.Messages.OK_BUTTON;
