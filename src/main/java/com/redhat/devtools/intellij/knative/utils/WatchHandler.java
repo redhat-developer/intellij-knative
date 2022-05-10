@@ -18,6 +18,7 @@ import io.fabric8.knative.serving.v1.Service;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,11 +32,13 @@ import static com.redhat.devtools.intellij.knative.Constants.KIND_FUNCTION;
 
 public class WatchHandler {
     private Map<String, Watch> watches;
+    private Map<String, Integer> watchRetry;
     private Kn kn;
     private static WatchHandler instance;
 
     private WatchHandler(Kn kn) {
         watches = new HashMap<>();
+        watchRetry = new HashMap<>();
         this.kn = kn;
     }
 
@@ -46,16 +49,25 @@ public class WatchHandler {
         return instance;
     }
 
-    public void watchResource(String id, String kindToWatch, Runnable doExecute) {
-        if (!watches.containsKey(id)) {
-            Watch watch = watchResource(kindToWatch, doExecute);
-            if (watch != null) {
-                watches.put(id, watch);
+    public void watchResource(String id, String kindToWatch, Runnable doExecute) throws IOException {
+        if (!watches.containsKey(id)
+            && (!watchRetry.containsKey(id) || watchRetry.get(id) < 3)) {
+            try {
+                Watch watch = watchResource(kindToWatch, doExecute);
+                if (watch != null) {
+                    watches.put(id, watch);
+                }
+            } catch (IOException e) {
+                int retry = watchRetry.getOrDefault(id, 0);
+                watchRetry.put(id, ++retry);
+                if (retry > 2) {
+                    throw new IOException("Unable to watch " + kindToWatch + " resources on cluster");
+                }
             }
         }
     }
 
-    private Watch watchResource(String kindToWatch, Runnable doExecute) {
+    private Watch watchResource(String kindToWatch, Runnable doExecute) throws IOException {
         if (kindToWatch.equalsIgnoreCase(KIND_FUNCTION)) {
             return new FunctionWatcher(kn).doWatch(doExecute);
         }
@@ -63,15 +75,21 @@ public class WatchHandler {
     }
 
     public void watchResource(String id, String kindToWatch, BiConsumer<Watcher.Action, Service> doExecute) {
-        if (!watches.containsKey(id)) {
-            Watch watch = watchResource(kindToWatch, doExecute);
-            if (watch != null) {
-                watches.put(id, watch);
+        if (!watches.containsKey(id)
+                && (!watchRetry.containsKey(id) || watchRetry.get(id) < 3)) {
+            try {
+                Watch watch = watchResource(kindToWatch, doExecute);
+                if (watch != null) {
+                    watches.put(id, watch);
+                }
+            } catch (IOException e) {
+                int retry = watchRetry.getOrDefault(id, 0);
+                watchRetry.put(id, ++retry);
             }
         }
     }
 
-    private Watch watchResource(String kindToWatch, BiConsumer<Watcher.Action, Service> doExecute) {
+    private Watch watchResource(String kindToWatch, BiConsumer<Watcher.Action, Service> doExecute) throws IOException {
         if (kindToWatch.equalsIgnoreCase(KIND_FUNCTION)) {
             return new FunctionWatcher(kn).doWatch(doExecute);
         }
@@ -88,5 +106,6 @@ public class WatchHandler {
     public void removeAll() {
         this.watches.values().forEach(Watch::close);
         this.watches.clear();
+        this.watchRetry.clear();
     }
 }

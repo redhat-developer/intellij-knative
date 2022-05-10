@@ -12,6 +12,9 @@ package com.redhat.devtools.intellij.knative.tree;
 
 import com.google.common.base.Strings;
 import com.intellij.ide.util.treeView.NodeDescriptor;
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
@@ -22,6 +25,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileEvent;
 import com.intellij.openapi.vfs.VirtualFileListener;
 import com.intellij.openapi.vfs.VirtualFileSystem;
+import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.kn.Kn;
@@ -41,6 +45,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.redhat.devtools.intellij.knative.Constants.KIND_FUNCTION;
+import static com.redhat.devtools.intellij.knative.Constants.NOTIFICATION_ID;
 
 public class KnFunctionsTreeStructure extends KnTreeStructure {
 
@@ -59,12 +64,28 @@ public class KnFunctionsTreeStructure extends KnTreeStructure {
             if (element instanceof KnRootNode) {
                 Pair<Object[], List<String>> children = getFunctionNodes(root);
                 root.showWarnings(children.getSecond());
-                clusterModelSynchronizer.updateElementOnChange(root, KIND_FUNCTION);
+                try {
+                    clusterModelSynchronizer.updateElementOnChange(root, KIND_FUNCTION);
+                } catch (IOException e) {
+                    notifyUnstableSystemWarning(e.getLocalizedMessage());
+                    logger.warn(e.getLocalizedMessage(), e);
+                }
                 return children.getFirst();
             }
         }
 
         return new Object[0];
+    }
+
+    private void notifyUnstableSystemWarning(String error) {
+        ExecHelper.submit(() -> {
+            Notification notification = new Notification(NOTIFICATION_ID, "Unstable system detected",
+                    "The IntelliJ plugin for Knative & Serverless Functions was unable to perform some operations on cluster.\n " +
+                            "This could generate some unwanted behavior of the plugin. " +
+                            "Please check the connection with the cluster to improve the experience with it. \n" +
+                            "Error: " + error, NotificationType.WARNING);
+            Notifications.Bus.notify(notification);
+        });
     }
 
     private Pair<Object[], List<String>> getFunctionNodes(KnRootNode parent) {

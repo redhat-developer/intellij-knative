@@ -13,6 +13,8 @@ package com.redhat.devtools.intellij.knative.watch;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import io.fabric8.kubernetes.client.Watch;
 
+import java.io.IOException;
+
 public abstract class AbstractWatcher {
     protected Kn kn;
 
@@ -20,5 +22,5 @@ public abstract class AbstractWatcher {
         this.kn = kn;
     }
 
-    public abstract Watch doWatch(Runnable doExecute);
+    public abstract Watch doWatch(Runnable doExecute) throws IOException;
 }
