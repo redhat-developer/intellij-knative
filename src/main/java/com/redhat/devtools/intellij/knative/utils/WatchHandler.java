@@ -50,8 +50,7 @@ public class WatchHandler {
     }
 
     public void watchResource(String id, String kindToWatch, Runnable doExecute) throws IOException {
-        if (!watches.containsKey(id)
-            && (!watchRetry.containsKey(id) || watchRetry.get(id) < 3)) {
+        if (isRetryable(id)) {
             try {
                 Watch watch = watchResource(kindToWatch, doExecute);
                 if (watch != null) {
