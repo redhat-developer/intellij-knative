@@ -75,8 +75,7 @@ public class WatchHandler {
     }
 
     public void watchResource(String id, String kindToWatch, BiConsumer<Watcher.Action, Service> doExecute) {
-        if (!watches.containsKey(id)
-                && (!watchRetry.containsKey(id) || watchRetry.get(id) < 3)) {
+        if (isRetryable(id)) {
             try {
                 Watch watch = watchResource(kindToWatch, doExecute);
                 if (watch != null) {
@@ -84,9 +83,15 @@ public class WatchHandler {
                 }
             } catch (IOException e) {
                 int retry = watchRetry.getOrDefault(id, 0);
+
                 watchRetry.put(id, ++retry);
             }
         }
+    }
+
+    private boolean isRetryable(String id) {
+        return !watches.containsKey(id)
+                && (!watchRetry.containsKey(id) || watchRetry.get(id) < 3);
     }
 
     private Watch watchResource(String kindToWatch, BiConsumer<Watcher.Action, Service> doExecute) throws IOException {

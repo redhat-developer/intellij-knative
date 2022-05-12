@@ -153,7 +153,7 @@ public class KnFunctionsTreeStructure extends KnTreeStructure {
 
     private void setListenerOnFile(String path) {
         VirtualFile vf = LocalFileSystem.getInstance().findFileByPath(path);
-        VirtualFileListener virtualFileListener = getVirtualFileListener();
+        VirtualFileListener virtualFileListener = getVirtualFileListener(path);
         if (vf != null) {
             VirtualFileSystem virtualFileSystem = vf.getFileSystem();
             virtualFileSystem.addVirtualFileListener(virtualFileListener);
@@ -161,17 +161,21 @@ public class KnFunctionsTreeStructure extends KnTreeStructure {
         }
     }
 
-    private VirtualFileListener getVirtualFileListener() {
+    private VirtualFileListener getVirtualFileListener(String path) {
         Scheduler scheduler = new Scheduler(1000);
         return new VirtualFileListener() {
             @Override
             public void contentsChanged(@NotNull VirtualFileEvent event) {
-                scheduler.schedule(() -> TreeHelper.refreshFuncTree(project));
+                if (event.getFile().getPath().equals(path)) {
+                    scheduler.schedule(() -> TreeHelper.refreshFuncTree(project));
+                }
             }
 
             @Override
             public void fileDeleted(@NotNull VirtualFileEvent event) {
-                scheduler.schedule(() -> TreeHelper.refreshFuncTree(project));
+                if (event.getFile().getPath().equals(path)) {
+                    scheduler.schedule(() -> TreeHelper.refreshFuncTree(project));
+                }
             }
         };
     }
