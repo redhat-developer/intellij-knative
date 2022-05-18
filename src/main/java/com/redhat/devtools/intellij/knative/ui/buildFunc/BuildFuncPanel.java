@@ -43,7 +43,6 @@ import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.BorderLayout;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -56,8 +55,8 @@ import static com.redhat.devtools.intellij.knative.Constants.BUILDFUNC_CONTENT_N
 
 public class BuildFuncPanel extends ContentImpl {
 
-    private ToolWindow toolWindow;
-    private Map<String, List<BuildFuncHandler>> funcPerHandlers;
+    private final ToolWindow toolWindow;
+    private final Map<String, List<BuildFuncHandler>> funcPerHandlers;
     private JPanel terminalPanel;
     private DefaultTreeModel buildTreeModel;
     private Tree buildTree;
@@ -96,6 +95,9 @@ public class BuildFuncPanel extends ContentImpl {
         BuildFuncHandler buildFuncHandler = new BuildFuncHandler(project, function);
         List<BuildFuncHandler> buildFuncHandlers = funcPerHandlers.getOrDefault(function.getName(), new ArrayList<>());
         buildFuncHandlers.add(0, buildFuncHandler);
+        if (buildFuncHandlers.size() > 10) {
+            buildFuncHandlers.remove(10);
+        }
         funcPerHandlers.put(function.getName(), buildFuncHandlers);
 
         drawBuildFuncHandler(buildFuncHandlers);
