@@ -43,13 +43,12 @@ import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.BorderLayout;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Comparator;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.intellij.ide.plugins.PluginManagerConfigurable.SEARCH_FIELD_BORDER_COLOR;
 import static com.intellij.ui.AnimatedIcon.ANIMATION_IN_RENDERER_ALLOWED;
@@ -231,7 +230,6 @@ public class BuildFuncPanel extends ContentImpl {
 
     private OnePixelSplitter createSplitter() {
         return new OnePixelSplitter(false, (float) 0.40) {
-
             protected Divider createDivider() {
                 Divider divider = super.createDivider();
                 divider.setBackground(SEARCH_FIELD_BORDER_COLOR);
