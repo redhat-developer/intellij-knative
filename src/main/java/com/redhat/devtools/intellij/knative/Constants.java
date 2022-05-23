@@ -27,6 +27,7 @@ public class Constants {
     public static final String BUILDFUNC_TOOLWINDOW_ID = "BuildFunc";
 
     public static final String BUILDFUNC_CONTENT_NAME = "Build Output";
+    public static final String RUNFUNC_CONTENT_NAME = "Run Output";
 
     public static final String[] YAML_NAME_PATH = new String[] { "metadata", "name" };
     public static final String[] YAML_FIRST_IMAGE_PATH = new String[] { "spec", "template", "spec", "containers[0]", "image" };

@@ -379,7 +379,7 @@ public class KnCli implements Kn {
     }
 
     @Override
-    public void runFunc(String path, CommonTerminalExecutionConsole terminalExecutionConsole) throws IOException {
+    public void runFunc(String path, ConsoleView terminalExecutionConsole) throws IOException {
         ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, funcCommand, "run", "-p", path);
     }
 

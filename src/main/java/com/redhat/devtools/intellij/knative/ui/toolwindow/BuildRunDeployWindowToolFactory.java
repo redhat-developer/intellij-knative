@@ -8,15 +8,17 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.buildFunc;
+package com.redhat.devtools.intellij.knative.ui.toolwindow;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
+import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.buildFuncWindowTab.BuildFuncPanel;
+import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.runFuncWindowTab.RunFuncPanel;
 import org.jetbrains.annotations.NotNull;
 
-public class BuildFuncWindowToolFactory implements ToolWindowFactory {
+public class BuildRunDeployWindowToolFactory implements ToolWindowFactory {
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
@@ -28,6 +30,8 @@ public class BuildFuncWindowToolFactory implements ToolWindowFactory {
     public void init(ToolWindow window) {
         BuildFuncPanel buildFuncPanel = new BuildFuncPanel(window);
         window.getContentManager().addContent(buildFuncPanel);
+        RunFuncPanel runFuncPanel = new RunFuncPanel(window);
+        window.getContentManager().addContent(runFuncPanel);
     }
 
     @Override

@@ -24,8 +24,8 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
-import com.redhat.devtools.intellij.knative.ui.buildFunc.BuildFuncHandler;
-import com.redhat.devtools.intellij.knative.ui.buildFunc.BuildFuncPanel;
+import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.ActionFuncHandler;
+import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.buildFuncWindowTab.BuildFuncPanel;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import org.junit.Before;
 import org.mockito.MockedStatic;
@@ -86,8 +86,8 @@ public abstract class ActionTest extends FixtureBaseTest {
         when(toolWindowManager.getToolWindow(anyString())).thenReturn(toolWindow);
         when(toolWindow.getContentManager()).thenReturn(contentManager);
         when(contentManager.findContent(anyString())).thenReturn(buildFuncPanel);
-        BuildFuncHandler buildFuncHandler = mock(BuildFuncHandler.class);
-        when(buildFuncPanel.createBuildFuncHandler(any(), any())).thenReturn(buildFuncHandler);
+        ActionFuncHandler buildFuncHandler = mock(ActionFuncHandler.class);
+        //when(buildFuncPanel.createActionFuncHandler(any(), any())).thenReturn(buildFuncHandler);
     }
 
     protected void mockTelemetry(MockedStatic<TelemetryService> telemetryServiceMockedStatic) {

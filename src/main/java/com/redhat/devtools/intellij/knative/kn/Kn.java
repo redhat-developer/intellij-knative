@@ -240,7 +240,7 @@ public interface Kn {
      * @param terminalExecutionConsole terminal tab to be used to run the command. If null a new tab will be created
      * @throws IOException if communication errored
      */
-    void runFunc(String path, CommonTerminalExecutionConsole terminalExecutionConsole) throws IOException;
+    void runFunc(String path, ConsoleView terminalExecutionConsole) throws IOException;
 
     /**
      * Add environment variable to the function configuration
