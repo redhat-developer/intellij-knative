@@ -25,6 +25,9 @@ import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.actions.func.BuildAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
+import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.FuncActionTask;
+import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.buildFuncWindowTab.BuildFuncActionPipeline;
+import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.runFuncWindowTab.RunFuncActionPipeline;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,6 +46,7 @@ import java.nio.file.Paths;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
@@ -96,24 +100,19 @@ public class BuildActionTest extends ActionTest {
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
             try (MockedStatic<Paths> pathsMockedStatic = mockStatic(Paths.class)) {
                 try (MockedStatic<YAMLHelper> yamlHelperMockedStatic = mockStatic(YAMLHelper.class)) {
-                    try (MockedStatic<ToolWindowManager> toolWindowManagerMockedStatic = mockStatic(ToolWindowManager.class)) {
-                        try (MockedStatic<TelemetryService> telemetryServiceMockedStatic = mockStatic((TelemetryService.class))) {
-                            try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-                                execHelperMockedStatic.when(() -> ExecHelper.submit(any(Runnable.class))).then((Answer) invocation -> {
-                                    ((Runnable) invocation.getArguments()[0]).run();
-                                    return 0;
-                                });
+                    try(MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
+                        try(MockedConstruction<BuildFuncActionPipeline> buildFuncActionPipelineMockedConstruction = mockConstruction(BuildFuncActionPipeline.class,
+                                (mock, context) -> {
+                                    doNothing().when(mock).start();
+                                })) {
                                 treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
                                 pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
                                 yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
                                 yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("image: test");
                                 yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("test");
-                                mockToolWindow(toolWindowManagerMockedStatic);
-                                mockTelemetry(telemetryServiceMockedStatic);
                                 action.actionPerformed(anActionEvent);
                                 Thread.sleep(1000);
-                                verify(kn, times(1)).buildFunc(eq("path"), eq(""), eq("test"), eq(null), any(ProcessListener.class));
-                            }
+                                verify(buildFuncActionPipelineMockedConstruction.constructed().get(0), times(1)).start();
                         }
                     }
                 }
@@ -129,25 +128,22 @@ public class BuildActionTest extends ActionTest {
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
             try (MockedStatic<Paths> pathsMockedStatic = mockStatic(Paths.class)) {
                 try (MockedStatic<YAMLHelper> yamlHelperMockedStatic = mockStatic(YAMLHelper.class)) {
-                    try(MockedStatic<ToolWindowManager> toolWindowManagerMockedStatic = mockStatic(ToolWindowManager.class)) {
-                        try (MockedStatic<TelemetryService> telemetryServiceMockedStatic = mockStatic((TelemetryService.class))) {
-                            try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-                                execHelperMockedStatic.when(() -> ExecHelper.submit(any(Runnable.class))).then((Answer) invocation -> {
-                                    ((Runnable) invocation.getArguments()[0]).run();
-                                    return 0;
-                                });
+                    try(MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
+                        try(MockedConstruction<BuildFuncActionPipeline> buildFuncActionPipelineMockedConstruction = mockConstruction(BuildFuncActionPipeline.class,
+                                (mock, context) -> {
+                                    doNothing().when(mock).start();
+                                })) {
                                 treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
                                 pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
                                 when(kn.getFuncFileURL(any())).thenReturn(mock(URL.class));
                                 yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
                                 yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("registry: test");
                                 yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("test").thenReturn("");
-                                mockToolWindow(toolWindowManagerMockedStatic);
-                                mockTelemetry(telemetryServiceMockedStatic);
+
                                 action.actionPerformed(anActionEvent);
                                 Thread.sleep(1000);
-                                verify(kn, times(1)).buildFunc(eq("path"), eq("test"), eq(""), eq(null), any(ProcessListener.class));
-                            }
+
+                                verify(buildFuncActionPipelineMockedConstruction.constructed().get(0), times(1)).start();
                         }
                     }
                 }
@@ -168,28 +164,23 @@ public class BuildActionTest extends ActionTest {
                                 when(mock.isOK()).thenReturn(true);
                                 when(mock.getInputString()).thenReturn("image");
                             })) {
-                        try(MockedStatic<ToolWindowManager> toolWindowManagerMockedStatic = mockStatic(ToolWindowManager.class)) {
-                            try(MockedStatic<TelemetryService> telemetryServiceMockedStatic = mockStatic((TelemetryService.class))) {
-                                try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-                                    execHelperMockedStatic.when(() -> ExecHelper.submit(any(Runnable.class))).then((Answer) invocation -> {
-                                        ((Runnable) invocation.getArguments()[0]).run();
-                                        return 0;
-                                    });
+                        try(MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
+                            try (MockedConstruction<BuildFuncActionPipeline> buildFuncActionPipelineMockedConstruction = mockConstruction(BuildFuncActionPipeline.class,
+                                    (mock, context) -> {
+                                        doNothing().when(mock).start();
+                                    })) {
 
-                                    treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
-                                    pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
-                                    when(kn.getFuncFileURL(any())).thenReturn(mock(URL.class));
-                                    yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
-                                    yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("");
-                                    yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("");
+                                treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+                                pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
+                                when(kn.getFuncFileURL(any())).thenReturn(mock(URL.class));
+                                yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
+                                yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("");
+                                yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("");
 
-                                    mockToolWindow(toolWindowManagerMockedStatic);
-                                    mockTelemetry(telemetryServiceMockedStatic);
 
-                                    action.actionPerformed(anActionEvent);
-                                    Thread.sleep(1000);
-                                    verify(kn, times(1)).buildFunc(eq("path"), eq(""), eq("image"), eq(null), any(ProcessListener.class));
-                                }
+                                action.actionPerformed(anActionEvent);
+                                Thread.sleep(1000);
+                                verify(buildFuncActionPipelineMockedConstruction.constructed().get(0), times(1)).start();
                             }
                         }
                     }
@@ -217,14 +208,21 @@ public class BuildActionTest extends ActionTest {
                                         when(mock.isOK()).thenReturn(true);
                                         when(mock.getInputString()).thenReturn("image");
                                     })) {
+                                try(MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
+                                    try (MockedConstruction<BuildFuncActionPipeline> buildFuncActionPipelineMockedConstruction = mockConstruction(BuildFuncActionPipeline.class,
+                                            (mock, context) -> {
+                                                doNothing().when(mock).start();
+                                            })) {
 
-                                treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
-                                pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
-                                mockToolWindow(toolWindowManagerMockedStatic);
-                                mockTelemetry(telemetryServiceMockedStatic);
-                                action.actionPerformed(anActionEvent);
-                                Thread.sleep(1000);
-                                verify(kn, times(1)).buildFunc(eq("path"), eq(null), eq("image"), eq(null), any(ProcessListener.class));
+                                        treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+                                        pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
+                                        mockToolWindow(toolWindowManagerMockedStatic);
+                                        mockTelemetry(telemetryServiceMockedStatic);
+                                        action.actionPerformed(anActionEvent);
+                                        Thread.sleep(1000);
+                                        verify(buildFuncActionPipelineMockedConstruction.constructed().get(0), times(1)).start();
+                                    }
+                                }
                             }
                         }
                     }
@@ -242,28 +240,23 @@ public class BuildActionTest extends ActionTest {
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
             try (MockedStatic<Paths> pathsMockedStatic = mockStatic(Paths.class)) {
                 try (MockedStatic<YAMLHelper> yamlHelperMockedStatic = mockStatic(YAMLHelper.class)) {
-                    try(MockedStatic<ToolWindowManager> toolWindowManagerMockedStatic = mockStatic(ToolWindowManager.class)) {
-                        try (MockedStatic<TelemetryService> telemetryServiceMockedStatic = mockStatic((TelemetryService.class))) {
-                            try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-                                execHelperMockedStatic.when(() -> ExecHelper.submit(any(Runnable.class))).then((Answer) invocation -> {
-                                    ((Runnable) invocation.getArguments()[0]).run();
-                                    return 0;
-                                });
-                                try (MockedConstruction<Messages.InputDialog> inputDialogMockedConstruction = mockConstruction(Messages.InputDialog.class,
-                                        (mock, context) -> {
-                                            when(mock.isOK()).thenReturn(true);
-                                            when(mock.getInputString()).thenReturn("image");
-                                        })) {
-
+                    try (MockedConstruction<Messages.InputDialog> inputDialogMockedConstruction = mockConstruction(Messages.InputDialog.class,
+                        (mock, context) -> {
+                            when(mock.isOK()).thenReturn(true);
+                            when(mock.getInputString()).thenReturn("image");
+                        })) {
+                        try(MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
+                            try(MockedConstruction<BuildFuncActionPipeline> buildFuncActionPipelineMockedConstruction = mockConstruction(BuildFuncActionPipeline.class,
+                                    (mock, context) -> {
+                                        doNothing().when(mock).start();
+                                    })) {
                                     treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
                                     pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
                                     yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenThrow(new IOException("error"));
-                                    mockToolWindow(toolWindowManagerMockedStatic);
-                                    mockTelemetry(telemetryServiceMockedStatic);
                                     action.actionPerformed(anActionEvent);
                                     Thread.sleep(1000);
-                                    verify(kn, times(0)).buildFunc(eq("path"), eq(""), eq("image"), eq(null), eq(null));
-                                }
+                                    verify(buildFuncActionPipelineMockedConstruction.constructed().get(0), times(1)).start();
+
                             }
                         }
                     }

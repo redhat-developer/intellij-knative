@@ -25,6 +25,8 @@ public class FuncActionsPipelineBuilder {
     private final List<FuncActionTask> tasks = new ArrayList<>();
     private FuncActionPipeline pipeline;
 
+    public FuncActionsPipelineBuilder(){}
+
     public FuncActionsPipelineBuilder createBuildPipeline(Project project, Function function) {
         pipeline = new BuildFuncActionPipeline(project, function);
         return this;

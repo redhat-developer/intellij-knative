@@ -14,25 +14,35 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.GroupedElementsRenderer;
 import com.intellij.ui.treeStructure.Tree;
+import com.intellij.util.Consumer;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.actions.func.RunAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionsTreeStructure;
+import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.FuncActionPipeline;
+import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.FuncActionTask;
+import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.FuncActionsPipelineBuilder;
+import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.runFuncWindowTab.RunFuncActionPipeline;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 
 import java.io.IOException;
 import javax.swing.tree.TreePath;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -68,10 +78,18 @@ public class RunActionTest extends ActionTest {
         AnActionEvent anActionEvent = createRunActionEvent();
         when(function.getLocalPath()).thenReturn("path");
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
-            treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
-            action.actionPerformed(anActionEvent);
-            Thread.sleep(1000);
-            verify(kn, times(1)).runFunc(anyString(), any(), any());
+            try(MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
+                try(MockedConstruction<RunFuncActionPipeline> runFuncActionPipelineMockedConstruction = mockConstruction(RunFuncActionPipeline.class,
+                        (mock, context) -> {
+                            doNothing().when(mock).start();
+                })) {
+                    treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+                    action.actionPerformed(anActionEvent);
+                    Thread.sleep(1000);
+
+                    verify(runFuncActionPipelineMockedConstruction.constructed().get(0), times(1)).start();
+               }
+            }
         }
     }
 
