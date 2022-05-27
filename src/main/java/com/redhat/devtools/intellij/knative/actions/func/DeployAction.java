@@ -15,9 +15,13 @@ import com.intellij.execution.process.ProcessListener;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.Pair;
+import com.redhat.devtools.intellij.common.utils.ExecHelper;
+import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
+import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import com.redhat.devtools.intellij.knative.utils.FuncUtils;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 
@@ -37,7 +41,20 @@ public class DeployAction extends BuildAction {
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Kn knCli) {
-        actionPerformed(anActionEvent, selected, knCli, false);
+        ParentableNode node = getElement(selected);
+        Function function = ((KnFunctionNode) node).getFunction();
+        TelemetryMessageBuilder.ActionMessage telemetry = createTelemetry();
+
+        Pair<String, String> registryAndImage = confirmAndGetRegistryImage(function, knCli, telemetry);
+        if (registryAndImage == null) {
+            return;
+        }
+
+        ExecHelper.submit(() -> {
+            doExecuteAction(getEventProject(anActionEvent), function, registryAndImage.getFirst(),
+                    registryAndImage.getSecond(), knCli, null,
+                    null, telemetry);
+        });
     }
 
     @Override

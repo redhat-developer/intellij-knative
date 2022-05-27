@@ -10,6 +10,31 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.ui.brdWindowTabs;
 
-public interface ActionFuncHandlerListener {
-    void fireModified(FuncActionPipeline element);
+import com.intellij.openapi.project.Project;
+import com.redhat.devtools.intellij.knative.kn.Function;
+
+import javax.swing.Icon;
+
+public interface IFuncAction {
+    long getStartTime();
+
+    long getEndTime();
+
+    Project getProject();
+
+    String getFuncName();
+
+    Icon getStateIcon();
+
+    String getState();
+
+    boolean isFinished();
+
+    boolean isSuccessfullyCompleted();
+
+    Function getFunction();
+
+    String getStartingDate();
+
+
 }

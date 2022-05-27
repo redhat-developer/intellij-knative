@@ -10,12 +10,9 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.ui.brdWindowTabs.buildFuncWindowTab;
 
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
-import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
-import com.redhat.devtools.intellij.knative.kn.Function;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.ActionFuncHandler;
 import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.BRDFuncPanel;
+import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.IFuncAction;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.List;
@@ -28,36 +25,50 @@ public class BuildFuncPanel extends BRDFuncPanel {
         super(toolWindow, BUILDFUNC_CONTENT_NAME);
     }
 
-    @Override
-    public ActionFuncHandler createActionFuncHandler(Project project, Function function, List<String> steps) {
-        return super.createActionFuncHandler("Build", project, function, steps);
-    }
-
-    protected DefaultMutableTreeNode createActionFuncTreeNode(List<ActionFuncHandler> actionFuncHandlers) {
-        ActionFuncHandler runningBuild = actionFuncHandlers.get(0);
-        DefaultMutableTreeNode buildNode = new DefaultMutableTreeNode(
-                new LabelAndIconDescriptor(runningBuild.getProject(),
-                        runningBuild,
-                        () -> showHistory ? runningBuild.getFuncName() + " [latest-build]:" : "Build " + runningBuild.getFuncName() + " [latest]:",
-                        () -> createReadableBuildLocation(runningBuild),
-                        runningBuild::getStateIcon,
-                        null));
+    protected DefaultMutableTreeNode createFuncActionTreeNode(List<IFuncAction> actionFuncHandlers) {
+        IFuncAction buildAction = actionFuncHandlers.get(0);
+        DefaultMutableTreeNode buildNode = createTreeNode(
+                buildAction,
+                () -> showHistory ? buildAction.getFuncName() + " [latest-build]:" : "Build " + buildAction.getFuncName() + " [latest]:",
+                () -> createReadableBuildLocation(buildAction)
+        );
         if(showHistory) {
             addChildrenToBuildFuncTreeNode(buildNode, actionFuncHandlers);
         }
         return buildNode;
     }
 
-    private void addChildrenToBuildFuncTreeNode(DefaultMutableTreeNode parent, List<ActionFuncHandler> actionFuncHandlers) {
-        for (ActionFuncHandler buildFuncHandler: actionFuncHandlers) {
-            DefaultMutableTreeNode buildNode = new DefaultMutableTreeNode(
-                    new LabelAndIconDescriptor(buildFuncHandler.getProject(),
-                            buildFuncHandler,
-                            () -> "Build " + buildFuncHandler.getFuncName(),
-                            () -> createReadableHistoryLocation(buildFuncHandler),
-                            buildFuncHandler::getStateIcon,
-                            null));
+    private String createReadableBuildLocation(IFuncAction funcAction) {
+        if (showHistory) {
+            return getNodeLocation(funcAction);
+        }
+        if (funcAction instanceof BuildFuncActionPipeline
+                && funcAction.isFinished()) {
+            return getBuildLocation(funcAction);
+        }
+        return funcAction.getState();
+    }
+
+    private void addChildrenToBuildFuncTreeNode(DefaultMutableTreeNode parent, List<IFuncAction> actionFuncHandlers) {
+        for (IFuncAction buildFuncHandler: actionFuncHandlers) {
+            DefaultMutableTreeNode buildNode = createTreeNode(
+                    buildFuncHandler,
+                    () -> ":build",
+                    () -> createReadableHistoryLocation(buildFuncHandler)
+            );
             parent.add(buildNode);
         }
     }
+
+    private String createReadableHistoryLocation(IFuncAction funcAction) {
+        if (funcAction.isFinished()) {
+            return (!funcAction.isSuccessfullyCompleted() ?
+                    funcAction.getState() :
+                    funcAction.getFunction().getImage()) +
+                    " <span style=\"color: gray;\">At " + funcAction.getStartingDate() + "</span>";
+        }
+        return funcAction.getState();
+    }
+
+
 }

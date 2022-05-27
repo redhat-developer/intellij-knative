@@ -524,7 +524,7 @@ public class KnCliTest extends BaseTest {
     public void RunFunc_PathIsInserted_RunIsCalled() throws IOException {
         CommonTerminalExecutionConsole commonTerminalExecutionConsole = mock(CommonTerminalExecutionConsole.class);
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            kn.runFunc("path", commonTerminalExecutionConsole);
+            kn.runFunc("path", commonTerminalExecutionConsole, null);
             execHelperMockedStatic.verify(() ->
                     ExecHelper.executeWithTerminal(eq(null), anyString(), anyMap(),
                             any(CommonTerminalExecutionConsole.class), anyString(), eq("run"), eq("-p"), eq("path")));
@@ -535,7 +535,7 @@ public class KnCliTest extends BaseTest {
     public void RunFunc_ClientFails_Throws() {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             execHelperMockedStatic.when(() -> ExecHelper.executeWithTerminal(any(), anyString())).thenThrow(new IOException("error"));
-            kn.runFunc("", null);
+            kn.runFunc("", null, null);
         } catch (IOException e) {
             assertEquals("error", e.getLocalizedMessage());
         }

@@ -14,8 +14,11 @@ import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessListener;
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.project.Project;
 import com.intellij.terminal.TerminalExecutionConsole;
 import com.intellij.ui.AnimatedIcon;
+import com.intellij.util.Consumer;
+import com.redhat.devtools.intellij.knative.kn.Function;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;
@@ -23,8 +26,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class ActionFuncStepHandler {
-    private final ActionFuncHandler actionFuncHandler;
+public class FuncActionTask implements IFuncAction {
+    protected final FuncActionPipeline actionFuncHandler;
     private final String actionName;
     private TerminalExecutionConsole terminalExecutionConsole;
     private ProcessListener processListener;
@@ -33,24 +36,34 @@ public class ActionFuncStepHandler {
     private Icon[] stateIcon;
     private String[] state;
     private final int stepIndex;
+    private final Consumer<FuncActionTask> doExecute;
 
-    public ActionFuncStepHandler(ActionFuncHandler actionFuncHandler, String actionName, int stepIndex){
+    public FuncActionTask(FuncActionPipeline actionFuncHandler, String actionName, Consumer<FuncActionTask> doExecute, int stepIndex){
         this.actionFuncHandler = actionFuncHandler;
         this.actionName = actionName;
         this.stepIndex = stepIndex;
+        this.startTime = -1;
+        this.endTime = -1;
+        this.doExecute = doExecute;
         init();
     }
 
+    public void doExecute() {
+        this.doExecute.consume(this);
+    }
+
     private void init() {
-        ActionFuncStepHandler that = this;
-        stateIcon = new Icon[]{new AnimatedIcon.FS()};
-        state = new String[]{"running ..."};
+        FuncActionTask that = this;
+        stateIcon = new Icon[]{ AllIcons.Actions.Profile };
+        state = new String[]{"Waiting to start"};
         TerminalExecutionConsole commonTerminalExecutionConsole = new TerminalExecutionConsole(actionFuncHandler.getProject(), null);
         ProcessListener processListener = new ProcessAdapter() {
             @Override
             public void startNotified(@NotNull ProcessEvent event) {
                 startTime = System.currentTimeMillis();
-                actionFuncHandler.fireChangeRunningStep(that);
+                stateIcon = new Icon[]{new AnimatedIcon.FS()};
+                state = new String[]{""};
+                actionFuncHandler.fireChangeRunningStep();
             }
 
             @Override
@@ -74,7 +87,7 @@ public class ActionFuncStepHandler {
         return actionName;
     }
 
-    public ActionFuncHandler getActionFuncHandler() {
+    public FuncActionPipeline getActionFuncHandler() {
         return actionFuncHandler;
     }
 
@@ -102,6 +115,16 @@ public class ActionFuncStepHandler {
         return endTime;
     }
 
+    @Override
+    public Project getProject() {
+        return actionFuncHandler.getProject();
+    }
+
+    @Override
+    public String getFuncName() {
+        return actionFuncHandler.getFuncName();
+    }
+
     public void setEndTime() {
         this.endTime = System.currentTimeMillis();
     }
@@ -112,6 +135,14 @@ public class ActionFuncStepHandler {
 
     public String getState() {
         return state[0];
+    }
+
+    public void setStateIcon(Icon[] stateIcon) {
+        this.stateIcon = stateIcon;
+    }
+
+    public void setState(String[] state) {
+        this.state = state;
     }
 
     public String getStartingDate() {
@@ -128,10 +159,9 @@ public class ActionFuncStepHandler {
         return state[0].equals("successful");
     }
 
-    public void dispose() {
-        if (terminalExecutionConsole != null) {
-            terminalExecutionConsole.dispose();
-        }
+    @Override
+    public Function getFunction() {
+        return actionFuncHandler.getFunction();
     }
 
     public int getStepIndex() {

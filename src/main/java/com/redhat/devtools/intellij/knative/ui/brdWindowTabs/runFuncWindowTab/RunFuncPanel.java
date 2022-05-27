@@ -10,15 +10,15 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.ui.brdWindowTabs.runFuncWindowTab;
 
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
-import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
-import com.redhat.devtools.intellij.knative.kn.Function;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.ActionFuncHandler;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.ActionFuncStepHandler;
 import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.BRDFuncPanel;
+import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.FuncActionPipeline;
+import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.FuncActionTask;
+import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.IFuncAction;
+import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.buildFuncWindowTab.BuildFuncActionTask;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.util.Collections;
 import java.util.List;
 
 import static com.redhat.devtools.intellij.knative.Constants.RUNFUNC_CONTENT_NAME;
@@ -30,49 +30,62 @@ public class RunFuncPanel extends BRDFuncPanel {
     }
 
     @Override
-    public ActionFuncHandler createActionFuncHandler(Project project, Function function, List<String> steps) {
-        return super.createActionFuncHandler("Run", project, function, steps);
-    }
-
-    @Override
-    protected DefaultMutableTreeNode createActionFuncTreeNode(List<ActionFuncHandler> actionFuncHandlers) {
-        ActionFuncHandler runningBuild = actionFuncHandlers.get(0);
+    protected DefaultMutableTreeNode createFuncActionTreeNode(List<IFuncAction> actionFuncHandlers) {
+        IFuncAction runningAction = actionFuncHandlers.get(0);
         if (showHistory) {
-            DefaultMutableTreeNode runNode = new DefaultMutableTreeNode(
-                    new LabelAndIconDescriptor(runningBuild.getProject(),
-                            runningBuild,
-                            () -> runningBuild.getFuncName() + " [" + runningBuild.getRunningStep().getActionName().toLowerCase() + "]:" ,
-                            () -> createReadableBuildLocation(runningBuild),
-                            runningBuild::getStateIcon,
-                            null));
-            for (ActionFuncHandler actionFuncHandler: actionFuncHandlers) {
+            DefaultMutableTreeNode runNode = createTreeNode(
+                    runningAction,
+                    () -> runningAction.getFuncName() + " [latest-" + getRunningStep(runningAction).getActionName() + "]:" ,
+                    () -> getNodeLocation(runningAction)
+            );
+            for (IFuncAction actionFuncHandler: actionFuncHandlers) {
                 runNode.add(createRunFuncTreeNode(actionFuncHandler));
             }
             return runNode;
         } else {
-            return createRunFuncTreeNode(runningBuild);
+            return createRunFuncTreeNode(runningAction);
         }
     }
 
-    private DefaultMutableTreeNode createRunFuncTreeNode(ActionFuncHandler runFuncHandler) {
-        DefaultMutableTreeNode runNode = new DefaultMutableTreeNode(
-                new LabelAndIconDescriptor(runFuncHandler.getProject(),
-                        runFuncHandler,
-                        () -> "Run " + runFuncHandler.getFuncName(),
-                        () -> createReadableBuildLocation(runFuncHandler),
-                        runFuncHandler::getStateIcon,
-                        null));
-        List<ActionFuncStepHandler> stepHandlers = runFuncHandler.getSteps();
-        for (ActionFuncStepHandler step: stepHandlers) {
-            DefaultMutableTreeNode stepNode = new DefaultMutableTreeNode(
-                    new LabelAndIconDescriptor(runFuncHandler.getProject(),
-                            runFuncHandler,
-                            () -> step.getActionName() + " " + runFuncHandler.getFuncName(),
-                            () -> createReadableBuildLocation(runFuncHandler),
-                            runFuncHandler::getStateIcon,
-                            null));
+    private DefaultMutableTreeNode createRunFuncTreeNode(IFuncAction runFuncHandler) {
+        DefaultMutableTreeNode runNode = createTreeNode(
+                runFuncHandler,
+                () -> runFuncHandler.getFuncName() + " [" + getRunningStep(runFuncHandler).getActionName() + "]:",
+                () -> getNodeLocation(runFuncHandler)
+        );
+
+        List<FuncActionTask> tasks = getSteps(runFuncHandler);
+        for (FuncActionTask task: tasks) {
+            DefaultMutableTreeNode stepNode = createTreeNode(
+                    task,
+                    () -> ":" + task.getActionName(),
+                    () -> getTaskLocation(task)
+            );
             runNode.add(stepNode);
         }
         return runNode;
+    }
+
+    private String getTaskLocation(IFuncAction funcAction) {
+        if (funcAction instanceof BuildFuncActionTask) {
+            return getBuildLocation(funcAction);
+        }
+        return funcAction.getState();
+    }
+
+    private FuncActionTask getRunningStep(IFuncAction actionFuncHandler) {
+        if (actionFuncHandler instanceof FuncActionPipeline) {
+            return ((FuncActionPipeline) actionFuncHandler).getRunningStep();
+        } else {
+            return (FuncActionTask) actionFuncHandler;
+        }
+    }
+
+    private List<FuncActionTask> getSteps(IFuncAction actionFuncHandler) {
+        if (actionFuncHandler instanceof FuncActionPipeline) {
+            return ((FuncActionPipeline) actionFuncHandler).getSteps();
+        } else {
+            return Collections.singletonList(((FuncActionTask) actionFuncHandler));
+        }
     }
 }

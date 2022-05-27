@@ -10,6 +10,7 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.ui.brdWindowTabs;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.AnimatedIcon;
 import com.redhat.devtools.intellij.knative.kn.Function;
@@ -20,52 +21,43 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
-public class ActionFuncHandler {
+public class FuncActionPipeline implements IFuncAction {
 
-    private final Project project;
+    protected final Project project;
     private final Function function;
     private final String actionName;
     private final long startTime;
     private long endTime;
     private final Icon[] stateIcon;
     private final String[] state;
-    private final List<ActionFuncStepHandler> actionSteps;
+    private List<FuncActionTask> actionTasks;
     private final List<ActionFuncHandlerListener> listenerList;
-    private ActionFuncStepHandler runningStep;
+    private FuncActionTask runningStep;
 
-    public ActionFuncHandler(String name, Project project, Function function, List<String> steps){
+    public FuncActionPipeline(String name, Project project, Function function){
         this.actionName = name;
         this.project = project;
         this.function = function;
         this.startTime = System.currentTimeMillis();
-        this.actionSteps = new ArrayList<>();
+        this.endTime = -1;
+        this.actionTasks = new ArrayList<>();
         this.stateIcon = new Icon[]{new AnimatedIcon.FS()};
-        this.state = new String[]{"running ..."};
+        this.state = new String[]{"Run tasks ..."};
         this.listenerList = new ArrayList<>();
-        addSteps(steps);
     }
 
-    public void addSteps(List<String> steps) {
-        for (String step: steps) {
-            actionSteps.add(actionSteps.size(), new ActionFuncStepHandler(this, step, actionSteps.size() + 1));
-        }
-        runningStep = actionSteps.get(0);
+    public void start() {
+        runningStep.doExecute();
     }
 
-    public ActionFuncStepHandler getStep(String name) {
-        Optional<ActionFuncStepHandler> actionFuncStepHandlerOptional = actionSteps.stream()
-                .filter(step -> step.getActionName().equals(name)).findFirst();
-        return actionFuncStepHandlerOptional.orElse(null);
+    public void setTasks(List<FuncActionTask> tasks) {
+        actionTasks = tasks;
+        runningStep = actionTasks.get(0);
     }
 
-    public List<ActionFuncStepHandler> getSteps() {
-        return actionSteps;
-    }
-
-    public ActionFuncStepHandler getFirstStep() {
-        return actionSteps.get(0);
+    public List<FuncActionTask> getSteps() {
+        return actionTasks;
     }
 
     public String getActionName() {
@@ -118,24 +110,30 @@ public class ActionFuncHandler {
         return state[0].equals("successful");
     }
 
-    public void dispose() {
-
-    }
-
-    public void fireChangeRunningStep(ActionFuncStepHandler stepHandler) {
-        runningStep = stepHandler;
+    public void fireChangeRunningStep() {
         notifyListeners();
     }
 
-    public void fireTerminatedStep(ActionFuncStepHandler stepHandler) {
+    public void fireTerminatedStep(FuncActionTask stepHandler) {
         // if last step is terminated or any step failed set end time and update icon
-        if (actionSteps.size() == stepHandler.getStepIndex()
-            || !stepHandler.isSuccessfullyCompleted()) {
+        if ((actionTasks.size() - 1) == stepHandler.getStepIndex()
+                || !stepHandler.isSuccessfullyCompleted()) {
             stateIcon[0] = stepHandler.getStateIcon();
             state[0] = stepHandler.getState();
             setEndTime();
-            //notifyListeners();
+            skipNextSteps(stepHandler.getStepIndex());
+        } else {
+            FuncActionTask nextStepHandler = actionTasks.get(stepHandler.getStepIndex() + 1);
+            runningStep = nextStepHandler;
+            nextStepHandler.doExecute();
         }
+    }
+
+    private void skipNextSteps(int currentStep) {
+        actionTasks.stream().skip(currentStep + 1).forEach(task -> {
+            task.setState(new String[]{ "Skipped" });
+            task.setStateIcon(new Icon[] { AllIcons.RunConfigurations.TestSkipped });
+        });
     }
 
     private void notifyListeners() {
@@ -148,7 +146,7 @@ public class ActionFuncHandler {
         listenerList.add(listener);
     }
 
-    public ActionFuncStepHandler getRunningStep() {
+    public FuncActionTask getRunningStep() {
         return runningStep;
     }
 }

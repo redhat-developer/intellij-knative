@@ -15,7 +15,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.util.IconLoader;
 import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.BRDFuncPanel;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.buildFuncWindowTab.BuildFuncPanel;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;
@@ -32,7 +31,7 @@ public class ShowBuildHistoryAction  extends DumbAwareAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        panel.switchShowHistoryMode();
+        panel.switchHistoryMode();
     }
 
     @Override

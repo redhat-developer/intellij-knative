@@ -58,7 +58,7 @@ public class RunActionTest extends ActionTest {
             treeHelperMockedStatic.when(() -> TreeHelper.getKn(any(Project.class))).thenReturn(kn);
             action.actionPerformed(anActionEvent);
             Thread.sleep(1000);
-            verify(kn, times(0)).runFunc(anyString(), any());
+            verify(kn, times(0)).runFunc(anyString(), any(), any());
         }
     }
 
@@ -71,7 +71,7 @@ public class RunActionTest extends ActionTest {
             treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
             action.actionPerformed(anActionEvent);
             Thread.sleep(1000);
-            verify(kn, times(1)).runFunc(anyString(), any());
+            verify(kn, times(1)).runFunc(anyString(), any(), any());
         }
     }
 

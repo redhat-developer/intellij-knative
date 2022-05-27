@@ -238,9 +238,10 @@ public interface Kn {
      *
      * @param path path where the function is stored
      * @param terminalExecutionConsole terminal tab to be used to run the command. If null a new tab will be created
+     * @param processListener
      * @throws IOException if communication errored
      */
-    void runFunc(String path, ConsoleView terminalExecutionConsole) throws IOException;
+    void runFunc(String path, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException;
 
     /**
      * Add environment variable to the function configuration

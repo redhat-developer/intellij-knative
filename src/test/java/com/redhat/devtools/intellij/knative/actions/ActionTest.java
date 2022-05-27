@@ -24,7 +24,6 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.ActionFuncHandler;
 import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.buildFuncWindowTab.BuildFuncPanel;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import org.junit.Before;
@@ -86,7 +85,7 @@ public abstract class ActionTest extends FixtureBaseTest {
         when(toolWindowManager.getToolWindow(anyString())).thenReturn(toolWindow);
         when(toolWindow.getContentManager()).thenReturn(contentManager);
         when(contentManager.findContent(anyString())).thenReturn(buildFuncPanel);
-        ActionFuncHandler buildFuncHandler = mock(ActionFuncHandler.class);
+        //ActionFuncHandlerOld buildFuncHandler = mock(ActionFuncHandlerOld.class);
         //when(buildFuncPanel.createActionFuncHandler(any(), any())).thenReturn(buildFuncHandler);
     }
 

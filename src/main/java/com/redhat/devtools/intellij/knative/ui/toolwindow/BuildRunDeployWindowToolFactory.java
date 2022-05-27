@@ -14,6 +14,10 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
+import com.intellij.ui.content.ContentManagerAdapter;
+import com.intellij.ui.content.ContentManagerEvent;
+import com.intellij.ui.content.ContentManagerListener;
+import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.BRDFuncPanel;
 import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.buildFuncWindowTab.BuildFuncPanel;
 import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.runFuncWindowTab.RunFuncPanel;
 import org.jetbrains.annotations.NotNull;
@@ -23,15 +27,18 @@ public class BuildRunDeployWindowToolFactory implements ToolWindowFactory {
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         toolWindow.setIcon(AllIcons.Toolwindows.ToolWindowBuild);
-        toolWindow.setStripeTitle("Function Build");
+        toolWindow.setStripeTitle("Functions");
     }
 
     @Override
     public void init(ToolWindow window) {
         BuildFuncPanel buildFuncPanel = new BuildFuncPanel(window);
         window.getContentManager().addContent(buildFuncPanel);
+
         RunFuncPanel runFuncPanel = new RunFuncPanel(window);
         window.getContentManager().addContent(runFuncPanel);
+
+        window.getContentManager().addContentManagerListener(new ContentChangeManagerListener());
     }
 
     @Override
@@ -42,5 +49,30 @@ public class BuildRunDeployWindowToolFactory implements ToolWindowFactory {
     @Override
     public boolean isDoNotActivateOnStart() {
         return true;
+    }
+}
+
+class ContentChangeManagerListener implements ContentManagerListener {
+
+    @Override
+    public void contentAdded(@NotNull ContentManagerEvent event) {
+
+    }
+
+    @Override
+    public void contentRemoved(@NotNull ContentManagerEvent event) {
+
+    }
+
+    @Override
+    public void contentRemoveQuery(@NotNull ContentManagerEvent event) {
+
+    }
+
+    @Override
+    public void selectionChanged(@NotNull ContentManagerEvent event) {
+        if (event.getOperation().equals(ContentManagerEvent.ContentOperation.add)) {
+            ((BRDFuncPanel) event.getContent()).setSelectionDefault();
+        }
     }
 }

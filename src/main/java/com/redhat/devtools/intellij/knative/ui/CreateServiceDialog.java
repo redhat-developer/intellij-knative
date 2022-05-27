@@ -34,6 +34,7 @@ import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.utils.EditorHelper;
 import com.redhat.devtools.intellij.knative.utils.KnHelper;
+import com.redhat.devtools.intellij.knative.utils.UIUtils;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.jetbrains.annotations.NotNull;
@@ -310,13 +311,8 @@ public class CreateServiceDialog extends DialogWrapper {
     protected @Nullable JComponent createCenterPanel() {
         final JPanel panel = new JPanel(new BorderLayout());
         panel.setPreferredSize(new Dimension(600, 350));
-        splitterPanel = new OnePixelSplitter(true, 1.00F) {
-            protected Divider createDivider() {
-                Divider divider = super.createDivider();
-                divider.setBackground(JBColor.namedColor("Plugins.SearchField.borderColor", new JBColor(0xC5C5C5, 0x515151)));
-                return divider;
-            }
-        };
+        splitterPanel = UIUtils.createSplitter(true, 1.00F,
+                JBColor.namedColor("Plugins.SearchField.borderColor", new JBColor(0xC5C5C5, 0x515151)));
         splitterPanel.setFirstComponent(contentPanel);
         splitterPanel.setSecondComponent(logPanel);
         panel.add(splitterPanel, BorderLayout.CENTER);

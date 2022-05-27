@@ -16,11 +16,10 @@ import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.Divider;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.terminal.TerminalExecutionConsole;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.OnePixelSplitter;
 import com.intellij.ui.components.JBScrollPane;
@@ -28,9 +27,8 @@ import com.intellij.ui.content.impl.ContentImpl;
 import com.intellij.ui.treeStructure.Tree;
 import com.intellij.util.ui.UIUtil;
 import com.intellij.util.ui.tree.TreeUtil;
-import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
 import com.redhat.devtools.intellij.knative.actions.toolbar.ShowBuildHistoryAction;
-import com.redhat.devtools.intellij.knative.kn.Function;
+import com.redhat.devtools.intellij.knative.utils.UIUtils;
 
 import javax.swing.Icon;
 import javax.swing.JComponent;
@@ -50,14 +48,15 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
-import static com.intellij.ide.plugins.PluginManagerConfigurable.SEARCH_FIELD_BORDER_COLOR;
 import static com.intellij.ui.AnimatedIcon.ANIMATION_IN_RENDERER_ALLOWED;
 
-public abstract class BRDFuncPanel extends ContentImpl implements ActionFuncHandlerListener {
+public abstract class BRDFuncPanel extends ContentImpl {
 
     protected final ToolWindow toolWindow;
-    protected final Map<String, List<ActionFuncHandler>> funcPerHandlers;
+    private final String displayName;
+    protected final Map<String, List<IFuncAction>> funcPerActionHandlers;
     protected JPanel terminalPanel;
     protected DefaultTreeModel buildTreeModel;
     protected Tree buildTree;
@@ -66,141 +65,10 @@ public abstract class BRDFuncPanel extends ContentImpl implements ActionFuncHand
     public BRDFuncPanel(ToolWindow toolWindow, String displayName) {
         super(null, displayName, true);
         this.toolWindow = toolWindow;
-        this.funcPerHandlers = new HashMap<>();
+        this.displayName = displayName;
+        this.funcPerActionHandlers = new HashMap<>();
         this.showHistory = false;
         setComponent(createMainComponent());
-    }
-
-    public boolean isShowHistory() {
-        return showHistory;
-    }
-
-    public void switchShowHistoryMode() {
-        showHistory = !showHistory;
-        refreshBuildTree();
-    }
-
-    private void refreshBuildTree() {
-        removeNodeOrAll(null);
-        funcPerHandlers.entrySet().stream()
-                .sorted(Comparator.comparing(p -> p.getValue().get(0).getStartingDate())).forEachOrdered((entry) -> {
-                    drawActionFuncHandlers(entry.getValue());
-                });
-    }
-
-    public abstract ActionFuncHandler createActionFuncHandler(Project project, Function function, List<String> steps);
-
-    protected ActionFuncHandler createActionFuncHandler(String name, Project project, Function function, List<String> steps) {
-        ensureToolWindowOpened();
-        removeNodeOrAll(function.getName());
-
-        ActionFuncHandler actionFuncHandler = new ActionFuncHandler(name, project, function, steps);
-        actionFuncHandler.addStepChangeListener(element -> {
-            try {
-                Object pathComponent = buildTree.getLastSelectedPathComponent();
-                Object node = TreeUtil.getUserObject(pathComponent);
-
-                if (node instanceof LabelAndIconDescriptor) {
-                    if (((LabelAndIconDescriptor<?>) node).getElement() instanceof  ActionFuncHandler) {
-                        ActionFuncHandler buildFuncHandler = ((ActionFuncHandler)((LabelAndIconDescriptor<?>) node).getElement());
-                        if (buildFuncHandler.equals(element)) {
-                            updateTerminalPanel(element.getRunningStep().getTerminalExecutionConsole());
-                        }
-                    }
-                }
-            } catch (Exception ignored) {}
-        });
-        List<ActionFuncHandler> actionFuncHandlers = funcPerHandlers.getOrDefault(function.getName(), new ArrayList<>());
-        actionFuncHandlers.add(0, actionFuncHandler);
-        if (actionFuncHandlers.size() > 10) {
-            actionFuncHandlers.remove(10);
-        }
-        funcPerHandlers.put(function.getName(), actionFuncHandlers);
-
-        drawActionFuncHandlers(actionFuncHandlers);
-
-        return actionFuncHandler;
-    }
-
-    private void drawActionFuncHandlers(List<ActionFuncHandler> actionFuncHandlers) {
-        DefaultMutableTreeNode node = createActionFuncTreeNode(actionFuncHandlers);
-        addFuncHandlerTreeNode(node);
-        updateTerminalPanel(actionFuncHandlers.get(0).getFirstStep().getTerminalExecutionConsole());
-    }
-
-    protected String createReadableHistoryLocation(ActionFuncHandler actionFuncHandler) {
-        if (actionFuncHandler.isFinished()) {
-            return (!actionFuncHandler.isSuccessfullyCompleted() ?
-                    actionFuncHandler.getState() :
-                    actionFuncHandler.getFunction().getImage()) +
-                    " <span style=\"color: gray;\">At " + actionFuncHandler.getStartingDate() + "</span>";
-        }
-        return actionFuncHandler.getState();
-    }
-
-    protected abstract DefaultMutableTreeNode createActionFuncTreeNode(List<ActionFuncHandler> actionFuncHandlers);
-
-   // protected abstract void addChildrenToBuildFuncTreeNode(DefaultMutableTreeNode parent, List<ActionFuncHandler> actionFuncHandlers);
-
-    private void addFuncHandlerTreeNode(DefaultMutableTreeNode node) {
-        buildTreeModel.insertNodeInto(node, (MutableTreeNode) buildTreeModel.getRoot(), 0);
-        buildTree.invalidate();
-        buildTree.expandPath(new TreePath(((DefaultMutableTreeNode) buildTreeModel.getRoot()).getPath()));
-        buildTree.setSelectionRow(0);
-    }
-
-  /*  private void addChildrenToBuildFuncTreeNode(DefaultMutableTreeNode parent, List<ActionFuncHandler> actionFuncHandlers) {
-        for (ActionFuncHandler buildFuncHandler: actionFuncHandlers) {
-            DefaultMutableTreeNode buildNode = new DefaultMutableTreeNode(
-                    new LabelAndIconDescriptor(buildFuncHandler.getProject(),
-                            buildFuncHandler,
-                            () -> "Build " + buildFuncHandler.getFuncName(),
-                            () -> createReadableHistoryLocation(buildFuncHandler),
-                            buildFuncHandler::getStateIcon,
-                            null));
-            parent.add(buildNode);
-        }
-    }*/
-
-    protected String createReadableBuildLocation(ActionFuncHandler actionFuncHandler) {
-        if (actionFuncHandler.isFinished()) {
-            return !actionFuncHandler.isSuccessfullyCompleted() ?
-                    actionFuncHandler.getState() :
-                    actionFuncHandler.getState() + (
-                            actionFuncHandler.getFunction().getImage().isEmpty() ?
-                                    "" :
-                                    " <span style=\"color: gray;\">" + actionFuncHandler.getFunction().getImage() + "</span>"
-                    );
-        }
-        return actionFuncHandler.getState();
-    }
-
-    private void ensureToolWindowOpened() {
-        if (toolWindow.isVisible()
-                && toolWindow.isActive()
-                && toolWindow.isAvailable()) {
-            return;
-        }
-        toolWindow.setToHideOnEmptyContent(true);
-        toolWindow.setAvailable(true, null);
-        toolWindow.activate(null);
-        toolWindow.show(null);
-    }
-
-    private void removeNodeOrAll(String name) {
-        int children = buildTreeModel.getChildCount(buildTreeModel.getRoot());
-        for (int i = children - 1; i>=0; i--) {
-            DefaultMutableTreeNode child = (DefaultMutableTreeNode) buildTreeModel.getChild(buildTreeModel.getRoot(), i);
-            if (name == null) {
-                buildTreeModel.removeNodeFromParent(child);
-            } else {
-                String nodeName = ((ActionFuncHandler)((LabelAndIconDescriptor)child.getUserObject()).getElement()).getFuncName();
-                if (nodeName.equals(name)) {
-                    buildTreeModel.removeNodeFromParent(child);
-                    break;
-                }
-            }
-        }
     }
 
     private JComponent createMainComponent() {
@@ -230,20 +98,10 @@ public abstract class BRDFuncPanel extends ContentImpl implements ActionFuncHand
     }
 
     protected JComponent createMainPanel() {
-        OnePixelSplitter mainSplitter = createSplitter();
+        OnePixelSplitter mainSplitter = UIUtils.createSplitter(false, (float) 0.40);
         mainSplitter.setFirstComponent(buildBuildsTree());
         mainSplitter.setSecondComponent(buildTerminalPanel());
         return mainSplitter;
-    }
-
-    protected OnePixelSplitter createSplitter() {
-        return new OnePixelSplitter(false, (float) 0.40) {
-            protected Divider createDivider() {
-                Divider divider = super.createDivider();
-                divider.setBackground(SEARCH_FIELD_BORDER_COLOR);
-                return divider;
-            }
-        };
     }
 
     protected JComponent buildTerminalPanel() {
@@ -274,21 +132,11 @@ public abstract class BRDFuncPanel extends ContentImpl implements ActionFuncHand
 
     private JComponent buildBuildsTree() {
         buildTreeModel = createTreeModel();
-        buildTree = buildTree("build", buildTreeModel);
+        buildTree = buildTree(displayName, buildTreeModel);
         buildTree.addTreeSelectionListener(e -> {
             try {
                 Object pathComponent = e.getNewLeadSelectionPath().getLastPathComponent();
-                Object node = TreeUtil.getUserObject(pathComponent);
-
-                if (node instanceof LabelAndIconDescriptor) {
-                    if (((LabelAndIconDescriptor<?>) node).getElement() instanceof  ActionFuncHandler) {
-                        ActionFuncHandler buildFuncHandler = ((ActionFuncHandler)((LabelAndIconDescriptor<?>) node).getElement());
-                        updateTerminalPanel(buildFuncHandler.getRunningStep().getTerminalExecutionConsole());
-                    } else if (((LabelAndIconDescriptor<?>) node).getElement() instanceof ActionFuncStepHandler) {
-                        ActionFuncStepHandler stepHandler = ((ActionFuncStepHandler)((LabelAndIconDescriptor<?>) node).getElement());
-                        updateTerminalPanel(stepHandler.getTerminalExecutionConsole());
-                    }
-                }
+                updateTerminalBySelectedPath(pathComponent);
             } catch (Exception ignored) {}
         });
         return new JBScrollPane(buildTree);
@@ -313,19 +161,19 @@ public abstract class BRDFuncPanel extends ContentImpl implements ActionFuncHand
         return (tree1, value, selected, expanded, leaf, row, hasFocus) -> {
             Object node = TreeUtil.getUserObject(value);
 
-            if (node instanceof LabelAndIconDescriptor) {
-                ((LabelAndIconDescriptor) node).update();
-                return createLabel(((LabelAndIconDescriptor) node).getPresentation().getPresentableText(),
-                        ((LabelAndIconDescriptor) node).getPresentation().getLocationString(),
-                        ((LabelAndIconDescriptor) node).getIcon(),
-                        (ActionFuncHandler) ((LabelAndIconDescriptor<?>) node).getElement()
+            if (node instanceof FuncActionNodeDescriptor) {
+                ((FuncActionNodeDescriptor) node).update();
+                return createLabel(((FuncActionNodeDescriptor) node).getPresentation().getPresentableText(),
+                        ((FuncActionNodeDescriptor) node).getPresentation().getLocationString(),
+                        ((FuncActionNodeDescriptor) node).getIcon(),
+                        ((FuncActionNodeDescriptor) node).getElement()
                 );
             }
             return null;
         };
     }
 
-    private JComponent createLabel(String name, String location, Icon icon, ActionFuncHandler actionFuncHandler) {
+    private JComponent createLabel(String name, String location, Icon icon, IFuncAction actionFuncHandler) {
         JPanel buildInfo = new JPanel(new BorderLayout());
         String label = "<html><span style=\"font-weight: bold;\">" + name + "</span> ";
         if (location != null && !location.isEmpty() ) {
@@ -340,9 +188,11 @@ public abstract class BRDFuncPanel extends ContentImpl implements ActionFuncHand
         return buildInfo;
     }
 
-    public String getDuration(ActionFuncHandler actionFuncHandler) {
+    public String getDuration(IFuncAction actionFuncHandler) {
         long duration;
-        if (actionFuncHandler.getEndTime() != -1) {
+        if (actionFuncHandler.getStartTime() == -1) {
+            return "0";
+        } else if (actionFuncHandler.getEndTime() != -1) {
             duration = actionFuncHandler.getEndTime() - actionFuncHandler.getStartTime();
         } else {
             duration = System.currentTimeMillis() - actionFuncHandler.getStartTime();
@@ -356,8 +206,170 @@ public abstract class BRDFuncPanel extends ContentImpl implements ActionFuncHand
         return durationText;
     }
 
-    @Override
-    public void fireModified(ActionFuncHandler element) {
+    public void setSelectionDefault() {
+        if (getChildrenCount() > 0) {
+            buildTree.setSelectionRow(0);
+            Object pathComponent = buildTree.getLastSelectedPathComponent();
+            updateTerminalBySelectedPath(pathComponent);
+        }
+    }
 
+    private int getChildrenCount() {
+        return buildTreeModel.getChildCount(buildTreeModel.getRoot());
+    }
+
+    private void updateTerminalBySelectedPath(Object path) {
+        try {
+            Object node = TreeUtil.getUserObject(path);
+
+            if (node instanceof FuncActionNodeDescriptor) {
+                IFuncAction actionNode = ((FuncActionNodeDescriptor) node).getElement();
+                if (actionNode instanceof FuncActionPipeline) {
+                    updateTerminalPanel(((FuncActionPipeline)actionNode).getRunningStep().getTerminalExecutionConsole());
+                } else if (actionNode instanceof FuncActionTask) {
+                    updateTerminalPanel(((FuncActionTask)actionNode).getTerminalExecutionConsole());
+                }
+            }
+        } catch (Exception ignored) {}
+    }
+
+    public boolean isShowHistory() {
+        return showHistory;
+    }
+
+    public void switchHistoryMode() {
+        showHistory = !showHistory;
+        refreshBuildTree();
+    }
+
+    private void refreshBuildTree() {
+        removeAllNodes();
+        drawAllNodes();
+    }
+
+    private void drawAllNodes() {
+        funcPerActionHandlers.entrySet().stream()
+                .sorted(Comparator.comparing(p -> p.getValue().get(0).getStartingDate())).forEachOrdered((entry) -> {
+                    drawFuncActionHandlers(entry.getValue(), true);
+                });
+    }
+
+    private void removeAllNodes() {
+        removeNodeOrAll(null);
+    }
+
+    private void removeNodeOrAll(String name) {
+        int childrenCount = getChildrenCount();
+        for (int i = childrenCount - 1; i>=0; i--) {
+            DefaultMutableTreeNode child = (DefaultMutableTreeNode) buildTreeModel.getChild(buildTreeModel.getRoot(), i);
+            if (name == null) {
+                buildTreeModel.removeNodeFromParent(child);
+            } else {
+                String nodeName = ((FuncActionNodeDescriptor)child.getUserObject()).getElement().getFuncName();
+                if (nodeName.equals(name)) {
+                    buildTreeModel.removeNodeFromParent(child);
+                    break;
+                }
+            }
+        }
+    }
+
+    public void drawFuncAction(IFuncAction funcAction) {
+        boolean isPipeline = funcAction instanceof FuncActionPipeline;
+        removeNode(funcAction.getFuncName());
+
+        if (isPipeline) {
+            ensureToolWindowOpened();
+            ((FuncActionPipeline)funcAction).addStepChangeListener(element -> {
+                try {
+                    Object pathComponent = buildTree.getLastSelectedPathComponent();
+                    updateTerminalBySelectedPath(pathComponent);
+                } catch (Exception ignored) {}
+            });
+        }
+
+        List<IFuncAction> funcActionHandlers = funcPerActionHandlers.getOrDefault(funcAction.getFuncName(), new ArrayList<>());
+        funcActionHandlers.add(0, funcAction);
+        if (funcActionHandlers.size() > 10) {
+            funcActionHandlers.remove(10);
+        }
+        funcPerActionHandlers.put(funcAction.getFuncName(), funcActionHandlers);
+
+        drawFuncActionHandlers(funcActionHandlers, isPipeline);
+    }
+
+    private void removeNode(String name) {
+        removeNodeOrAll(name);
+    }
+
+    private void drawFuncActionHandlers(List<IFuncAction> funcActionHandlers, boolean updateTerminal) {
+        DefaultMutableTreeNode node = createFuncActionTreeNode(funcActionHandlers);
+        addFuncActionTreeNode(node);
+        if (updateTerminal) {
+            updateTerminalPanel(getDefaultTerminal(funcActionHandlers.get(0)));
+        }
+    }
+
+    protected abstract DefaultMutableTreeNode createFuncActionTreeNode(List<IFuncAction> actionFuncHandlers);
+
+    private void addFuncActionTreeNode(DefaultMutableTreeNode node) {
+        buildTreeModel.insertNodeInto(node, (MutableTreeNode) buildTreeModel.getRoot(), 0);
+        buildTree.invalidate();
+        buildTree.expandPath(new TreePath(((DefaultMutableTreeNode) buildTreeModel.getRoot()).getPath()));
+        buildTree.setSelectionRow(0);
+    }
+
+    private TerminalExecutionConsole getDefaultTerminal(IFuncAction funcActionHandlers) {
+        if (funcActionHandlers instanceof FuncActionPipeline) {
+            return ((FuncActionPipeline)funcActionHandlers).getRunningStep().getTerminalExecutionConsole();
+        } else {
+            return ((FuncActionTask)funcActionHandlers).getTerminalExecutionConsole();
+        }
+    }
+
+    private void ensureToolWindowOpened() {
+        if (toolWindow.isVisible()
+                && toolWindow.isActive()
+                && toolWindow.isAvailable()) {
+            ensureContentIsSelected();
+            return;
+        }
+        toolWindow.setToHideOnEmptyContent(true);
+        toolWindow.setAvailable(true, null);
+        toolWindow.activate(null);
+        toolWindow.show(null);
+        ensureContentIsSelected();
+    }
+
+    private void ensureContentIsSelected() {
+        toolWindow.getContentManager().setSelectedContent(this, true);
+    }
+
+    protected DefaultMutableTreeNode createTreeNode(IFuncAction funcAction, Supplier<String> label, Supplier<String> location) {
+        return new DefaultMutableTreeNode(
+                new FuncActionNodeDescriptor(
+                        funcAction.getProject(),
+                        funcAction,
+                        label,
+                        location,
+                        funcAction::getStateIcon,
+                        null)
+        );
+    }
+
+    protected String getBuildLocation(IFuncAction funcAction) {
+        return !funcAction.isSuccessfullyCompleted() ?
+                funcAction.getState() :
+                funcAction.getState() + (
+                        funcAction.getFunction().getImage().isEmpty() ?
+                                "" :
+                                " <span style=\"color: gray;\">" + funcAction.getFunction().getImage() + "</span>"
+                );
+    }
+
+    protected String getNodeLocation(IFuncAction funcAction) {
+        return !funcAction.isSuccessfullyCompleted() ?
+                funcAction.getState() :
+                funcAction.getState() + " <span style=\"color: gray;\">At " + funcAction.getStartingDate() + "</span>";
     }
 }
