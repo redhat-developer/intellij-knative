@@ -14,12 +14,11 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
-import com.intellij.ui.content.ContentManagerAdapter;
 import com.intellij.ui.content.ContentManagerEvent;
 import com.intellij.ui.content.ContentManagerListener;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.BRDFuncPanel;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.buildFuncWindowTab.BuildFuncPanel;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.runFuncWindowTab.RunFuncPanel;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.BRDFuncPanel;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.buildFuncWindowTab.BuildFuncPanel;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.runFuncWindowTab.RunFuncPanel;
 import org.jetbrains.annotations.NotNull;
 
 public class BuildRunDeployWindowToolFactory implements ToolWindowFactory {

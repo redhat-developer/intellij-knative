@@ -8,7 +8,7 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.brdWindowTabs;
+package com.redhat.devtools.intellij.knative.ui.brdWindow;
 
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.actionSystem.ActionManager;
@@ -358,9 +358,14 @@ public abstract class BRDFuncPanel extends ContentImpl {
     }
 
     protected String getBuildLocation(IFuncAction funcAction) {
+        return getBuildLocation(funcAction, "");
+    }
+
+    protected String getBuildLocation(IFuncAction funcAction, String defaultState) {
+        String state = funcAction.getState() == null || funcAction.getState().isEmpty() ? defaultState : funcAction.getState();
         return !funcAction.isSuccessfullyCompleted() ?
-                funcAction.getState() :
-                funcAction.getState() + (
+                state :
+                state + (
                         funcAction.getFunction().getImage().isEmpty() ?
                                 "" :
                                 " <span style=\"color: gray;\">" + funcAction.getFunction().getImage() + "</span>"

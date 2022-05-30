@@ -8,7 +8,7 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.brdWindowTabs;
+package com.redhat.devtools.intellij.knative.ui.brdWindow;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
@@ -43,7 +43,7 @@ public class FuncActionPipeline implements IFuncAction {
         this.endTime = -1;
         this.actionTasks = new ArrayList<>();
         this.stateIcon = new Icon[]{new AnimatedIcon.FS()};
-        this.state = new String[]{"Run tasks ..."};
+        this.state = new String[]{"run tasks ..."};
         this.listenerList = new ArrayList<>();
     }
 
@@ -131,7 +131,7 @@ public class FuncActionPipeline implements IFuncAction {
 
     private void skipNextSteps(int currentStep) {
         actionTasks.stream().skip(currentStep + 1).forEach(task -> {
-            task.setState(new String[]{ "Skipped" });
+            task.setState(new String[]{ "skipped" });
             task.setStateIcon(new Icon[] { AllIcons.RunConfigurations.TestSkipped });
         });
     }

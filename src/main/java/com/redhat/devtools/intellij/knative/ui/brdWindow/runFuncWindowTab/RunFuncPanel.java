@@ -8,14 +8,14 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.brdWindowTabs.runFuncWindowTab;
+package com.redhat.devtools.intellij.knative.ui.brdWindow.runFuncWindowTab;
 
 import com.intellij.openapi.wm.ToolWindow;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.BRDFuncPanel;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.FuncActionPipeline;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.FuncActionTask;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.IFuncAction;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.buildFuncWindowTab.BuildFuncActionTask;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.BRDFuncPanel;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.FuncActionPipeline;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.FuncActionTask;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.IFuncAction;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.buildFuncWindowTab.BuildFuncActionTask;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.Collections;

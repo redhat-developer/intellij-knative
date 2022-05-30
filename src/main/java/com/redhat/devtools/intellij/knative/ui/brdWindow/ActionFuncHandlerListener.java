@@ -1,5 +1,3 @@
-package com.redhat.devtools.intellij.knative.actions;
-
 /*******************************************************************************
  * Copyright (c) 2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
@@ -10,5 +8,8 @@ package com.redhat.devtools.intellij.knative.actions;
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-public class ViewableKnAction {
+package com.redhat.devtools.intellij.knative.ui.brdWindow;
+
+public interface ActionFuncHandlerListener {
+    void fireModified(FuncActionPipeline element);
 }

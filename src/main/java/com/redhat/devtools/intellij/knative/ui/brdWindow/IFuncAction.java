@@ -8,7 +8,7 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.brdWindowTabs;
+package com.redhat.devtools.intellij.knative.ui.brdWindow;
 
 import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.knative.kn.Function;

@@ -14,7 +14,7 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.util.IconLoader;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.BRDFuncPanel;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.BRDFuncPanel;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;

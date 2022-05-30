@@ -24,7 +24,7 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.buildFuncWindowTab.BuildFuncPanel;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.buildFuncWindowTab.BuildFuncPanel;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import org.junit.Before;
 import org.mockito.MockedStatic;

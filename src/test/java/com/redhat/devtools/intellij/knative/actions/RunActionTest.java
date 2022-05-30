@@ -14,26 +14,17 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.Messages;
-import com.intellij.ui.GroupedElementsRenderer;
-import com.intellij.ui.treeStructure.Tree;
-import com.intellij.util.Consumer;
-import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.actions.func.RunAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
-import com.redhat.devtools.intellij.knative.tree.KnFunctionsTreeStructure;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.FuncActionPipeline;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.FuncActionTask;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.FuncActionsPipelineBuilder;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.runFuncWindowTab.RunFuncActionPipeline;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.FuncActionTask;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.runFuncWindowTab.RunFuncActionPipeline;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 
 import java.io.IOException;
 import javax.swing.tree.TreePath;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 

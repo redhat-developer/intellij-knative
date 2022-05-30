@@ -8,14 +8,14 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.brdWindowTabs;
+package com.redhat.devtools.intellij.knative.ui.brdWindow;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.util.Consumer;
 import com.redhat.devtools.intellij.knative.kn.Function;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.buildFuncWindowTab.BuildFuncActionPipeline;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.buildFuncWindowTab.BuildFuncActionTask;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.runFuncWindowTab.RunFuncActionPipeline;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.buildFuncWindowTab.BuildFuncActionPipeline;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.buildFuncWindowTab.BuildFuncActionTask;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.runFuncWindowTab.RunFuncActionPipeline;
 
 import java.util.ArrayList;
 import java.util.List;

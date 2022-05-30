@@ -11,7 +11,6 @@
 package com.redhat.devtools.intellij.knative.actions;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.intellij.execution.process.ProcessListener;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -25,9 +24,8 @@ import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.actions.func.BuildAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.FuncActionTask;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.buildFuncWindowTab.BuildFuncActionPipeline;
-import com.redhat.devtools.intellij.knative.ui.brdWindowTabs.runFuncWindowTab.RunFuncActionPipeline;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.FuncActionTask;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.buildFuncWindowTab.BuildFuncActionPipeline;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import org.junit.Before;
 import org.junit.Test;
