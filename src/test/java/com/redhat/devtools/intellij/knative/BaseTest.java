@@ -13,6 +13,7 @@ package com.redhat.devtools.intellij.knative;
 import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.kn.KnCli;
+import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.tree.KnEventingBrokerNode;
 import com.redhat.devtools.intellij.knative.tree.KnEventingChannelsNode;
 import com.redhat.devtools.intellij.knative.tree.KnEventingNode;
@@ -62,6 +63,7 @@ public class BaseTest {
     protected KnEventingTriggersNode knEventingTriggersNode;
     protected KnSourceNode knSourceNode;
     protected KnSinkNode knSinkNode;
+    protected TelemetryService telemetryService;
     protected TelemetryMessageBuilder telemetryMessageBuilder;
     protected TelemetryMessageBuilder.ActionMessage actionMessage;
 
@@ -87,6 +89,7 @@ public class BaseTest {
         knFunctionNode = mock(KnFunctionNode.class);
         telemetryMessageBuilder = mock(TelemetryMessageBuilder.class);
         actionMessage = mock(TelemetryMessageBuilder.ActionMessage.class);
+
     }
 
     protected String load(String name) throws IOException {

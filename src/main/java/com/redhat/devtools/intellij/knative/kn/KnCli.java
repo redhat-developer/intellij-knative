@@ -14,6 +14,8 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
+import com.intellij.execution.process.ProcessListener;
+import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
@@ -301,8 +303,8 @@ public class KnCli implements Kn {
     }
 
     @Override
-    public void buildFunc(String path, String registry, String image, CommonTerminalExecutionConsole terminalExecutionConsole) throws IOException {
-        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, getBuildDeployArgs("build", "", path, registry, image, false));
+    public void buildFunc(String path, String registry, String image, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException {
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, processListener, getBuildDeployArgs("build", "", path, registry, image, true));
     }
 
     @Override

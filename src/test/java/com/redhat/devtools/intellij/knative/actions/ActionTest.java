@@ -12,6 +12,9 @@ package com.redhat.devtools.intellij.knative.actions;
 
 import com.intellij.ide.util.treeView.smartTree.TreeAction;
 import com.intellij.openapi.actionSystem.Presentation;
+import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.ui.content.ContentManager;
 import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.knative.FixtureBaseTest;
 import com.redhat.devtools.intellij.knative.kn.Service;
@@ -20,10 +23,16 @@ import com.redhat.devtools.intellij.knative.kn.ServiceTraffic;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
+import com.redhat.devtools.intellij.knative.ui.buildFunc.BuildFuncHandler;
+import com.redhat.devtools.intellij.knative.ui.buildFunc.BuildFuncPanel;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import org.junit.Before;
+import org.mockito.MockedStatic;
 
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -67,4 +76,24 @@ public abstract class ActionTest extends FixtureBaseTest {
         when(serviceStatus.getUrl()).thenReturn("url");
     }
 
+    protected void mockToolWindow(MockedStatic<ToolWindowManager> toolWindowManagerMockedStatic) {
+        ToolWindowManager toolWindowManager = mock(ToolWindowManager.class);
+        toolWindowManagerMockedStatic.when(() -> ToolWindowManager.getInstance(any())).thenReturn(toolWindowManager);
+
+        ToolWindow toolWindow = mock(ToolWindow.class);
+        ContentManager contentManager = mock(ContentManager.class);
+        BuildFuncPanel buildFuncPanel = mock(BuildFuncPanel.class);
+        when(toolWindowManager.getToolWindow(anyString())).thenReturn(toolWindow);
+        when(toolWindow.getContentManager()).thenReturn(contentManager);
+        when(contentManager.findContent(anyString())).thenReturn(buildFuncPanel);
+        BuildFuncHandler buildFuncHandler = mock(BuildFuncHandler.class);
+        when(buildFuncPanel.createBuildFuncHandler(any(), any())).thenReturn(buildFuncHandler);
+    }
+
+    protected void mockTelemetry(MockedStatic<TelemetryService> telemetryServiceMockedStatic) {
+        telemetryServiceMockedStatic.when(TelemetryService::instance).thenReturn(telemetryMessageBuilder);
+        when(telemetryMessageBuilder.action(anyString())).thenReturn(actionMessage);
+        when(actionMessage.result(anyString())).thenReturn(actionMessage);
+        when(actionMessage.send()).thenReturn(null);
+    }
 }

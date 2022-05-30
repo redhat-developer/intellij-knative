@@ -10,6 +10,8 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.kn;
 
+import com.intellij.execution.process.ProcessListener;
+import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
@@ -208,7 +210,7 @@ public interface Kn {
      * @param terminalExecutionConsole terminal tab to be used to run the command. If null a new tab will be created
      * @throws IOException if communication errored
      */
-    void buildFunc(String path, String registry, String image, CommonTerminalExecutionConsole terminalExecutionConsole) throws IOException;
+    void buildFunc(String path, String registry, String image, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException;
 
     /**
      * Deploy a function from path

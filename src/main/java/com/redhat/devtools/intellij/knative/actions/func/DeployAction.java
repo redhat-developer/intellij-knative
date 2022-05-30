@@ -11,6 +11,9 @@
 package com.redhat.devtools.intellij.knative.actions.func;
 
 import com.google.common.base.Strings;
+import com.intellij.execution.process.ProcessListener;
+import com.intellij.execution.ui.ConsoleView;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
@@ -20,6 +23,7 @@ import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.utils.FuncUtils;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 
+import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -38,7 +42,13 @@ public class DeployAction extends BuildAction {
     }
 
     @Override
-    protected void doExecute(CommonTerminalExecutionConsole terminalExecutionConsole, Kn knCli, String namespace, String localPathFunc, String registry, String image) throws IOException {
+    public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Kn knCli) {
+        actionPerformed(anActionEvent, selected, knCli, false);
+    }
+
+    @Override
+    protected void doExecute(ConsoleView terminalExecutionConsole, ProcessListener processListener,
+                             Kn knCli, String namespace, String localPathFunc, String registry, String image) throws IOException {
         knCli.deployFunc(namespace, localPathFunc, registry, image);
     }
 
