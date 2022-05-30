@@ -21,6 +21,7 @@ import com.intellij.openapi.module.ModuleTypeId;
 import com.intellij.openapi.module.ModuleTypeManager;
 import com.intellij.openapi.module.ModuleWithNameAlreadyExists;
 import com.intellij.openapi.options.ConfigurationException;
+import com.intellij.openapi.roots.ModifiableRootModel;
 import com.intellij.openapi.roots.ui.configuration.ModulesProvider;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.InvalidDataException;
@@ -126,5 +127,10 @@ public class FunctionModuleBuilder extends ModuleBuilder {
     public ModuleWizardStep[] createFinishingSteps(@NotNull WizardContext wizardContext, @NotNull ModulesProvider modulesProvider) {
         this.wizardContext = wizardContext;
         return super.createFinishingSteps(wizardContext, modulesProvider);
+    }
+
+    @Override
+    public void setupRootModel(@NotNull ModifiableRootModel modifiableRootModel) throws ConfigurationException {
+        doAddContentEntry(modifiableRootModel);
     }
 }
