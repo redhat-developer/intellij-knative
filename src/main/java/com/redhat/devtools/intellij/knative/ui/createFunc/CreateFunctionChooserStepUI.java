@@ -68,7 +68,7 @@ public class CreateFunctionChooserStepUI {
         JPanel imageLabel = createLabelInFlowPanel("Template", "Function template.");
         verticalBox.add(imageLabel);
 
-        cmbTemplate = createComboBox(Arrays.asList("http", "events"));
+        cmbTemplate = createComboBox(Arrays.asList("http", "cloudevents"));
         verticalBox.add(cmbTemplate);
 
         verticalBox.add(new JPanel(new BorderLayout())); // hack to push components to the top
