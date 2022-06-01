@@ -70,7 +70,12 @@
                     text="Build"/>
             <action id="com.redhat.devtools.intellij.knative.actions.func.RunAction"
                     class="com.redhat.devtools.intellij.knative.actions.func.RunAction"
-                    text="Run"/>
+                    text="Run"
+                    description="Run the latest image built"/>
+            <action id="com.redhat.devtools.intellij.knative.actions.func.RunLatestAction"
+                    class="com.redhat.devtools.intellij.knative.actions.func.RunLatestAction"
+                    text="Run Latest"
+                    description="Build the function project and run the image created"/>
             <action id="com.redhat.devtools.intellij.knative.actions.func.DeployAction"
                     class="com.redhat.devtools.intellij.knative.actions.func.DeployAction"
                     text="Deploy"/>

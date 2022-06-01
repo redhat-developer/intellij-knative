@@ -55,24 +55,18 @@ public class RunAction extends KnAction {
             return;
         }
 
-        FuncActionPipeline runPipeline = new FuncActionsPipelineBuilder()
-                .createRunPipeline(project, function)
-                .withBuildTask((task) -> doBuild(knCli, task))
-                .withTask("runFunc", (task) -> doRun(name, knCli, task, telemetry))
-                .build();
+        FuncActionPipeline runPipeline = createPipeline(project, knCli, function, name, telemetry);
         runPipeline.start();
     }
 
-    private void doBuild(Kn knCli, FuncActionTask funcActionTask) {
-        ExecHelper.submit(() -> BuildAction.execute(
-                funcActionTask.getProject(),
-                funcActionTask.getFunction(),
-                knCli,
-                funcActionTask)
-        );
+    protected FuncActionPipeline createPipeline(Project project, Kn knCli, Function function, String nodeName, TelemetryMessageBuilder.ActionMessage telemetry) {
+        return new FuncActionsPipelineBuilder()
+                .createRunPipeline(project, function)
+                .withTask("runFunc", (task) -> doRun(nodeName, knCli, task, telemetry))
+                .build();
     }
 
-    private void doRun(String name, Kn knCli, FuncActionTask funcActionTask, TelemetryMessageBuilder.ActionMessage telemetry) {
+    protected void doRun(String name, Kn knCli, FuncActionTask funcActionTask, TelemetryMessageBuilder.ActionMessage telemetry) {
         ExecHelper.submit(() -> {
             try {
                 knCli.runFunc(funcActionTask.getFunction().getLocalPath(), funcActionTask.getTerminalExecutionConsole(), funcActionTask.getProcessListener());
