@@ -11,7 +11,7 @@
 package com.redhat.devtools.intellij.knative.ui.brdWindow.buildFuncWindowTab;
 
 import com.intellij.openapi.wm.ToolWindow;
-import com.redhat.devtools.intellij.knative.ui.brdWindow.BRDFuncPanel;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.BuildRunDeployFuncPanel;
 import com.redhat.devtools.intellij.knative.ui.brdWindow.IFuncAction;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -19,7 +19,7 @@ import java.util.List;
 
 import static com.redhat.devtools.intellij.knative.Constants.BUILDFUNC_CONTENT_NAME;
 
-public class BuildFuncPanel extends BRDFuncPanel {
+public class BuildFuncPanel extends BuildRunDeployFuncPanel {
 
     public BuildFuncPanel(ToolWindow toolWindow) {
         super(toolWindow, BUILDFUNC_CONTENT_NAME);

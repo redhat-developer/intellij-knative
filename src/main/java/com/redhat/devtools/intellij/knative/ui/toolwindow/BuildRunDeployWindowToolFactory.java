@@ -16,7 +16,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.content.ContentManagerEvent;
 import com.intellij.ui.content.ContentManagerListener;
-import com.redhat.devtools.intellij.knative.ui.brdWindow.BRDFuncPanel;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.BuildRunDeployFuncPanel;
 import com.redhat.devtools.intellij.knative.ui.brdWindow.buildFuncWindowTab.BuildFuncPanel;
 import com.redhat.devtools.intellij.knative.ui.brdWindow.runFuncWindowTab.RunFuncPanel;
 import org.jetbrains.annotations.NotNull;
@@ -71,7 +71,7 @@ class ContentChangeManagerListener implements ContentManagerListener {
     @Override
     public void selectionChanged(@NotNull ContentManagerEvent event) {
         if (event.getOperation().equals(ContentManagerEvent.ContentOperation.add)) {
-            ((BRDFuncPanel) event.getContent()).setSelectionDefault();
+            ((BuildRunDeployFuncPanel) event.getContent()).setSelectionDefault();
         }
     }
 }

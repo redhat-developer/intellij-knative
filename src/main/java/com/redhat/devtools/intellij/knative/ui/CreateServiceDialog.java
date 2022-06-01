@@ -70,6 +70,7 @@ import java.util.Collection;
 
 import static com.redhat.devtools.intellij.knative.Constants.YAML_FIRST_IMAGE_PATH;
 import static com.redhat.devtools.intellij.knative.Constants.YAML_NAME_PATH;
+import static com.redhat.devtools.intellij.knative.Constants.borderSearchFieldColor;
 import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymizeResource;
 
 public class CreateServiceDialog extends DialogWrapper {
@@ -311,8 +312,7 @@ public class CreateServiceDialog extends DialogWrapper {
     protected @Nullable JComponent createCenterPanel() {
         final JPanel panel = new JPanel(new BorderLayout());
         panel.setPreferredSize(new Dimension(600, 350));
-        splitterPanel = UIUtils.createSplitter(true, 1.00F,
-                JBColor.namedColor("Plugins.SearchField.borderColor", new JBColor(0xC5C5C5, 0x515151)));
+        splitterPanel = UIUtils.createSplitter(true, 1.00F, borderSearchFieldColor);
         splitterPanel.setFirstComponent(contentPanel);
         splitterPanel.setSecondComponent(logPanel);
         panel.add(splitterPanel, BorderLayout.CENTER);

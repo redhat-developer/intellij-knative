@@ -11,6 +11,9 @@
 package com.redhat.devtools.intellij.knative;
 
 import com.intellij.openapi.util.Key;
+import com.intellij.ui.JBColor;
+
+import java.awt.Color;
 
 public class Constants {
     public static final String STRUCTURE_PROPERTY = Constants.class.getPackage().getName() + ".structure";
@@ -57,5 +60,7 @@ public class Constants {
 
     public static final String KIND_FUNCTIONS = "functions";
     public static final String KIND_FUNCTION = "function";
+
+    public static final Color borderSearchFieldColor = JBColor.namedColor("Plugins.SearchField.borderColor", new JBColor(0xC5C5C5, 0x515151));
 
 }

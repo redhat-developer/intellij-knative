@@ -11,7 +11,7 @@
 package com.redhat.devtools.intellij.knative.ui.brdWindow.runFuncWindowTab;
 
 import com.intellij.openapi.wm.ToolWindow;
-import com.redhat.devtools.intellij.knative.ui.brdWindow.BRDFuncPanel;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.BuildRunDeployFuncPanel;
 import com.redhat.devtools.intellij.knative.ui.brdWindow.FuncActionPipeline;
 import com.redhat.devtools.intellij.knative.ui.brdWindow.FuncActionTask;
 import com.redhat.devtools.intellij.knative.ui.brdWindow.IFuncAction;
@@ -23,7 +23,7 @@ import java.util.List;
 
 import static com.redhat.devtools.intellij.knative.Constants.RUNFUNC_CONTENT_NAME;
 
-public class RunFuncPanel extends BRDFuncPanel {
+public class RunFuncPanel extends BuildRunDeployFuncPanel {
 
     public RunFuncPanel(ToolWindow toolWindow) {
         super(toolWindow, RUNFUNC_CONTENT_NAME);

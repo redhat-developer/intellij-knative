@@ -52,7 +52,7 @@ import java.util.function.Supplier;
 
 import static com.intellij.ui.AnimatedIcon.ANIMATION_IN_RENDERER_ALLOWED;
 
-public abstract class BRDFuncPanel extends ContentImpl {
+public abstract class BuildRunDeployFuncPanel extends ContentImpl {
 
     protected final ToolWindow toolWindow;
     private final String displayName;
@@ -62,7 +62,7 @@ public abstract class BRDFuncPanel extends ContentImpl {
     protected Tree buildTree;
     protected boolean showHistory;
 
-    public BRDFuncPanel(ToolWindow toolWindow, String displayName) {
+    public BuildRunDeployFuncPanel(ToolWindow toolWindow, String displayName) {
         super(null, displayName, true);
         this.toolWindow = toolWindow;
         this.displayName = displayName;
