@@ -20,19 +20,26 @@ import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionPipelineBuilder;
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionTask;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.IFuncActionPipeline;
 import com.redhat.devtools.intellij.knative.utils.FuncUtils;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 
-import static com.intellij.openapi.ui.Messages.CANCEL_BUTTON;
-import static com.intellij.openapi.ui.Messages.OK_BUTTON;
+import static com.intellij.openapi.ui.Messages.getCancelButton;
+import static com.intellij.openapi.ui.Messages.getOkButton;
 import static com.intellij.openapi.ui.Messages.showOkCancelDialog;
 import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_BUILD_DEPLOY;
+import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymizeResource;
 
 public class DeployAction extends BuildAction {
+
+    private static final Logger logger = LoggerFactory.getLogger(DeployAction.class);
 
     public DeployAction() {
         super();
@@ -49,16 +56,39 @@ public class DeployAction extends BuildAction {
             return;
         }
 
-        ExecHelper.submit(() -> {
-            doExecuteAction(getEventProject(anActionEvent), function, registryAndImage.getFirst(),
-                    registryAndImage.getSecond(), knCli, null, telemetry);
-        });
+        IFuncActionPipeline deployPipeline = new FuncActionPipelineBuilder()
+                .createDeployPipeline(getEventProject(anActionEvent), function)
+                .withBuildTask((task) -> doBuild(knCli, task))
+                .withTask("deployFunc", (task) -> doDeploy(node.getName(), knCli, task,
+                        registryAndImage.getFirst(), registryAndImage.getSecond(), telemetry))
+                .build();
+        knCli.getFuncActionPipelineManager().start(deployPipeline);
     }
 
-    @Override
-    protected void doExecute(FuncActionTask task, Kn knCli, String namespace,
-                             String localPathFunc, String registry, String image) throws IOException {
-        knCli.deployFunc(namespace, localPathFunc, registry, image);
+    private void doBuild(Kn knCli, FuncActionTask funcActionTask) {
+        ExecHelper.submit(() -> BuildAction.execute(
+                funcActionTask.getProject(),
+                funcActionTask.getFunction(),
+                knCli,
+                funcActionTask)
+        );
+    }
+
+    protected void doDeploy(String name, Kn knCli, FuncActionTask funcActionTask, String registry, String image, TelemetryMessageBuilder.ActionMessage telemetry) {
+        ExecHelper.submit(() -> {
+            try {
+                knCli.deployFunc(knCli.getNamespace(), funcActionTask.getFunction().getLocalPath(), registry, image,
+                        funcActionTask.getTerminalExecutionConsole(), funcActionTask.getProcessListener());
+                telemetry
+                        .result(anonymizeResource(name, knCli.getNamespace(), "Function " + name + " is running locally"))
+                        .send();
+            } catch (IOException e) {
+                logger.warn(e.getLocalizedMessage(), e);
+                telemetry
+                        .error(anonymizeResource(name, knCli.getNamespace(), e.getLocalizedMessage()))
+                        .send();
+            }
+        });
     }
 
     @Override
@@ -73,7 +103,7 @@ public class DeployAction extends BuildAction {
 
         int result = showOkCancelDialog(message,
                 "Deploy Function " + name,
-                OK_BUTTON, CANCEL_BUTTON, null);
+                getOkButton(), getCancelButton(), null);
         return result == Messages.OK;
     }
 

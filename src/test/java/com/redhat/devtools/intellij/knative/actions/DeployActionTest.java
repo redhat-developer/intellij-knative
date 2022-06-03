@@ -67,7 +67,7 @@ public class DeployActionTest extends ActionTest {
             treeHelperMockedStatic.when(() -> TreeHelper.getKn(any(Project.class))).thenReturn(kn);
             action.actionPerformed(anActionEvent);
             Thread.sleep(1000);
-            verify(kn, times(0)).deployFunc(anyString(), anyString(), anyString(), anyString());
+            verify(kn, times(0)).deployFunc(anyString(), anyString(), anyString(), anyString(), any(), any());
         }
     }
 
@@ -88,7 +88,7 @@ public class DeployActionTest extends ActionTest {
                         messagesMockedStatic.when(() -> Messages.showOkCancelDialog(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
                         action.actionPerformed(anActionEvent);
                         Thread.sleep(1000);
-                        verify(kn, times(1)).deployFunc("namespace", "path", "", "test");
+                        verify(kn, times(1)).deployFunc("namespace", "path", "", "test", null, null);
                     }
                 }
             }
@@ -115,7 +115,7 @@ public class DeployActionTest extends ActionTest {
                             mockTelemetry(telemetryServiceMockedStatic);
                             action.actionPerformed(anActionEvent);
                             Thread.sleep(1000);
-                            verify(kn, times(0)).deployFunc("namespace", "path", "", "test");
+                            verify(kn, times(0)).deployFunc("namespace", "path", "", "test", null, null);
                         }
                     }
                 }
@@ -141,7 +141,7 @@ public class DeployActionTest extends ActionTest {
                         messagesMockedStatic.when(() -> Messages.showOkCancelDialog(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
                         action.actionPerformed(anActionEvent);
                         Thread.sleep(1000);
-                        verify(kn, times(1)).deployFunc("namespace", "path", "test", "");
+                        verify(kn, times(1)).deployFunc("namespace", "path", "test", "",null, null);
                     }
                 }
             }
@@ -172,7 +172,7 @@ public class DeployActionTest extends ActionTest {
                             messagesMockedStatic.when(() -> Messages.showOkCancelDialog(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
                             action.actionPerformed(anActionEvent);
                             Thread.sleep(1000);
-                            verify(kn, times(1)).deployFunc("namespace", "path", "", "image");
+                            verify(kn, times(1)).deployFunc("namespace", "path", "", "image", null, null);
                         }
                     }
                 }
@@ -198,7 +198,7 @@ public class DeployActionTest extends ActionTest {
                         messagesMockedStatic.when(() -> Messages.showOkCancelDialog(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
                         action.actionPerformed(anActionEvent);
                         Thread.sleep(1000);
-                        verify(kn, times(1)).deployFunc("namespace", "path", null, "image");
+                        verify(kn, times(1)).deployFunc("namespace", "path", null, "image", null, null);
                     }
                 }
             }
@@ -226,7 +226,7 @@ public class DeployActionTest extends ActionTest {
                             messagesMockedStatic.when(() -> Messages.showOkCancelDialog(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
                             action.actionPerformed(anActionEvent);
                             Thread.sleep(1000);
-                            verify(kn, times(0)).deployFunc("namespace", "path", "", "image");
+                            verify(kn, times(0)).deployFunc("namespace", "path", "", "image", null, null);
                         }
                     }
                 }
@@ -255,7 +255,7 @@ public class DeployActionTest extends ActionTest {
                         yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("");
                         action.actionPerformed(anActionEvent);
                         Thread.sleep(1000);
-                        verify(kn, times(0)).deployFunc("namespace","path", "", "image");
+                        verify(kn, times(0)).deployFunc("namespace","path", "", "image", null, null);
                     }
                 }
             }

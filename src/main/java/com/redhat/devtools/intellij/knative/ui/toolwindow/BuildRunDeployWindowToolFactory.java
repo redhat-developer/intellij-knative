@@ -21,6 +21,7 @@ import com.intellij.ui.content.ContentManagerListener;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.BuildRunDeployFuncPanel;
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.buildFuncWindowTab.BuildFuncPanel;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.deployFuncWindowTab.DeployFuncPanel;
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.runFuncWindowTab.RunFuncPanel;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import org.jetbrains.annotations.NotNull;
@@ -46,6 +47,9 @@ public class BuildRunDeployWindowToolFactory implements ToolWindowFactory {
 
         RunFuncPanel runFuncPanel = new RunFuncPanel(window);
         window.getContentManager().addContent(runFuncPanel);
+
+        DeployFuncPanel deployFuncPanel = new DeployFuncPanel(window);
+        window.getContentManager().addContent(deployFuncPanel);
 
         window.getContentManager().addContentManagerListener(new ContentChangeManagerListener());
 

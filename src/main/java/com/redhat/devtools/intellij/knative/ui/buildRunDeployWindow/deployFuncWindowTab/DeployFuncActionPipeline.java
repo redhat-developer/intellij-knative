@@ -8,21 +8,21 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.runFuncWindowTab;
+package com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.deployFuncWindowTab;
 
 import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionPipeline;
 
-import static com.redhat.devtools.intellij.knative.Constants.RUNFUNC_CONTENT_NAME;
+import static com.redhat.devtools.intellij.knative.Constants.DEPLOYFUNC_CONTENT_NAME;
 
-public class RunFuncActionPipeline extends FuncActionPipeline {
-    public RunFuncActionPipeline(Project project, Function function) {
-        super("Run", project, function);
+public class DeployFuncActionPipeline extends FuncActionPipeline {
+    public DeployFuncActionPipeline(Project project, Function function) {
+        super("Deploy", project, function);
     }
 
     @Override
     protected String getTabName() {
-        return RUNFUNC_CONTENT_NAME;
+        return DEPLOYFUNC_CONTENT_NAME;
     }
 }

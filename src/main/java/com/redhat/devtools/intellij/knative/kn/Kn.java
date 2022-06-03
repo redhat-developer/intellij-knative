@@ -224,9 +224,11 @@ public interface Kn {
      * @param path      path where the source code is stored
      * @param registry  registry to use
      * @param image     image name. This option takes precedence over registry which can be omitted
+     * @param terminalExecutionConsole
+     * @param processListener
      * @throws IOException if communication errored
      */
-    void deployFunc(String namespace, String path, String registry, String image) throws IOException;
+    void deployFunc(String namespace, String path, String registry, String image, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException;
 
     /**
      * Invokes the Function by sending a test request to the currently running
