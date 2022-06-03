@@ -455,19 +455,23 @@ public class KnCliTest extends BaseTest {
 
     @Test
     public void DeployFunc_RegistryIsInsertedButNoImage_DeployIsCalled() throws IOException {
+        TerminalExecutionConsole terminalExecutionConsole = mock(TerminalExecutionConsole.class);
+        ProcessListener processListener = mock(ProcessListener.class);
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            kn.deployFunc("namespace", "path", "registry", "", null, null);
+            kn.deployFunc("namespace", "path", "registry", "", terminalExecutionConsole, processListener);
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), anyString(), eq("deploy"), eq("-r"), eq("registry"), eq("-n"), eq("namespace"), eq("-p"), eq("path"), eq("-v")));
+                    ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), eq(terminalExecutionConsole), eq(processListener), anyString(), eq("deploy"), eq("-r"), eq("registry"), eq("-n"), eq("namespace"), eq("-p"), eq("path"), eq("-v"), eq("-b"), eq("disabled")));
         }
     }
 
     @Test
     public void DeployFunc_ImageIsInserted_DeployIsCalled() throws IOException {
+        TerminalExecutionConsole terminalExecutionConsole = mock(TerminalExecutionConsole.class);
+        ProcessListener processListener = mock(ProcessListener.class);
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            kn.deployFunc("namespace", "path", "registry", "image", null, null);
+            kn.deployFunc("namespace", "path", "registry", "image", terminalExecutionConsole, processListener);
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), anyString(), eq("deploy"), eq("-i"), eq("image"), eq("-n"), eq("namespace"), eq("-p"), eq("path"), eq("-v")));
+                    ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), eq(terminalExecutionConsole), eq(processListener), anyString(), eq("deploy"), eq("-i"), eq("image"), eq("-n"), eq("namespace"), eq("-p"), eq("path"), eq("-v"), eq("-b"), eq("disabled")));
         }
     }
 

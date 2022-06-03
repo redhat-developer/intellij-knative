@@ -98,10 +98,8 @@ public class BuildAction extends KnAction {
         IFuncActionPipeline buildPipeline = new FuncActionPipelineBuilder()
                 .createBuildPipeline(project, function)
                 .withBuildTask((task) ->
-                        ExecHelper.submit(() -> {
-                        doExecuteAction(project, function, registryAndImage.getFirst(),
-                                registryAndImage.getSecond(), knCli, task, telemetry);
-                        })
+                        ExecHelper.submit(() -> doExecuteAction(project, function, registryAndImage.getFirst(),
+                                registryAndImage.getSecond(), knCli, task, telemetry))
                 )
                 .build();
         knCli.getFuncActionPipelineManager().start(buildPipeline);
@@ -247,7 +245,7 @@ public class BuildAction extends KnAction {
         return TelemetryService.instance().action(NAME_PREFIX_BUILD_DEPLOY + "build func");
     }
 
-    protected String getSuccessMessage(String namespace, String name) {
+    private String getSuccessMessage(String namespace, String name) {
         return "Function " + name + " has been successfully built";
     }
 

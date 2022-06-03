@@ -76,16 +76,17 @@ public class DeployAction extends BuildAction {
 
     protected void doDeploy(String name, Kn knCli, FuncActionTask funcActionTask, String registry, String image, TelemetryMessageBuilder.ActionMessage telemetry) {
         ExecHelper.submit(() -> {
+            String namespace = knCli.getNamespace();
             try {
-                knCli.deployFunc(knCli.getNamespace(), funcActionTask.getFunction().getLocalPath(), registry, image,
+                knCli.deployFunc(namespace, funcActionTask.getFunction().getLocalPath(), registry, image,
                         funcActionTask.getTerminalExecutionConsole(), funcActionTask.getProcessListener());
                 telemetry
-                        .result(anonymizeResource(name, knCli.getNamespace(), "Function " + name + " is running locally"))
+                        .result(anonymizeResource(name, knCli.getNamespace(), getSuccessMessage(namespace, name)))
                         .send();
             } catch (IOException e) {
                 logger.warn(e.getLocalizedMessage(), e);
                 telemetry
-                        .error(anonymizeResource(name, knCli.getNamespace(), e.getLocalizedMessage()))
+                        .error(anonymizeResource(name, namespace, e.getLocalizedMessage()))
                         .send();
             }
         });
@@ -111,7 +112,7 @@ public class DeployAction extends BuildAction {
         return TelemetryService.instance().action(NAME_PREFIX_BUILD_DEPLOY + "deploy func");
     }
 
-    protected String getSuccessMessage(String namespace, String name) {
+    private String getSuccessMessage(String namespace, String name) {
         return "Function " + name + " in namespace " + namespace + " has been successfully deployed";
     }
 
