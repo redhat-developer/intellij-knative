@@ -25,7 +25,7 @@ public class ShowFunctionTaskHistoryAction extends DumbAwareAction {
     private static final Icon showHistoryIcon = AllIcons.General.InspectionsEye;
 
     public ShowFunctionTaskHistoryAction(BuildRunDeployFuncPanel panel) {
-        super("Show Function Build History", "Show function build history", showHistoryIcon);
+        super("Show Action History", "Show function action execution history", showHistoryIcon);
         this.panel = panel;
     }
 
@@ -37,12 +37,12 @@ public class ShowFunctionTaskHistoryAction extends DumbAwareAction {
     @Override
     public void update(@NotNull AnActionEvent e) {
         if (panel.isShowHistory()) {
-            e.getPresentation().setText("Hide Function Build History");
-            e.getPresentation().setDescription("Hide function build history");
+            e.getPresentation().setText("Hide Action History");
+            e.getPresentation().setDescription("Hide function action execution history");
             e.getPresentation().setIcon(IconLoader.getTransparentIcon(showHistoryIcon));
         } else {
-            e.getPresentation().setText("Show Function Build History");
-            e.getPresentation().setDescription("Show function build history");
+            e.getPresentation().setText("Show Action History");
+            e.getPresentation().setDescription("Show function action execution history");
             e.getPresentation().setIcon(showHistoryIcon);
         }
     }

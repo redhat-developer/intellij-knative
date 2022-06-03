@@ -136,6 +136,9 @@ public class BuildActionTest extends ActionTest {
                                 (mock, context) -> {
                                     doNothing().when(mock).start();
                                 })) {
+                            try(MockedStatic<FuncActionPipelineManager> funcActionPipelineManagerMockedStatic = mockStatic(FuncActionPipelineManager.class)) {
+
+                                funcActionPipelineManagerMockedStatic.when(() -> FuncActionPipelineManager.getInstance()).thenReturn(manager);
                                 treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
                                 pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
                                 when(kn.getFuncFileURL(any())).thenReturn(mock(URL.class));
@@ -146,7 +149,8 @@ public class BuildActionTest extends ActionTest {
                                 action.actionPerformed(anActionEvent);
                                 Thread.sleep(1000);
 
-                                verify(buildFuncActionPipelineMockedConstruction.constructed().get(0), times(1)).start();
+                                verify(manager, times(1)).start(buildFuncActionPipelineMockedConstruction.constructed().get(0));
+                            }
                         }
                     }
                 }

@@ -25,7 +25,7 @@ public class StopFunctionTaskAction extends DumbAwareAction {
     private static final Icon showHistoryIcon = AllIcons.Actions.Suspend;
 
     public StopFunctionTaskAction(BuildRunDeployFuncPanel panel) {
-        super("Stop Function Task", "Stop function task execution", showHistoryIcon);
+        super("Stop Function Execution", "Stop function task execution", showHistoryIcon);
         this.panel = panel;
     }
 
