@@ -8,16 +8,16 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.buildFunc;
+package com.redhat.devtools.intellij.knative.ui.brdWindow;
 
 import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessListener;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Pair;
 import com.intellij.terminal.TerminalExecutionConsole;
 import com.intellij.ui.AnimatedIcon;
+import com.intellij.util.Consumer;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,30 +26,46 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class BuildFuncHandler {
-
-    private Project project;
-    private Function function;
+public class FuncActionTask implements IFuncAction {
+    protected final FuncActionPipeline actionFuncHandler;
+    private final String actionName;
     private TerminalExecutionConsole terminalExecutionConsole;
     private ProcessListener processListener;
     private long startTime;
     private long endTime;
     private Icon[] stateIcon;
     private String[] state;
+    private final int stepIndex;
+    private final Consumer<FuncActionTask> doExecute;
 
-    public BuildFuncHandler(Project project, Function function){
-        this.project = project;
-        this.function = function;
-        this.startTime = System.currentTimeMillis();
+    public FuncActionTask(FuncActionPipeline actionFuncHandler, String actionName, Consumer<FuncActionTask> doExecute, int stepIndex){
+        this.actionFuncHandler = actionFuncHandler;
+        this.actionName = actionName;
+        this.stepIndex = stepIndex;
+        this.startTime = -1;
         this.endTime = -1;
-        init(project);
+        this.doExecute = doExecute;
+        init();
     }
 
-    private void init(Project project) {
-        stateIcon = new Icon[]{new AnimatedIcon.FS()};
-        state = new String[]{"running ..."};
-        TerminalExecutionConsole commonTerminalExecutionConsole = new TerminalExecutionConsole(project, null);
+    public void doExecute() {
+        this.doExecute.consume(this);
+    }
+
+    private void init() {
+        FuncActionTask that = this;
+        stateIcon = new Icon[]{ AllIcons.Actions.Profile };
+        state = new String[]{"Waiting to start"};
+        TerminalExecutionConsole commonTerminalExecutionConsole = new TerminalExecutionConsole(actionFuncHandler.getProject(), null);
         ProcessListener processListener = new ProcessAdapter() {
+            @Override
+            public void startNotified(@NotNull ProcessEvent event) {
+                startTime = System.currentTimeMillis();
+                stateIcon = new Icon[]{new AnimatedIcon.FS()};
+                state = new String[]{""};
+                actionFuncHandler.fireChangeRunningStep();
+            }
+
             @Override
             public void processTerminated(@NotNull ProcessEvent event) {
                 if (event.getExitCode() == 0) {
@@ -59,6 +75,7 @@ public class BuildFuncHandler {
                     stateIcon[0] = AllIcons.General.BalloonError;
                     state[0] = "failed";
                 }
+                actionFuncHandler.fireTerminatedStep(that);
                 setEndTime();
             }
         };
@@ -66,16 +83,12 @@ public class BuildFuncHandler {
         setTerminalExecutionConsole(commonTerminalExecutionConsole);
     }
 
-    public Project getProject() {
-        return project;
+    public String getActionName() {
+        return actionName;
     }
 
-    public String getFuncName() {
-        return function.getName();
-    }
-
-    public Function getFunction() {
-        return function;
+    public FuncActionPipeline getActionFuncHandler() {
+        return actionFuncHandler;
     }
 
     public TerminalExecutionConsole getTerminalExecutionConsole() {
@@ -102,6 +115,16 @@ public class BuildFuncHandler {
         return endTime;
     }
 
+    @Override
+    public Project getProject() {
+        return actionFuncHandler.getProject();
+    }
+
+    @Override
+    public String getFuncName() {
+        return actionFuncHandler.getFuncName();
+    }
+
     public void setEndTime() {
         this.endTime = System.currentTimeMillis();
     }
@@ -112,6 +135,14 @@ public class BuildFuncHandler {
 
     public String getState() {
         return state[0];
+    }
+
+    public void setStateIcon(Icon[] stateIcon) {
+        this.stateIcon = stateIcon;
+    }
+
+    public void setState(String[] state) {
+        this.state = state;
     }
 
     public String getStartingDate() {
@@ -128,9 +159,12 @@ public class BuildFuncHandler {
         return state[0].equals("successful");
     }
 
-    public void dispose() {
-        if (terminalExecutionConsole != null) {
-            terminalExecutionConsole.dispose();
-        }
+    @Override
+    public Function getFunction() {
+        return actionFuncHandler.getFunction();
+    }
+
+    public int getStepIndex() {
+        return stepIndex;
     }
 }

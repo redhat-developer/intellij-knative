@@ -11,13 +11,17 @@
 package com.redhat.devtools.intellij.knative.actions.func;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
+import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.actions.KnAction;
+import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.FuncActionPipeline;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.FuncActionTask;
+import com.redhat.devtools.intellij.knative.ui.brdWindow.FuncActionsPipelineBuilder;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +45,9 @@ public class RunAction extends KnAction {
         ParentableNode node = getElement(selected);
         String name = node.getName();
         String namespace = knCli.getNamespace();
-        String localPathFunc = ((KnFunctionNode) node).getFunction().getLocalPath();
+        Project project = getEventProject(anActionEvent);
+        Function function = ((KnFunctionNode) node).getFunction();
+        String localPathFunc = function.getLocalPath();
         if (localPathFunc.isEmpty()) {
             telemetry
                     .result(anonymizeResource(name, namespace, "Function " + name + "is not opened locally"))
@@ -49,21 +55,34 @@ public class RunAction extends KnAction {
             return;
         }
 
+        FuncActionPipeline runPipeline = new FuncActionsPipelineBuilder()
+                .createRunPipeline(project, function)
+                .withBuildTask((task) -> doBuild(knCli, task))
+                .withTask("runFunc", (task) -> doRun(name, knCli, task, telemetry))
+                .build();
+        runPipeline.start();
+    }
 
+    private void doBuild(Kn knCli, FuncActionTask funcActionTask) {
+        ExecHelper.submit(() -> BuildAction.execute(
+                funcActionTask.getProject(),
+                funcActionTask.getFunction(),
+                knCli,
+                funcActionTask)
+        );
+    }
+
+    private void doRun(String name, Kn knCli, FuncActionTask funcActionTask, TelemetryMessageBuilder.ActionMessage telemetry) {
         ExecHelper.submit(() -> {
             try {
-                CommonTerminalExecutionConsole terminalExecutionConsole = knCli.createTerminalTabToReuse();
-                BuildAction.execute(getEventProject(anActionEvent), ((KnFunctionNode) node).getFunction(),
-                        knCli, terminalExecutionConsole, "run");
-
-                knCli.runFunc(localPathFunc, terminalExecutionConsole);
+                knCli.runFunc(funcActionTask.getFunction().getLocalPath(), funcActionTask.getTerminalExecutionConsole(), funcActionTask.getProcessListener());
                 telemetry
-                        .result(anonymizeResource(name, namespace, "Function " + name + " is running locally"))
+                        .result(anonymizeResource(name, knCli.getNamespace(), "Function " + name + " is running locally"))
                         .send();
             } catch (IOException e) {
                 logger.warn(e.getLocalizedMessage(), e);
                 telemetry
-                        .error(anonymizeResource(name, namespace, e.getLocalizedMessage()))
+                        .error(anonymizeResource(name, knCli.getNamespace(), e.getLocalizedMessage()))
                         .send();
             }
         });

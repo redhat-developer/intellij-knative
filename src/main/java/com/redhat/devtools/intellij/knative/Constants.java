@@ -11,6 +11,9 @@
 package com.redhat.devtools.intellij.knative;
 
 import com.intellij.openapi.util.Key;
+import com.intellij.ui.JBColor;
+
+import java.awt.Color;
 
 public class Constants {
     public static final String STRUCTURE_PROPERTY = Constants.class.getPackage().getName() + ".structure";
@@ -27,6 +30,7 @@ public class Constants {
     public static final String BUILDFUNC_TOOLWINDOW_ID = "BuildFunc";
 
     public static final String BUILDFUNC_CONTENT_NAME = "Build Output";
+    public static final String RUNFUNC_CONTENT_NAME = "Run Output";
 
     public static final String[] YAML_NAME_PATH = new String[] { "metadata", "name" };
     public static final String[] YAML_FIRST_IMAGE_PATH = new String[] { "spec", "template", "spec", "containers[0]", "image" };
@@ -56,5 +60,7 @@ public class Constants {
 
     public static final String KIND_FUNCTIONS = "functions";
     public static final String KIND_FUNCTION = "function";
+
+    public static final Color borderSearchFieldColor = JBColor.namedColor("Plugins.SearchField.borderColor", new JBColor(0xC5C5C5, 0x515151));
 
 }
