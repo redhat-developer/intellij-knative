@@ -8,48 +8,48 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.brdWindow;
+package com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.util.Consumer;
 import com.redhat.devtools.intellij.knative.kn.Function;
-import com.redhat.devtools.intellij.knative.ui.brdWindow.buildFuncWindowTab.BuildFuncActionPipeline;
-import com.redhat.devtools.intellij.knative.ui.brdWindow.buildFuncWindowTab.BuildFuncActionTask;
-import com.redhat.devtools.intellij.knative.ui.brdWindow.runFuncWindowTab.RunFuncActionPipeline;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.buildFuncWindowTab.BuildFuncActionPipeline;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.buildFuncWindowTab.BuildFuncActionTask;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.runFuncWindowTab.RunFuncActionPipeline;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class FuncActionsPipelineBuilder {
+public class FuncActionPipelineBuilder {
 
     private final List<FuncActionTask> tasks = new ArrayList<>();
     private FuncActionPipeline pipeline;
 
-    public FuncActionsPipelineBuilder(){}
+    public FuncActionPipelineBuilder(){}
 
-    public FuncActionsPipelineBuilder createBuildPipeline(Project project, Function function) {
+    public FuncActionPipelineBuilder createBuildPipeline(Project project, Function function) {
         pipeline = new BuildFuncActionPipeline(project, function);
         return this;
     }
 
-    public FuncActionsPipelineBuilder createRunPipeline(Project project, Function function) {
+    public FuncActionPipelineBuilder createRunPipeline(Project project, Function function) {
         pipeline = new RunFuncActionPipeline(project, function);
         return this;
     }
 
-    public FuncActionsPipelineBuilder withBuildTask(Consumer<FuncActionTask> doExecute) {
+    public FuncActionPipelineBuilder withBuildTask(Consumer<FuncActionTask> doExecute) {
         int taskIndex = tasks.size();
         tasks.add(taskIndex, new BuildFuncActionTask(pipeline, doExecute, taskIndex));
         return this;
     }
 
-    public FuncActionsPipelineBuilder withTask(String name, Consumer<FuncActionTask> doExecute) {
+    public FuncActionPipelineBuilder withTask(String name, Consumer<FuncActionTask> doExecute) {
         int taskIndex = tasks.size();
         tasks.add(taskIndex, new FuncActionTask(pipeline, name, doExecute, taskIndex));
         return this;
     }
 
-    public FuncActionPipeline build() {
+    public IFuncActionPipeline build() {
         if (pipeline != null) {
             pipeline.setTasks(tasks);
         }

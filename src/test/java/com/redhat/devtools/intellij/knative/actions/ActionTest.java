@@ -24,7 +24,8 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
-import com.redhat.devtools.intellij.knative.ui.brdWindow.buildFuncWindowTab.BuildFuncPanel;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionPipelineManager;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.buildFuncWindowTab.BuildFuncPanel;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import org.junit.Before;
 import org.mockito.MockedStatic;
@@ -46,6 +47,7 @@ public abstract class ActionTest extends FixtureBaseTest {
     protected Presentation presentation;
     protected TreeAction treeAction;
     protected TelemetryMessageBuilder.ActionMessage telemetry;
+    protected FuncActionPipelineManager manager;
 
 
     @Before
@@ -64,6 +66,7 @@ public abstract class ActionTest extends FixtureBaseTest {
         treeAction = mock(TreeAction.class);
         telemetry = mock(TelemetryMessageBuilder.ActionMessage.class);
         presentation = new Presentation();
+        manager = mock(FuncActionPipelineManager.class);
 
         when(path.getLastPathComponent()).thenReturn(knServiceNode);
         when(path1.getLastPathComponent()).thenReturn(knRevisionNode);

@@ -8,7 +8,7 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.brdWindow;
+package com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow;
 
 import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.knative.kn.Function;
@@ -36,5 +36,5 @@ public interface IFuncAction {
 
     String getStartingDate();
 
-
+    void stop();
 }

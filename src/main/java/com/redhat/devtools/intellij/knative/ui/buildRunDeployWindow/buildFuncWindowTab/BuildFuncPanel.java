@@ -8,11 +8,11 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.brdWindow.buildFuncWindowTab;
+package com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.buildFuncWindowTab;
 
 import com.intellij.openapi.wm.ToolWindow;
-import com.redhat.devtools.intellij.knative.ui.brdWindow.BuildRunDeployFuncPanel;
-import com.redhat.devtools.intellij.knative.ui.brdWindow.IFuncAction;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.BuildRunDeployFuncPanel;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.IFuncAction;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.List;

@@ -13,7 +13,9 @@ package com.redhat.devtools.intellij.knative.kn;
 import com.intellij.execution.process.ProcessListener;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.project.Project;
+import com.redhat.devtools.intellij.common.model.ProcessHandlerInput;
 import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
+import com.redhat.devtools.intellij.common.utils.ExecProcessHandler;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
 import io.fabric8.kubernetes.client.Watch;
@@ -210,7 +212,9 @@ public interface Kn {
      * @param terminalExecutionConsole terminal tab to be used to run the command. If null a new tab will be created
      * @throws IOException if communication errored
      */
-    void buildFunc(String path, String registry, String image, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException;
+    void buildFunc(String path, String registry, String image, ConsoleView terminalExecutionConsole,
+                   java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> processHandlerFunction,
+                   ProcessListener processListener) throws IOException;
 
     /**
      * Deploy a function from path
@@ -241,7 +245,9 @@ public interface Kn {
      * @param processListener
      * @throws IOException if communication errored
      */
-    void runFunc(String path, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException;
+    void runFunc(String path, ConsoleView terminalExecutionConsole,
+                 java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> processHandlerFunction,
+                 ProcessListener processListener) throws IOException;
 
     /**
      * Add environment variable to the function configuration

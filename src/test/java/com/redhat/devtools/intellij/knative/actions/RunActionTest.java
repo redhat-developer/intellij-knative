@@ -17,8 +17,8 @@ import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.actions.func.RunAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
-import com.redhat.devtools.intellij.knative.ui.brdWindow.FuncActionTask;
-import com.redhat.devtools.intellij.knative.ui.brdWindow.runFuncWindowTab.RunFuncActionPipeline;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionTask;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.runFuncWindowTab.RunFuncActionPipeline;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 
 import java.io.IOException;
@@ -27,7 +27,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
-
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -59,7 +58,7 @@ public class RunActionTest extends ActionTest {
             treeHelperMockedStatic.when(() -> TreeHelper.getKn(any(Project.class))).thenReturn(kn);
             action.actionPerformed(anActionEvent);
             Thread.sleep(1000);
-            verify(kn, times(0)).runFunc(anyString(), any(), any());
+            verify(kn, times(0)).runFunc(anyString(), any(), any(), any());
         }
     }
 

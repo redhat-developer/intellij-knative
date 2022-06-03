@@ -14,17 +14,17 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.util.IconLoader;
-import com.redhat.devtools.intellij.knative.ui.brdWindow.BuildRunDeployFuncPanel;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.BuildRunDeployFuncPanel;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;
 
-public class ShowBuildHistoryAction  extends DumbAwareAction {
+public class ShowFunctionTaskHistoryAction extends DumbAwareAction {
 
     private final BuildRunDeployFuncPanel panel;
     private static final Icon showHistoryIcon = AllIcons.General.InspectionsEye;
 
-    public ShowBuildHistoryAction(BuildRunDeployFuncPanel panel) {
+    public ShowFunctionTaskHistoryAction(BuildRunDeployFuncPanel panel) {
         super("Show Function Build History", "Show function build history", showHistoryIcon);
         this.panel = panel;
     }

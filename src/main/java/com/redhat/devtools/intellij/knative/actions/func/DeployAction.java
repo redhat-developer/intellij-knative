@@ -11,8 +11,6 @@
 package com.redhat.devtools.intellij.knative.actions.func;
 
 import com.google.common.base.Strings;
-import com.intellij.execution.process.ProcessListener;
-import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Pair;
@@ -22,6 +20,7 @@ import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionTask;
 import com.redhat.devtools.intellij.knative.utils.FuncUtils;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 
@@ -52,14 +51,13 @@ public class DeployAction extends BuildAction {
 
         ExecHelper.submit(() -> {
             doExecuteAction(getEventProject(anActionEvent), function, registryAndImage.getFirst(),
-                    registryAndImage.getSecond(), knCli, null,
-                    null, telemetry);
+                    registryAndImage.getSecond(), knCli, null, telemetry);
         });
     }
 
     @Override
-    protected void doExecute(ConsoleView terminalExecutionConsole, ProcessListener processListener,
-                             Kn knCli, String namespace, String localPathFunc, String registry, String image) throws IOException {
+    protected void doExecute(FuncActionTask task, Kn knCli, String namespace,
+                             String localPathFunc, String registry, String image) throws IOException {
         knCli.deployFunc(namespace, localPathFunc, registry, image);
     }
 

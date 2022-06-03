@@ -8,7 +8,7 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.brdWindow;
+package com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow;
 
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.actionSystem.ActionManager;
@@ -27,7 +27,8 @@ import com.intellij.ui.content.impl.ContentImpl;
 import com.intellij.ui.treeStructure.Tree;
 import com.intellij.util.ui.UIUtil;
 import com.intellij.util.ui.tree.TreeUtil;
-import com.redhat.devtools.intellij.knative.actions.toolbar.ShowBuildHistoryAction;
+import com.redhat.devtools.intellij.knative.actions.toolbar.ShowFunctionTaskHistoryAction;
+import com.redhat.devtools.intellij.knative.actions.toolbar.StopFunctionTaskAction;
 import com.redhat.devtools.intellij.knative.utils.UIUtils;
 
 import javax.swing.Icon;
@@ -43,6 +44,7 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.BorderLayout;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -92,8 +94,9 @@ public abstract class BuildRunDeployFuncPanel extends ContentImpl {
     }
 
     protected List<AnAction> getToolbarActions() {
-        return Collections.singletonList(
-                new ShowBuildHistoryAction(this)
+        return Arrays.asList(
+                new ShowFunctionTaskHistoryAction(this),
+                new StopFunctionTaskAction(this)
         );
     }
 
@@ -376,5 +379,14 @@ public abstract class BuildRunDeployFuncPanel extends ContentImpl {
         return !funcAction.isSuccessfullyCompleted() ?
                 funcAction.getState() :
                 funcAction.getState() + " <span style=\"color: gray;\">At " + funcAction.getStartingDate() + "</span>";
+    }
+
+    public IFuncAction getSelectedFuncActionNode() {
+        Object pathComponent = buildTree.getLastSelectedPathComponent();
+        Object node = TreeUtil.getUserObject(pathComponent);
+        if (node instanceof FuncActionNodeDescriptor) {
+            return ((FuncActionNodeDescriptor) node).getElement();
+        }
+        return null;
     }
 }

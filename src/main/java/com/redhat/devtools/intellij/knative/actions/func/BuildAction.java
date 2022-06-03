@@ -22,7 +22,9 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.InputValidator;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Pair;
+import com.redhat.devtools.intellij.common.model.ProcessHandlerInput;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
+import com.redhat.devtools.intellij.common.utils.ExecProcessHandler;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.actions.KnAction;
@@ -31,9 +33,10 @@ import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
-import com.redhat.devtools.intellij.knative.ui.brdWindow.FuncActionPipeline;
-import com.redhat.devtools.intellij.knative.ui.brdWindow.FuncActionTask;
-import com.redhat.devtools.intellij.knative.ui.brdWindow.FuncActionsPipelineBuilder;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionPipelineManager;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionTask;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionPipelineBuilder;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.IFuncActionPipeline;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import org.slf4j.Logger;
@@ -77,7 +80,7 @@ public class BuildAction extends KnAction {
         }
 
         buildAction.doExecuteAction(project, function, registryAndImage.getFirst(),
-                registryAndImage.getSecond(), knCli, buildStepHandler.getTerminalExecutionConsole(), buildStepHandler.getProcessListener(), telemetry);
+                registryAndImage.getSecond(), knCli, buildStepHandler, telemetry);
     }
 
     @Override
@@ -92,17 +95,17 @@ public class BuildAction extends KnAction {
         }
 
         Project project = getEventProject(anActionEvent);
-        FuncActionPipeline buildPipeline = new FuncActionsPipelineBuilder()
+        IFuncActionPipeline buildPipeline = new FuncActionPipelineBuilder()
                 .createBuildPipeline(project, function)
                 .withBuildTask((task) ->
                         ExecHelper.submit(() -> {
                         doExecuteAction(project, function, registryAndImage.getFirst(),
-                                registryAndImage.getSecond(), knCli, task.getTerminalExecutionConsole(),
-                                task.getProcessListener(), telemetry);
+                                registryAndImage.getSecond(), knCli, task, telemetry);
                         })
                 )
                 .build();
-        buildPipeline.start();
+
+        FuncActionPipelineManager.getInstance().start(buildPipeline);
     }
 
     protected Pair<String, String> confirmAndGetRegistryImage(Function function, Kn knCli, TelemetryMessageBuilder.ActionMessage telemetry) {
@@ -163,14 +166,14 @@ public class BuildAction extends KnAction {
     }
 
     protected void doExecuteAction(Project project, Function function, String registry, String image,
-                                 Kn knCli, ConsoleView terminalExecutionConsole, ProcessListener processListener,
-                                 TelemetryMessageBuilder.ActionMessage telemetry) {
+                                   Kn knCli, FuncActionTask task,
+                                   TelemetryMessageBuilder.ActionMessage telemetry) {
         String name = function.getName();
         String namespace = knCli.getNamespace();
         String localPathFunc = function.getLocalPath();
         try {
             function.setBuilding(true);
-            doExecute(terminalExecutionConsole, processListener, knCli, namespace, localPathFunc, registry, image);
+            doExecute(task, knCli, namespace, localPathFunc, registry, image);
             telemetry
                     .result(anonymizeResource(name, namespace, getSuccessMessage(namespace, name)))
                     .send();
@@ -188,8 +191,11 @@ public class BuildAction extends KnAction {
         }
     }
 
-    protected void doExecute(ConsoleView terminalExecutionConsole, ProcessListener processListener, Kn knCli, String namespace, String localPathFunc, String registry, String image) throws IOException {
-        knCli.buildFunc(localPathFunc, registry, image, terminalExecutionConsole, processListener);
+    protected void doExecute(FuncActionTask task, Kn knCli, String namespace, String localPathFunc, String registry, String image) throws IOException {
+        ConsoleView terminalExecutionConsole = task != null ? task.getTerminalExecutionConsole() : null;
+        java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> processHandlerFunction = task != null ? task.getProcessHandlerFunction() : null;
+        ProcessListener processListener = task != null ? task.getProcessListener() : null;
+        knCli.buildFunc(localPathFunc, registry, image, terminalExecutionConsole, processHandlerFunction, processListener);
     }
 
     protected boolean isActionConfirmed(String name, String funcNamespace, String activeNamespace) {

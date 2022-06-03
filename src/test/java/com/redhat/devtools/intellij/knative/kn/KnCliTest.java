@@ -12,8 +12,10 @@ package com.redhat.devtools.intellij.knative.kn;
 
 import com.intellij.execution.process.ProcessListener;
 import com.intellij.terminal.TerminalExecutionConsole;
+import com.redhat.devtools.intellij.common.model.ProcessHandlerInput;
 import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
+import com.redhat.devtools.intellij.common.utils.ExecProcessHandler;
 import com.redhat.devtools.intellij.knative.BaseTest;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
@@ -415,11 +417,12 @@ public class KnCliTest extends BaseTest {
     public void BuildFunc_RegistryIsInsertedButNoImage_BuildIsCalled() throws IOException {
         TerminalExecutionConsole terminalExecutionConsole = mock(TerminalExecutionConsole.class);
         ProcessListener processListener = mock(ProcessListener.class);
+        java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> processHandlerFunction = mock(java.util.function.Function.class);
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            kn.buildFunc("path", "registry", "", terminalExecutionConsole, processListener);
+            kn.buildFunc("path", "registry", "", terminalExecutionConsole, processHandlerFunction, processListener);
             execHelperMockedStatic.verify(() ->
                     ExecHelper.executeWithTerminal(eq(null), anyString(), anyMap(),
-                            any(TerminalExecutionConsole.class), any(ProcessListener.class), anyString(),
+                            any(TerminalExecutionConsole.class), any(java.util.function.Function.class), any(ProcessListener.class), anyString(),
                             eq("build"), eq("-r"), eq("registry"), eq("-p"), eq("path"),
                             eq("-v")));
         }
@@ -429,11 +432,12 @@ public class KnCliTest extends BaseTest {
     public void BuildFunc_ImageIsInserted_BuildIsCalled() throws IOException {
         TerminalExecutionConsole terminalExecutionConsole = mock(TerminalExecutionConsole.class);
         ProcessListener processListener = mock(ProcessListener.class);
+        java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> processHandlerFunction = mock(java.util.function.Function.class);
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            kn.buildFunc("path", "registry", "image", terminalExecutionConsole, processListener);
+            kn.buildFunc("path", "registry", "image", terminalExecutionConsole, processHandlerFunction, processListener);
             execHelperMockedStatic.verify(() ->
                     ExecHelper.executeWithTerminal(eq(null), anyString(), anyMap(),
-                            any(TerminalExecutionConsole.class), any(ProcessListener.class), anyString(),
+                            any(TerminalExecutionConsole.class), any(java.util.function.Function.class), any(ProcessListener.class), anyString(),
                             eq("build"), eq("-i"), eq("image"), eq("-p"), eq("path"),
                             eq("-v")));
         }
@@ -443,7 +447,7 @@ public class KnCliTest extends BaseTest {
     public void BuildFunc_ClientFails_Throws() {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             execHelperMockedStatic.when(() -> ExecHelper.executeWithTerminal(any(), anyString())).thenThrow(new IOException("error"));
-            kn.buildFunc("", "", "", null, null);
+            kn.buildFunc("", "", "", null, null, null);
         } catch (IOException e) {
             assertEquals("error", e.getLocalizedMessage());
         }
@@ -523,12 +527,13 @@ public class KnCliTest extends BaseTest {
     @Test
     public void RunFunc_PathIsInserted_RunIsCalled() throws IOException {
         ProcessListener processListener = mock(ProcessListener.class);
+        java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> processHandlerFunction = mock(java.util.function.Function.class);
         CommonTerminalExecutionConsole commonTerminalExecutionConsole = mock(CommonTerminalExecutionConsole.class);
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            kn.runFunc("path", commonTerminalExecutionConsole, processListener);
+            kn.runFunc("path", commonTerminalExecutionConsole, processHandlerFunction, processListener);
             execHelperMockedStatic.verify(() ->
                     ExecHelper.executeWithTerminal(eq(null), anyString(), anyMap(),
-                            any(CommonTerminalExecutionConsole.class), any(ProcessListener.class), anyString(), eq("run"), eq("-p"), eq("path")));
+                            any(CommonTerminalExecutionConsole.class), any(java.util.function.Function.class), any(ProcessListener.class), anyString(), eq("run"), eq("-p"), eq("path")));
         }
     }
 
@@ -536,7 +541,7 @@ public class KnCliTest extends BaseTest {
     public void RunFunc_ClientFails_Throws() {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             execHelperMockedStatic.when(() -> ExecHelper.executeWithTerminal(any(), anyString())).thenThrow(new IOException("error"));
-            kn.runFunc("", null, null);
+            kn.runFunc("", null, null, null);
         } catch (IOException e) {
             assertEquals("error", e.getLocalizedMessage());
         }

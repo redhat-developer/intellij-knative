@@ -19,8 +19,10 @@ import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
+import com.redhat.devtools.intellij.common.model.ProcessHandlerInput;
 import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
+import com.redhat.devtools.intellij.common.utils.ExecProcessHandler;
 import com.redhat.devtools.intellij.common.utils.NetworkUtils;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
@@ -303,8 +305,11 @@ public class KnCli implements Kn {
     }
 
     @Override
-    public void buildFunc(String path, String registry, String image, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException {
-        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, processListener, getBuildDeployArgs("build", "", path, registry, image, true));
+    public void buildFunc(String path, String registry, String image, ConsoleView terminalExecutionConsole,
+                          java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> processHandlerFunction,
+                          ProcessListener processListener) throws IOException {
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole,
+                processHandlerFunction, processListener, getBuildDeployArgs("build", "", path, registry, image, true));
     }
 
     @Override
@@ -379,8 +384,10 @@ public class KnCli implements Kn {
     }
 
     @Override
-    public void runFunc(String path, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException {
-        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, processListener, funcCommand, "run", "-p", path);
+    public void runFunc(String path, ConsoleView terminalExecutionConsole,
+                        java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> processHandlerFunction,
+                        ProcessListener processListener) throws IOException {
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, processHandlerFunction, processListener, funcCommand, "run", "-p", path);
     }
 
     @Override
