@@ -272,11 +272,16 @@ public class KnTreeStructure extends AbstractKnTreeStructure implements ConfigWa
 
     protected void refresh() {
         try {
+            dispose();
             WatchHandler.get(null).removeAll();
             root.load().whenComplete((kn, err) -> {
                 mutableModelSupport.fireModified(root);
             });
         } catch (Exception e) {
         }
+    }
+
+    public void dispose() {
+        root.getKn().dispose();
     }
 }

@@ -16,6 +16,7 @@ import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.common.model.ProcessHandlerInput;
 import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
 import com.redhat.devtools.intellij.common.utils.ExecProcessHandler;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionPipelineManager;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
 import io.fabric8.kubernetes.client.Watch;
@@ -298,4 +299,15 @@ public interface Kn {
      * @return a terminal console
      */
     CommonTerminalExecutionConsole createTerminalTabToReuse();
+
+    /**
+     * Return an instance of funcActionPipelineManager
+     * @return the FuncActionPipelineManager object
+     */
+    FuncActionPipelineManager getFuncActionPipelineManager();
+
+    /**
+     * dispose all resources created by kn
+     */
+    void dispose();
 }

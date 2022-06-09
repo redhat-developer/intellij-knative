@@ -76,6 +76,8 @@ public abstract class ActionTest extends FixtureBaseTest {
         when(model.getSelectionPaths()).thenReturn(new TreePath[] {path});
         when(tree.getSelectionModel()).thenReturn(model);
         when(serviceStatus.getUrl()).thenReturn("url");
+
+        when(kn.getFuncActionPipelineManager()).thenReturn(manager);
     }
 
     protected void mockToolWindow(MockedStatic<ToolWindowManager> toolWindowManagerMockedStatic) {

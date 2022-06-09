@@ -25,6 +25,7 @@ import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.ExecProcessHandler;
 import com.redhat.devtools.intellij.common.utils.NetworkUtils;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionPipelineManager;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
@@ -66,12 +67,14 @@ public class KnCli implements Kn {
     private final String knCommand, funcCommand;
     private Map<String, String> envVars;
     private boolean hasKnativeServing, hasKnativeEventing;
+    private FuncActionPipelineManager funcActionPipelineManager;
 
     public KnCli(Project project, String knCommand, String funcCommand) {
         this.knCommand = knCommand;
         this.funcCommand = funcCommand;
         this.project = project;
         this.client = new DefaultKubernetesClient(new ConfigBuilder().build());
+        this.funcActionPipelineManager = new FuncActionPipelineManager();
         try {
             this.envVars = NetworkUtils.buildEnvironmentVariables(client.getMasterUrl().toString());
         } catch (URISyntaxException e) {
@@ -423,5 +426,13 @@ public class KnCli implements Kn {
     @Override
     public CommonTerminalExecutionConsole createTerminalTabToReuse() {
         return ExecHelper.createTerminalTabForReuse(project, KNATIVE_TOOL_WINDOW_ID);
+    }
+
+    public FuncActionPipelineManager getFuncActionPipelineManager() {
+        return funcActionPipelineManager;
+    }
+
+    public void dispose() {
+        funcActionPipelineManager.dispose();
     }
 }

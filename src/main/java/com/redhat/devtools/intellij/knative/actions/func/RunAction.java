@@ -64,7 +64,7 @@ public class RunAction extends KnAction {
                 .withTask("runFunc", (task) -> doRun(name, knCli, task, telemetry))
                 .build();
 
-        boolean isStarted = FuncActionPipelineManager.getInstance().start(runPipeline);
+        boolean isStarted = knCli.getFuncActionPipelineManager().start(runPipeline);
         if (!isStarted) {
             int response = Messages.showYesNoDialog(
                     project,
@@ -75,7 +75,7 @@ public class RunAction extends KnAction {
                     AllIcons.General.QuestionDialog
             );
             if (response == Messages.YES) {
-               FuncActionPipelineManager.getInstance().stopAndRerun(runPipeline);
+               knCli.getFuncActionPipelineManager().stopAndRerun(runPipeline);
             }
         }
 

@@ -104,8 +104,7 @@ public class BuildAction extends KnAction {
                         })
                 )
                 .build();
-
-        FuncActionPipelineManager.getInstance().start(buildPipeline);
+        knCli.getFuncActionPipelineManager().start(buildPipeline);
     }
 
     protected Pair<String, String> confirmAndGetRegistryImage(Function function, Kn knCli, TelemetryMessageBuilder.ActionMessage telemetry) {

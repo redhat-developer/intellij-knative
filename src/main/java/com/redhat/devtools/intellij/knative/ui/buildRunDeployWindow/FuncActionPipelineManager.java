@@ -20,18 +20,10 @@ import java.util.Optional;
 
 public class FuncActionPipelineManager {
 
-    private static FuncActionPipelineManager INSTANCE;
     private final Map<String, List<IFuncActionPipeline>> pipelines;
 
-    private FuncActionPipelineManager(){
+    public FuncActionPipelineManager(){
         pipelines = new HashMap<>();
-    }
-
-    public static FuncActionPipelineManager getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new FuncActionPipelineManager();
-        }
-        return INSTANCE;
     }
 
     public boolean start(IFuncActionPipeline pipeline) {
@@ -74,5 +66,13 @@ public class FuncActionPipelineManager {
         pipelinesFunction.add(pipeline);
         pipelines.put(pipeline.getFuncName(), pipelinesFunction);
         return true;
+    }
+
+    public void dispose() {
+        pipelines.values().forEach(pipelinesPerFunction -> pipelinesPerFunction.forEach(pipeline -> {
+            if (!pipeline.isFinished()) {
+                pipeline.stop();
+            }
+        }));
     }
 }
