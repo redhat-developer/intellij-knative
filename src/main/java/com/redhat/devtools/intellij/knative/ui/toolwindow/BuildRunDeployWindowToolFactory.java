@@ -12,13 +12,17 @@ package com.redhat.devtools.intellij.knative.ui.toolwindow;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.project.ProjectManagerListener;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.content.ContentManagerEvent;
 import com.intellij.ui.content.ContentManagerListener;
+import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.BuildRunDeployFuncPanel;
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.buildFuncWindowTab.BuildFuncPanel;
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.runFuncWindowTab.RunFuncPanel;
+import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import org.jetbrains.annotations.NotNull;
 
 public class BuildRunDeployWindowToolFactory implements ToolWindowFactory {
@@ -27,6 +31,12 @@ public class BuildRunDeployWindowToolFactory implements ToolWindowFactory {
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         toolWindow.setIcon(AllIcons.Toolwindows.ToolWindowBuild);
         toolWindow.setStripeTitle("Functions");
+        executeOnProjectClosing(project, () -> {
+            Kn kn = TreeHelper.getKn(project);
+            if (kn != null) {
+                kn.dispose();
+            }
+        });
     }
 
     @Override
@@ -38,6 +48,17 @@ public class BuildRunDeployWindowToolFactory implements ToolWindowFactory {
         window.getContentManager().addContent(runFuncPanel);
 
         window.getContentManager().addContentManagerListener(new ContentChangeManagerListener());
+
+
+    }
+
+    private void executeOnProjectClosing(Project project, Runnable runnable) {
+        ProjectManager.getInstance().addProjectManagerListener(project, new ProjectManagerListener() {
+            @Override
+            public void projectClosing(@NotNull Project project) {
+                runnable.run();
+            }
+        });
     }
 
     @Override
@@ -49,6 +70,7 @@ public class BuildRunDeployWindowToolFactory implements ToolWindowFactory {
     public boolean isDoNotActivateOnStart() {
         return true;
     }
+
 }
 
 class ContentChangeManagerListener implements ContentManagerListener {
