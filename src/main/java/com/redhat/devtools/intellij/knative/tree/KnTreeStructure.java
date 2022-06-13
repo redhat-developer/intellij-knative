@@ -276,7 +276,7 @@ public class KnTreeStructure extends AbstractKnTreeStructure implements ConfigWa
             root.load().whenComplete((kn, err) -> {
                 mutableModelSupport.fireModified(root);
             });
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
     }
 }

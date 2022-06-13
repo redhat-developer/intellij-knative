@@ -8,7 +8,7 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.brdWindow;
+package com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class FuncActionPipeline implements IFuncAction {
+public class FuncActionPipeline implements IFuncActionPipeline {
 
     protected final Project project;
     private final Function function;
@@ -62,6 +62,11 @@ public class FuncActionPipeline implements IFuncAction {
 
     public String getActionName() {
         return actionName;
+    }
+
+    @Override
+    public void stop() {
+        runningStep.stop();
     }
 
     public Project getProject() {

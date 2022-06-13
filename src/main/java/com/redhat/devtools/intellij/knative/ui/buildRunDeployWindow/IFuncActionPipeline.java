@@ -8,8 +8,10 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.brdWindow;
+package com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow;
 
-public interface ActionFuncHandlerListener {
-    void fireModified(FuncActionPipeline element);
+public interface IFuncActionPipeline extends IFuncAction {
+
+    String getActionName();
+
 }

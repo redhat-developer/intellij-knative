@@ -19,10 +19,13 @@ import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
+import com.redhat.devtools.intellij.common.model.ProcessHandlerInput;
 import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
+import com.redhat.devtools.intellij.common.utils.ExecProcessHandler;
 import com.redhat.devtools.intellij.common.utils.NetworkUtils;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionPipelineManager;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
@@ -64,12 +67,14 @@ public class KnCli implements Kn {
     private final String knCommand, funcCommand;
     private Map<String, String> envVars;
     private boolean hasKnativeServing, hasKnativeEventing;
+    private FuncActionPipelineManager funcActionPipelineManager;
 
     public KnCli(Project project, String knCommand, String funcCommand) {
         this.knCommand = knCommand;
         this.funcCommand = funcCommand;
         this.project = project;
         this.client = new DefaultKubernetesClient(new ConfigBuilder().build());
+        this.funcActionPipelineManager = new FuncActionPipelineManager();
         try {
             this.envVars = NetworkUtils.buildEnvironmentVariables(client.getMasterUrl().toString());
         } catch (URISyntaxException e) {
@@ -303,8 +308,11 @@ public class KnCli implements Kn {
     }
 
     @Override
-    public void buildFunc(String path, String registry, String image, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException {
-        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, processListener, getBuildDeployArgs("build", "", path, registry, image, true));
+    public void buildFunc(String path, String registry, String image, ConsoleView terminalExecutionConsole,
+                          java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> processHandlerFunction,
+                          ProcessListener processListener) throws IOException {
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole,
+                processHandlerFunction, processListener, getBuildDeployArgs("build", "", path, registry, image, true));
     }
 
     @Override
@@ -379,8 +387,10 @@ public class KnCli implements Kn {
     }
 
     @Override
-    public void runFunc(String path, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException {
-        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, processListener, funcCommand, "run", "-p", path);
+    public void runFunc(String path, ConsoleView terminalExecutionConsole,
+                        java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> processHandlerFunction,
+                        ProcessListener processListener) throws IOException {
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, processHandlerFunction, processListener, funcCommand, "run", "-p", path);
     }
 
     @Override
@@ -416,5 +426,13 @@ public class KnCli implements Kn {
     @Override
     public CommonTerminalExecutionConsole createTerminalTabToReuse() {
         return ExecHelper.createTerminalTabForReuse(project, KNATIVE_TOOL_WINDOW_ID);
+    }
+
+    public FuncActionPipelineManager getFuncActionPipelineManager() {
+        return funcActionPipelineManager;
+    }
+
+    public void dispose() {
+        funcActionPipelineManager.dispose();
     }
 }

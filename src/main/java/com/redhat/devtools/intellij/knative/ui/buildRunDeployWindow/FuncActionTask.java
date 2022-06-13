@@ -8,8 +8,9 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.brdWindow;
+package com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow;
 
+import com.intellij.execution.process.KillableProcessHandler;
 import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessListener;
@@ -18,6 +19,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.terminal.TerminalExecutionConsole;
 import com.intellij.ui.AnimatedIcon;
 import com.intellij.util.Consumer;
+import com.redhat.devtools.intellij.common.model.ProcessHandlerInput;
+import com.redhat.devtools.intellij.common.utils.ExecProcessHandler;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,6 +33,8 @@ public class FuncActionTask implements IFuncAction {
     protected final FuncActionPipeline actionFuncHandler;
     private final String actionName;
     private TerminalExecutionConsole terminalExecutionConsole;
+    private ExecProcessHandler runHandler;
+    protected java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> processHandlerFunction;
     private ProcessListener processListener;
     private long startTime;
     private long endTime;
@@ -81,6 +86,13 @@ public class FuncActionTask implements IFuncAction {
         };
         setProcessListener(processListener);
         setTerminalExecutionConsole(commonTerminalExecutionConsole);
+        setProcessHandlerFunction();
+    }
+
+    public void stop() {
+        if (runHandler != null && !isFinished()) {
+            runHandler.destroyProcess();
+        }
     }
 
     public String getActionName() {
@@ -166,5 +178,18 @@ public class FuncActionTask implements IFuncAction {
 
     public int getStepIndex() {
         return stepIndex;
+    }
+
+    private void setProcessHandlerFunction() {
+        processHandlerFunction = processHandlerInput -> {
+                                        runHandler = new ExecProcessHandler(processHandlerInput.getProcess(),
+                                                processHandlerInput.getCommandLine(),
+                                                processHandlerInput.getCharset());
+                                        return runHandler;
+                                    };
+    }
+
+    public java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> getProcessHandlerFunction() {
+        return processHandlerFunction;
     }
 }
