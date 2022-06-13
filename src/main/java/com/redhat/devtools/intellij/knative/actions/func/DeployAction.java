@@ -12,6 +12,7 @@ package com.redhat.devtools.intellij.knative.actions.func;
 
 import com.google.common.base.Strings;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Pair;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
@@ -50,14 +51,15 @@ public class DeployAction extends BuildAction {
         ParentableNode node = getElement(selected);
         Function function = ((KnFunctionNode) node).getFunction();
         TelemetryMessageBuilder.ActionMessage telemetry = createTelemetry();
+        Project project = getEventProject(anActionEvent);
 
-        Pair<String, String> registryAndImage = confirmAndGetRegistryImage(function, knCli, telemetry);
+        Pair<String, String> registryAndImage = confirmAndGetRegistryImage(project, function, knCli, telemetry);
         if (registryAndImage == null) {
             return;
         }
 
         IFuncActionPipeline deployPipeline = new FuncActionPipelineBuilder()
-                .createDeployPipeline(getEventProject(anActionEvent), function)
+                .createDeployPipeline(project, function)
                 .withBuildTask((task) -> doBuild(knCli, task))
                 .withTask("deployFunc", (task) -> doDeploy(node.getName(), knCli, task,
                         registryAndImage.getFirst(), registryAndImage.getSecond(), telemetry))
@@ -93,7 +95,7 @@ public class DeployAction extends BuildAction {
     }
 
     @Override
-    protected boolean isActionConfirmed(String name, String funcNamespace, String activeNamespace) {
+    protected boolean isActionConfirmed(Project project, String name, String funcNamespace, String activeNamespace) {
         String message = "";
         if (!Strings.isNullOrEmpty(funcNamespace)) {
             if (!funcNamespace.equalsIgnoreCase(activeNamespace)) {
@@ -102,7 +104,8 @@ public class DeployAction extends BuildAction {
         }
         message += "Deploy function " + name + " to namespace " + activeNamespace + "?";
 
-        int result = showOkCancelDialog(message,
+        int result = showOkCancelDialog(project,
+                message,
                 "Deploy Function " + name,
                 getOkButton(), getCancelButton(), null);
         return result == Messages.OK;

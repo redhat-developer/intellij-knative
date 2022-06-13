@@ -22,6 +22,7 @@ import com.redhat.devtools.intellij.knative.actions.func.DeployAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionTask;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.IFuncActionPipeline;
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.deployFuncWindowTab.DeployFuncActionPipeline;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import java.io.File;
@@ -30,6 +31,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import javax.swing.Icon;
 import javax.swing.tree.TreePath;
 import org.junit.Before;
 import org.junit.Test;
@@ -106,39 +108,11 @@ public class DeployActionTest extends ActionTest {
                                 yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
                                 yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("image: test");
                                 yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("test");
-                                messagesMockedStatic.when(() -> Messages.showOkCancelDialog(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
+                                messagesMockedStatic.when(() -> Messages.showOkCancelDialog(any(Project.class), anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
                                 action.actionPerformed(anActionEvent);
                                 Thread.sleep(1000);
-                                verify(deployFuncActionPipelineMockedConstruction.constructed().get(0), times(1)).start();
+                                verify(manager, times(1)).start(deployFuncActionPipelineMockedConstruction.constructed().get(0));
                             }
-                        }
-                    }
-                }
-            }
-        }
-
-    }
-
-    @Test
-    public void ActionPerformed_SelectedHasLocalPathAndImageSpecifiedButDeployIsNotConfirmed_DoDeploy() throws IOException, InterruptedException {
-        AnAction action = new DeployAction();
-        AnActionEvent anActionEvent = createDeployActionEvent();
-        try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
-            try (MockedStatic<Paths> pathsMockedStatic = mockStatic(Paths.class)) {
-                try (MockedStatic<YAMLHelper> yamlHelperMockedStatic = mockStatic(YAMLHelper.class)) {
-                    try(MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
-                        try (MockedStatic<TelemetryService> telemetryServiceMockedStatic = mockStatic((TelemetryService.class))) {
-                            treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
-                            pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
-                            when(kn.getFuncFileURL(any())).thenReturn(mock(URL.class));
-                            yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
-                            yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("image: test");
-                            yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("test");
-                            messagesMockedStatic.when(() -> Messages.showOkCancelDialog(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.CANCEL);
-                            mockTelemetry(telemetryServiceMockedStatic);
-                            action.actionPerformed(anActionEvent);
-                            Thread.sleep(1000);
-                            verify(kn, times(0)).deployFunc("namespace", "path", "", "test", null, null);
                         }
                     }
                 }
@@ -166,10 +140,10 @@ public class DeployActionTest extends ActionTest {
                                 yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
                                 yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("registry: test");
                                 yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("test").thenReturn("");
-                                messagesMockedStatic.when(() -> Messages.showOkCancelDialog(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
+                                messagesMockedStatic.when(() -> Messages.showOkCancelDialog(any(Project.class), anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
                                 action.actionPerformed(anActionEvent);
                                 Thread.sleep(1000);
-                                verify(deployFuncActionPipelineMockedConstruction.constructed().get(0), times(1)).start();
+                                verify(manager, times(1)).start(deployFuncActionPipelineMockedConstruction.constructed().get(0));
                             }
                         }
                     }
@@ -203,10 +177,10 @@ public class DeployActionTest extends ActionTest {
                                     yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
                                     yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("");
                                     yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("");
-                                    messagesMockedStatic.when(() -> Messages.showOkCancelDialog(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
+                                    messagesMockedStatic.when(() -> Messages.showOkCancelDialog(any(Project.class), anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
                                     action.actionPerformed(anActionEvent);
                                     Thread.sleep(1000);
-                                    verify(deployFuncActionPipelineMockedConstruction.constructed().get(0), times(1)).start();
+                                    verify(manager, times(1)).start(deployFuncActionPipelineMockedConstruction.constructed().get(0));
                                 }
                             }
                         }
@@ -236,11 +210,11 @@ public class DeployActionTest extends ActionTest {
                                     })) {
                                 treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
                                 pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
-                                messagesMockedStatic.when(() -> Messages.showOkCancelDialog(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
+                                messagesMockedStatic.when(() -> Messages.showOkCancelDialog(any(Project.class), anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
                                 action.actionPerformed(anActionEvent);
                                 Thread.sleep(1000);
                                 assertEquals(1, inputDialogMockedConstruction.constructed().size());
-                                verify(deployFuncActionPipelineMockedConstruction.constructed().get(0), times(1)).start();
+                                verify(manager, times(1)).start(deployFuncActionPipelineMockedConstruction.constructed().get(0));
                             }
                         }
                     }
@@ -272,11 +246,11 @@ public class DeployActionTest extends ActionTest {
                                     treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
                                     pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
                                     yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenThrow(new IOException("error"));
-                                    messagesMockedStatic.when(() -> Messages.showOkCancelDialog(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
+                                    messagesMockedStatic.when(() -> Messages.showOkCancelDialog(any(Project.class), anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
                                     action.actionPerformed(anActionEvent);
                                     Thread.sleep(1000);
                                     assertEquals(1, inputDialogMockedConstruction.constructed().size());
-                                    verify(deployFuncActionPipelineMockedConstruction.constructed().get(0), times(1)).start();
+                                    verify(manager, times(1)).start(deployFuncActionPipelineMockedConstruction.constructed().get(0));
                                 }
                             }
                         }

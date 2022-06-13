@@ -74,7 +74,7 @@ public class BuildAction extends KnAction {
         TelemetryMessageBuilder.ActionMessage telemetry = createTelemetryBuild();
         telemetry.property(PROP_CALLER_ACTION, buildStepHandler.getActionFuncHandler().getActionName());
         BuildAction buildAction = (BuildAction) ActionManager.getInstance().getAction(ID);
-        Pair<String, String> registryAndImage = UIHelper.executeInUI(() -> buildAction.confirmAndGetRegistryImage(function, knCli, telemetry));
+        Pair<String, String> registryAndImage = UIHelper.executeInUI(() -> buildAction.confirmAndGetRegistryImage(project, function, knCli, telemetry));
         if (registryAndImage == null) {
             return;
         }
@@ -88,13 +88,13 @@ public class BuildAction extends KnAction {
         ParentableNode node = getElement(selected);
         Function function = ((KnFunctionNode) node).getFunction();
         TelemetryMessageBuilder.ActionMessage telemetry = createTelemetry();
+        Project project = getEventProject(anActionEvent);
 
-        Pair<String, String> registryAndImage = confirmAndGetRegistryImage(function, knCli, telemetry);
+        Pair<String, String> registryAndImage = confirmAndGetRegistryImage(project, function, knCli, telemetry);
         if (registryAndImage == null) {
             return;
         }
 
-        Project project = getEventProject(anActionEvent);
         IFuncActionPipeline buildPipeline = new FuncActionPipelineBuilder()
                 .createBuildPipeline(project, function)
                 .withBuildTask((task) ->
@@ -105,7 +105,7 @@ public class BuildAction extends KnAction {
         knCli.getFuncActionPipelineManager().start(buildPipeline);
     }
 
-    protected Pair<String, String> confirmAndGetRegistryImage(Function function, Kn knCli, TelemetryMessageBuilder.ActionMessage telemetry) {
+    protected Pair<String, String> confirmAndGetRegistryImage(Project project, Function function, Kn knCli, TelemetryMessageBuilder.ActionMessage telemetry) {
         String namespace = knCli.getNamespace();
         if (!isLocalFunction(function, namespace, telemetry)) {
             return null;
@@ -116,7 +116,7 @@ public class BuildAction extends KnAction {
             return null;
         }
 
-        if (!isExecutionConfirmed(function, namespace, telemetry)) {
+        if (!isExecutionConfirmed(project, function, namespace, telemetry)) {
             return null;
         }
         return registryAndImage;
@@ -152,8 +152,8 @@ public class BuildAction extends KnAction {
         return dataToDeploy;
     }
 
-    private boolean isExecutionConfirmed(Function function, String namespace, TelemetryMessageBuilder.ActionMessage telemetry) {
-        if (!isActionConfirmed(function.getName(), function.getNamespace(), namespace)) {
+    private boolean isExecutionConfirmed(Project project, Function function, String namespace, TelemetryMessageBuilder.ActionMessage telemetry) {
+        if (!isActionConfirmed(project, function.getName(), function.getNamespace(), namespace)) {
             telemetry
                     .result(anonymizeResource(function.getName(), namespace, "Build action execution has been stopped by user."))
                     .send();
@@ -195,7 +195,7 @@ public class BuildAction extends KnAction {
         knCli.buildFunc(localPathFunc, registry, image, terminalExecutionConsole, processHandlerFunction, processListener);
     }
 
-    protected boolean isActionConfirmed(String name, String funcNamespace, String activeNamespace) {
+    protected boolean isActionConfirmed(Project project, String name, String funcNamespace, String activeNamespace) {
         return true;
     }
 
