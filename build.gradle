@@ -34,7 +34,7 @@ runIdeForUiTests {
 }
 
 dependencies {
-    compile 'io.fabric8:knative-client:5.7.4'
+    compile 'io.fabric8:knative-client:5.12.2'
     compile 'com.redhat.devtools.intellij:intellij-common:1.7.0'
     testCompile 'org.mockito:mockito-inline:3.8.0'
     compile 'com.squareup.okio:okio:1.15.0'
