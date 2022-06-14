@@ -11,6 +11,13 @@
     ]]></description>
 
     <change-notes><![CDATA[
+      <p><b>1.2.0</b></p>
+      <p>The minimum IDEA version supported by the plugin has been increased to 2021.1</p>
+      <p>New ToolWindow for Functions to easily check the execution status of a build/run/deploy action.<p>
+      <p>History view to visualize the latest 10 build/run/deploy executions</p>
+      <p>New stop toolbar action</p>
+      <p>Fix creation of cloudevent trigger function</p>
+      <p>Fix import issue when new function module is created from JetBrains wizard</p>
       <p><b>1.1.0</b></p>
       <p>Add support for invoking Knative Functions</p>
       <p>Extends new Knative Function action to all JetBrains IDEs<p>
