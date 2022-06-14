@@ -14,16 +14,20 @@ A JetBrains IntelliJ plugin for interacting with Knative & Serverless Functions.
 ## New and Noteworthy
 
 The minimum IDEA version supported by the plugin has been increased to 2021.1.
-The plugin works by using `kn` CLI 1.3.1 and `func` CLI 0.23.1. 
+The plugin works by using `kn` CLI 1.5.0 and `func` CLI 0.24.0. 
 
 ### New ToolWindow for build/deploy/run actions
 
 It offers a custom ToolWindow for Functions to easily check the execution status of a build/run/deploy action.
 It is also possible to enable the history view to visualize the latest 10 logs of old build/run/deploy executions. 
 
+![](images/1.2.0/knative1.gif)
+
 ### Stop function execution and limit running sessions
 
 It is possible to stop a running function execution directly from the IDE UI.
+
+![](images/1.2.0/knative2.gif)
 
 ## Previous releases
 
