@@ -90,8 +90,6 @@ public abstract class ActionTest extends FixtureBaseTest {
         when(toolWindowManager.getToolWindow(anyString())).thenReturn(toolWindow);
         when(toolWindow.getContentManager()).thenReturn(contentManager);
         when(contentManager.findContent(anyString())).thenReturn(buildFuncPanel);
-        //ActionFuncHandlerOld buildFuncHandler = mock(ActionFuncHandlerOld.class);
-        //when(buildFuncPanel.createActionFuncHandler(any(), any())).thenReturn(buildFuncHandler);
     }
 
     protected void mockTelemetry(MockedStatic<TelemetryService> telemetryServiceMockedStatic) {

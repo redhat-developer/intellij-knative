@@ -15,6 +15,7 @@ import com.intellij.util.Consumer;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.buildFuncWindowTab.BuildFuncActionPipeline;
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.buildFuncWindowTab.BuildFuncActionTask;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.deployFuncWindowTab.DeployFuncActionPipeline;
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.runFuncWindowTab.RunFuncActionPipeline;
 
 import java.util.ArrayList;
@@ -34,6 +35,11 @@ public class FuncActionPipelineBuilder {
 
     public FuncActionPipelineBuilder createRunPipeline(Project project, Function function) {
         pipeline = new RunFuncActionPipeline(project, function);
+        return this;
+    }
+
+    public FuncActionPipelineBuilder createDeployPipeline(Project project, Function function) {
+        pipeline = new DeployFuncActionPipeline(project, function);
         return this;
     }
 

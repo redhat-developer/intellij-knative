@@ -10,7 +10,6 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow;
 
-import com.intellij.execution.process.KillableProcessHandler;
 import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessListener;

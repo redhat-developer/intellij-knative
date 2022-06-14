@@ -65,27 +65,4 @@ public class RunFuncPanel extends BuildRunDeployFuncPanel {
         }
         return runNode;
     }
-
-    private String getTaskLocation(IFuncAction funcAction) {
-        if (funcAction instanceof BuildFuncActionTask) {
-            return getBuildLocation(funcAction);
-        }
-        return funcAction.getState();
-    }
-
-    private FuncActionTask getRunningStep(IFuncAction actionFuncHandler) {
-        if (actionFuncHandler instanceof FuncActionPipeline) {
-            return ((FuncActionPipeline) actionFuncHandler).getRunningStep();
-        } else {
-            return (FuncActionTask) actionFuncHandler;
-        }
-    }
-
-    private List<FuncActionTask> getSteps(IFuncAction actionFuncHandler) {
-        if (actionFuncHandler instanceof FuncActionPipeline) {
-            return ((FuncActionPipeline) actionFuncHandler).getSteps();
-        } else {
-            return Collections.singletonList(((FuncActionTask) actionFuncHandler));
-        }
-    }
 }

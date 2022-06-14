@@ -12,6 +12,7 @@ package com.redhat.devtools.intellij.knative.actions.func;
 
 import com.google.common.base.Strings;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Pair;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
@@ -20,19 +21,26 @@ import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionPipelineBuilder;
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionTask;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.IFuncActionPipeline;
 import com.redhat.devtools.intellij.knative.utils.FuncUtils;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 
-import static com.intellij.openapi.ui.Messages.CANCEL_BUTTON;
-import static com.intellij.openapi.ui.Messages.OK_BUTTON;
+import static com.intellij.openapi.ui.Messages.getCancelButton;
+import static com.intellij.openapi.ui.Messages.getOkButton;
 import static com.intellij.openapi.ui.Messages.showOkCancelDialog;
 import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_BUILD_DEPLOY;
+import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymizeResource;
 
 public class DeployAction extends BuildAction {
+
+    private static final Logger logger = LoggerFactory.getLogger(DeployAction.class);
 
     public DeployAction() {
         super();
@@ -43,26 +51,51 @@ public class DeployAction extends BuildAction {
         ParentableNode node = getElement(selected);
         Function function = ((KnFunctionNode) node).getFunction();
         TelemetryMessageBuilder.ActionMessage telemetry = createTelemetry();
+        Project project = getEventProject(anActionEvent);
 
-        Pair<String, String> registryAndImage = confirmAndGetRegistryImage(function, knCli, telemetry);
+        Pair<String, String> registryAndImage = confirmAndGetRegistryImage(project, function, knCli, telemetry);
         if (registryAndImage == null) {
             return;
         }
 
+        IFuncActionPipeline deployPipeline = new FuncActionPipelineBuilder()
+                .createDeployPipeline(project, function)
+                .withBuildTask((task) -> doBuild(knCli, task))
+                .withTask("deployFunc", (task) -> doDeploy(node.getName(), knCli, task,
+                        registryAndImage.getFirst(), registryAndImage.getSecond(), telemetry))
+                .build();
+        knCli.getFuncActionPipelineManager().start(deployPipeline);
+    }
+
+    private void doBuild(Kn knCli, FuncActionTask funcActionTask) {
+        ExecHelper.submit(() -> BuildAction.execute(
+                funcActionTask.getProject(),
+                funcActionTask.getFunction(),
+                knCli,
+                funcActionTask)
+        );
+    }
+
+    protected void doDeploy(String name, Kn knCli, FuncActionTask funcActionTask, String registry, String image, TelemetryMessageBuilder.ActionMessage telemetry) {
         ExecHelper.submit(() -> {
-            doExecuteAction(getEventProject(anActionEvent), function, registryAndImage.getFirst(),
-                    registryAndImage.getSecond(), knCli, null, telemetry);
+            String namespace = knCli.getNamespace();
+            try {
+                knCli.deployFunc(namespace, funcActionTask.getFunction().getLocalPath(), registry, image,
+                        funcActionTask.getTerminalExecutionConsole(), funcActionTask.getProcessListener());
+                telemetry
+                        .result(anonymizeResource(name, knCli.getNamespace(), getSuccessMessage(namespace, name)))
+                        .send();
+            } catch (IOException e) {
+                logger.warn(e.getLocalizedMessage(), e);
+                telemetry
+                        .error(anonymizeResource(name, namespace, e.getLocalizedMessage()))
+                        .send();
+            }
         });
     }
 
     @Override
-    protected void doExecute(FuncActionTask task, Kn knCli, String namespace,
-                             String localPathFunc, String registry, String image) throws IOException {
-        knCli.deployFunc(namespace, localPathFunc, registry, image);
-    }
-
-    @Override
-    protected boolean isActionConfirmed(String name, String funcNamespace, String activeNamespace) {
+    protected boolean isActionConfirmed(Project project, String name, String funcNamespace, String activeNamespace) {
         String message = "";
         if (!Strings.isNullOrEmpty(funcNamespace)) {
             if (!funcNamespace.equalsIgnoreCase(activeNamespace)) {
@@ -71,9 +104,10 @@ public class DeployAction extends BuildAction {
         }
         message += "Deploy function " + name + " to namespace " + activeNamespace + "?";
 
-        int result = showOkCancelDialog(message,
+        int result = showOkCancelDialog(project,
+                message,
                 "Deploy Function " + name,
-                OK_BUTTON, CANCEL_BUTTON, null);
+                getOkButton(), getCancelButton(), null);
         return result == Messages.OK;
     }
 
@@ -81,7 +115,7 @@ public class DeployAction extends BuildAction {
         return TelemetryService.instance().action(NAME_PREFIX_BUILD_DEPLOY + "deploy func");
     }
 
-    protected String getSuccessMessage(String namespace, String name) {
+    private String getSuccessMessage(String namespace, String name) {
         return "Function " + name + " in namespace " + namespace + " has been successfully deployed";
     }
 

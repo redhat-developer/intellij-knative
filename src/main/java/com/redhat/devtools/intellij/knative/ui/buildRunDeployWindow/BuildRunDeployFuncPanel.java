@@ -29,6 +29,7 @@ import com.intellij.util.ui.UIUtil;
 import com.intellij.util.ui.tree.TreeUtil;
 import com.redhat.devtools.intellij.knative.actions.toolbar.ShowFunctionTaskHistoryAction;
 import com.redhat.devtools.intellij.knative.actions.toolbar.StopFunctionTaskAction;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.buildFuncWindowTab.BuildFuncActionTask;
 import com.redhat.devtools.intellij.knative.utils.UIUtils;
 
 import javax.swing.Icon;
@@ -388,5 +389,28 @@ public abstract class BuildRunDeployFuncPanel extends ContentImpl {
             return ((FuncActionNodeDescriptor) node).getElement();
         }
         return null;
+    }
+
+    protected List<FuncActionTask> getSteps(IFuncAction actionFuncHandler) {
+        if (actionFuncHandler instanceof FuncActionPipeline) {
+            return ((FuncActionPipeline) actionFuncHandler).getSteps();
+        } else {
+            return Collections.singletonList(((FuncActionTask) actionFuncHandler));
+        }
+    }
+
+    protected FuncActionTask getRunningStep(IFuncAction actionFuncHandler) {
+        if (actionFuncHandler instanceof FuncActionPipeline) {
+            return ((FuncActionPipeline) actionFuncHandler).getRunningStep();
+        } else {
+            return (FuncActionTask) actionFuncHandler;
+        }
+    }
+
+    protected String getTaskLocation(IFuncAction funcAction) {
+        if (funcAction instanceof BuildFuncActionTask) {
+            return getBuildLocation(funcAction);
+        }
+        return funcAction.getState();
     }
 }

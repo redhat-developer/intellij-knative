@@ -12,6 +12,8 @@ package com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.AnimatedIcon;
 import com.redhat.devtools.intellij.knative.kn.Function;
 
@@ -22,7 +24,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class FuncActionPipeline implements IFuncActionPipeline {
+import static com.redhat.devtools.intellij.knative.Constants.BUILDFUNC_TOOLWINDOW_ID;
+
+public abstract class FuncActionPipeline implements IFuncActionPipeline {
 
     protected final Project project;
     private final Function function;
@@ -48,8 +52,13 @@ public class FuncActionPipeline implements IFuncActionPipeline {
     }
 
     public void start() {
+        ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(BUILDFUNC_TOOLWINDOW_ID);
+        BuildRunDeployFuncPanel panel = (BuildRunDeployFuncPanel) toolWindow.getContentManager().findContent(getTabName());
+        panel.drawFuncAction(this);
         runningStep.doExecute();
     }
+
+    protected abstract String getTabName();
 
     public void setTasks(List<FuncActionTask> tasks) {
         actionTasks = tasks;
