@@ -13,7 +13,7 @@ A JetBrains IntelliJ plugin for interacting with Knative & Serverless Functions.
 
 ## New and Noteworthy
 
-The minimum IDEA version supported by the plugin has been increased to 2021.1.
+The minimum IDEA version supported by the plugin has been increased to 2021.1
 The plugin works by using `kn` CLI 1.5.0 and `func` CLI 0.24.0. 
 
 ### New ToolWindow for build/deploy/run actions
