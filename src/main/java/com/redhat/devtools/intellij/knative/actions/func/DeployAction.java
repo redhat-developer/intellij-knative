@@ -57,6 +57,9 @@ public class DeployAction extends BuildAction {
         if (registryAndImage == null) {
             return;
         }
+        if (!Strings.isNullOrEmpty(registryAndImage.getSecond())) {
+            function.setImage(registryAndImage.getSecond());
+        }
 
         IFuncActionPipeline deployPipeline = new FuncActionPipelineBuilder()
                 .createDeployPipeline(project, function)

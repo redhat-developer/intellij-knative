@@ -74,13 +74,17 @@ public class BuildAction extends KnAction {
         TelemetryMessageBuilder.ActionMessage telemetry = createTelemetryBuild();
         telemetry.property(PROP_CALLER_ACTION, buildStepHandler.getActionFuncHandler().getActionName());
         BuildAction buildAction = (BuildAction) ActionManager.getInstance().getAction(ID);
-        Pair<String, String> registryAndImage = UIHelper.executeInUI(() -> buildAction.confirmAndGetRegistryImage(project, function, knCli, telemetry));
-        if (registryAndImage == null) {
-            return;
+        String image = function.getImage(), registry = "";
+        if (Strings.isNullOrEmpty(image)) {
+            Pair<String, String> registryAndImage = UIHelper.executeInUI(() -> buildAction.confirmAndGetRegistryImage(project, function, knCli, telemetry));
+            if (registryAndImage == null) {
+                return;
+            }
+            registry = registryAndImage.getFirst();
+            image = registryAndImage.getSecond();
         }
-
-        buildAction.doExecuteAction(project, function, registryAndImage.getFirst(),
-                registryAndImage.getSecond(), knCli, buildStepHandler, telemetry);
+        buildAction.doExecuteAction(project, function, registry,
+                image, knCli, buildStepHandler, telemetry);
     }
 
     @Override
