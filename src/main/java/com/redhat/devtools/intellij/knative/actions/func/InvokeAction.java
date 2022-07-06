@@ -22,10 +22,11 @@ import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.knative.actions.KnAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.kn.Kn;
-import com.redhat.devtools.intellij.knative.kn.KnCli;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.runFuncWindowTab.RunFuncActionPipeline;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.runFuncWindowTab.RunFuncActionTask;
 import com.redhat.devtools.intellij.knative.ui.invokeFunc.InvokeDialog;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
@@ -76,15 +77,7 @@ public class InvokeAction extends KnAction {
                 try {
                     doInvokeWithRetry(project, knCli, model, function);
                 } catch (IOException e) {
-                    Notification notification = new Notification(NOTIFICATION_ID,
-                            "Invoking function " + name + " failed",
-                            e.getLocalizedMessage(),
-                            NotificationType.ERROR);
-                    Notifications.Bus.notify(notification);
-                    logger.warn(e.getLocalizedMessage(), e);
-                    telemetry
-                            .error(anonymizeResource(name, namespace, e.getLocalizedMessage()))
-                            .send();
+                    doInvokeExceptionHandler(e, name, namespace);
                 }
             });
         } else {
@@ -109,11 +102,14 @@ public class InvokeAction extends KnAction {
                         AllIcons.General.QuestionDialog
                 ));
                 if (response == Messages.YES) {
-                    UIHelper.executeInUI(() -> RunAction.Run(project, function, knCli, name));
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException ignored) { }
-                    doInvoke(knCli, model, name);
+                    RunFuncActionPipeline pipeline = UIHelper.executeInUI(() -> RunAction.Run(project, function, knCli, name));
+                    ((RunFuncActionTask)pipeline.getRunningStep()).setCallbackWhenListeningReady(() -> {
+                        try {
+                            doInvoke(knCli, model, name);
+                        } catch (IOException ex) {
+                            doInvokeExceptionHandler(ex, name, knCli.getNamespace());
+                        }
+                    });
                     return;
                 }
             }
@@ -130,6 +126,18 @@ public class InvokeAction extends KnAction {
         Notifications.Bus.notify(notification);
         telemetry
                 .result(anonymizeResource(name, model.getNamespace(), "Invoked function " + name))
+                .send();
+    }
+
+    private void doInvokeExceptionHandler(IOException ex, String name, String namespace) {
+        Notification notification = new Notification(NOTIFICATION_ID,
+                "Invoking function " + name + " failed",
+                ex.getLocalizedMessage(),
+                NotificationType.ERROR);
+        Notifications.Bus.notify(notification);
+        logger.warn(ex.getLocalizedMessage(), ex);
+        telemetry
+                .error(anonymizeResource(name, namespace, ex.getLocalizedMessage()))
                 .send();
     }
 

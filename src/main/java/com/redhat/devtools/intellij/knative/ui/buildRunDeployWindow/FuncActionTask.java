@@ -15,6 +15,7 @@ import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessListener;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Key;
 import com.intellij.terminal.TerminalExecutionConsole;
 import com.intellij.ui.AnimatedIcon;
 import com.intellij.util.Consumer;
@@ -35,10 +36,10 @@ public class FuncActionTask implements IFuncAction {
     private ExecProcessHandler runHandler;
     protected java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> processHandlerFunction;
     private ProcessListener processListener;
-    private long startTime;
-    private long endTime;
-    private Icon[] stateIcon;
-    private String[] state;
+    protected long startTime;
+    protected long endTime;
+    protected Icon[] stateIcon;
+    protected String[] state;
     private final int stepIndex;
     private final Consumer<FuncActionTask> doExecute;
 
@@ -57,11 +58,19 @@ public class FuncActionTask implements IFuncAction {
     }
 
     private void init() {
-        FuncActionTask that = this;
+
         stateIcon = new Icon[]{ AllIcons.Actions.Profile };
         state = new String[]{"Waiting to start"};
         TerminalExecutionConsole commonTerminalExecutionConsole = new TerminalExecutionConsole(actionFuncHandler.getProject(), null);
-        ProcessListener processListener = new ProcessAdapter() {
+        ProcessListener processListener = buildProcessListener();
+        setProcessListener(processListener);
+        setTerminalExecutionConsole(commonTerminalExecutionConsole);
+        setProcessHandlerFunction();
+    }
+
+    protected ProcessListener buildProcessListener() {
+        FuncActionTask that = this;
+        return new ProcessAdapter() {
             @Override
             public void startNotified(@NotNull ProcessEvent event) {
                 startTime = System.currentTimeMillis();
@@ -83,9 +92,6 @@ public class FuncActionTask implements IFuncAction {
                 setEndTime();
             }
         };
-        setProcessListener(processListener);
-        setTerminalExecutionConsole(commonTerminalExecutionConsole);
-        setProcessHandlerFunction();
     }
 
     public void stop() {
@@ -186,6 +192,10 @@ public class FuncActionTask implements IFuncAction {
                                                 processHandlerInput.getCharset());
                                         return runHandler;
                                     };
+    }
+
+    public ExecProcessHandler getRunHandler() {
+        return runHandler;
     }
 
     public java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> getProcessHandlerFunction() {
