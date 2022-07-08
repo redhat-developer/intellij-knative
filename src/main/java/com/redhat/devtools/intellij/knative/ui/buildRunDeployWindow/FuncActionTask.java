@@ -28,6 +28,7 @@ import javax.swing.Icon;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.function.Supplier;
 
 public class FuncActionTask implements IFuncAction {
     protected final FuncActionPipeline actionFuncHandler;
@@ -40,7 +41,7 @@ public class FuncActionTask implements IFuncAction {
     protected long endTime;
     protected Icon[] stateIcon;
     protected String[] state;
-    private final int stepIndex;
+    private int stepIndex;
     private final Consumer<FuncActionTask> doExecute;
 
     public FuncActionTask(FuncActionPipeline actionFuncHandler, String actionName, Consumer<FuncActionTask> doExecute, int stepIndex){
@@ -58,7 +59,6 @@ public class FuncActionTask implements IFuncAction {
     }
 
     private void init() {
-
         stateIcon = new Icon[]{ AllIcons.Actions.Profile };
         state = new String[]{"Waiting to start"};
         TerminalExecutionConsole commonTerminalExecutionConsole = new TerminalExecutionConsole(actionFuncHandler.getProject(), null);
@@ -69,7 +69,7 @@ public class FuncActionTask implements IFuncAction {
     }
 
     protected ProcessListener buildProcessListener() {
-        FuncActionTask that = this;
+        Supplier<FuncActionTask> thisSupplier = () -> this;
         return new ProcessAdapter() {
             @Override
             public void startNotified(@NotNull ProcessEvent event) {
@@ -88,7 +88,7 @@ public class FuncActionTask implements IFuncAction {
                     stateIcon[0] = AllIcons.General.BalloonError;
                     state[0] = "failed";
                 }
-                actionFuncHandler.fireTerminatedStep(that);
+                actionFuncHandler.fireTerminatedStep(thisSupplier);
                 setEndTime();
             }
         };
@@ -183,6 +183,10 @@ public class FuncActionTask implements IFuncAction {
 
     public int getStepIndex() {
         return stepIndex;
+    }
+
+    public void setStepIndex(int stepIndex) {
+        this.stepIndex = stepIndex;
     }
 
     private void setProcessHandlerFunction() {

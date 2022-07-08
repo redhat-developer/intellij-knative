@@ -22,6 +22,7 @@ import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionTa
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;
+import java.util.function.Supplier;
 
 public class RunFuncActionTask extends FuncActionTask {
     private Runnable callbackWhenListeningReady;
@@ -35,7 +36,7 @@ public class RunFuncActionTask extends FuncActionTask {
     }
 
     protected ProcessListener buildProcessListener() {
-        FuncActionTask that = this;
+        Supplier<FuncActionTask> thisSupplier = () -> this;
         return new ProcessAdapter() {
             @Override
             public void startNotified(@NotNull ProcessEvent event) {
@@ -54,7 +55,7 @@ public class RunFuncActionTask extends FuncActionTask {
                     stateIcon[0] = AllIcons.General.BalloonError;
                     state[0] = "failed";
                 }
-                actionFuncHandler.fireTerminatedStep(that);
+                actionFuncHandler.fireTerminatedStep(thisSupplier);
                 setEndTime();
             }
 

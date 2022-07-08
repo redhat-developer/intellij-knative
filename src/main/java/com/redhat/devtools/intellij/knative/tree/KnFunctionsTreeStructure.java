@@ -25,6 +25,7 @@ import com.intellij.openapi.vfs.VirtualFileSystem;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.kn.Kn;
+import com.redhat.devtools.intellij.knative.listener.KnFileListener;
 import com.redhat.devtools.intellij.knative.utils.Scheduler;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import org.jetbrains.annotations.NotNull;
@@ -75,7 +76,12 @@ public class KnFunctionsTreeStructure extends KnTreeStructure {
         addLocalFunctions(kn, functions, warnings);
 
         List<Object> functionNodes = new ArrayList<>();
-        functions.forEach(f -> functionNodes.add(new KnFunctionNode(parent, parent, f)));
+        functions.forEach(f -> {
+            functionNodes.add(new KnFunctionNode(parent, parent, f));
+            if (!f.getLocalPath().isEmpty()) {
+                KnFileListener.registerFunction(f.getLocalPath());
+            }
+        });
         return Pair.create(functionNodes.toArray(), warnings);
     }
 

@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static com.redhat.devtools.intellij.knative.Constants.BUILDFUNC_TOOLWINDOW_ID;
 
@@ -62,6 +63,20 @@ public abstract class FuncActionPipeline implements IFuncActionPipeline {
 
     public void setTasks(List<FuncActionTask> tasks) {
         actionTasks = tasks;
+        runningStep = actionTasks.get(0);
+    }
+
+    public void removeTask(int index) {
+        if (actionTasks.size() == 1) {
+            return;
+        }
+        actionTasks.remove(index);
+        actionTasks.forEach(task -> {
+            int curIndex = task.getStepIndex();
+            if (curIndex > index) {
+                task.setStepIndex(--curIndex);
+            }
+        });
         runningStep = actionTasks.get(0);
     }
 
@@ -128,8 +143,9 @@ public abstract class FuncActionPipeline implements IFuncActionPipeline {
         notifyListeners();
     }
 
-    public void fireTerminatedStep(FuncActionTask stepHandler) {
+    public void fireTerminatedStep(Supplier<FuncActionTask> stepHandlerSupplier) {
         // if last step is terminated or any step failed set end time and update icon
+        FuncActionTask stepHandler = stepHandlerSupplier.get();
         if ((actionTasks.size() - 1) == stepHandler.getStepIndex()
                 || !stepHandler.isSuccessfullyCompleted()) {
             stateIcon[0] = stepHandler.getStateIcon();
