@@ -102,14 +102,13 @@ public class InvokeAction extends KnAction {
                         AllIcons.General.QuestionDialog
                 ));
                 if (response == Messages.YES) {
-                    RunFuncActionPipeline pipeline = UIHelper.executeInUI(() -> RunAction.Run(project, function, knCli, name));
-                    ((RunFuncActionTask)pipeline.getRunningStep()).setCallbackWhenListeningReady(() -> {
+                    UIHelper.executeInUI(() -> RunAction.Run(project, function, knCli, name, () -> {
                         try {
                             doInvoke(knCli, model, name);
                         } catch (IOException ex) {
                             doInvokeExceptionHandler(ex, name, knCli.getNamespace());
                         }
-                    });
+                    }));
                     return;
                 }
             }

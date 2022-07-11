@@ -26,6 +26,7 @@ import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionTa
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionPipelineBuilder;
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.IFuncActionPipeline;
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.runFuncWindowTab.RunFuncActionPipeline;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.runFuncWindowTab.RunFuncActionTask;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,13 +70,14 @@ public class RunAction extends KnAction {
         doRunPipeline(project, knCli, runPipeline, name);
     }
 
-    public static RunFuncActionPipeline Run(Project project, Function function, Kn knCli, String name) {
-        IFuncActionPipeline runPipeline = new FuncActionPipelineBuilder()
+    public static void Run(Project project, Function function, Kn knCli, String name, Runnable callbackWhenListeningReady) {
+        RunFuncActionPipeline runPipeline = (RunFuncActionPipeline) new FuncActionPipelineBuilder()
                 .createRunPipeline(project, function)
                 .withRunTask((task) -> doRun(name, knCli, task, telemetry))
                 .build();
+        RunFuncActionTask runTask = (RunFuncActionTask) runPipeline.getSteps().get(0);
+        runTask.setCallbackWhenListeningReady(callbackWhenListeningReady);
         doRunPipeline(project, knCli, runPipeline, name);
-        return (RunFuncActionPipeline) runPipeline;
     }
 
     private static void doRunPipeline(Project project, Kn knCli, IFuncActionPipeline runPipeline, String name) {
