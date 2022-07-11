@@ -90,7 +90,7 @@ public class FuncActionPipelineManager {
     public IFuncActionPipeline optimizePipeline(IFuncActionPipeline pipeline) {
         for (IFuncActionPipeline oldPipeline: allPipelinesHistory.getOrDefault(pipeline.getFuncName(), Collections.emptyList())) {
             for (FuncActionTask task: ((FuncActionPipeline)oldPipeline).getSteps()) {
-                if (task instanceof BuildFuncActionTask && task.getEndTime() > -1) {
+                if (task instanceof BuildFuncActionTask && task.isSuccessfullyCompleted()) {
                     Date lastBuildDate = new Date(task.getEndTime());
                     if (!KnFileListener.isFuncChangedSinceLastBuild(pipeline.getFunction().getLocalPath(), lastBuildDate)) {
                         ((FuncActionPipeline)pipeline).removeTask(0);
