@@ -31,7 +31,7 @@ import java.util.Date;
 import java.util.function.Supplier;
 
 public class FuncActionTask implements IFuncAction {
-    protected final FuncActionPipeline actionFuncHandler;
+    protected FuncActionPipeline pipeline;
     private final String actionName;
     private TerminalExecutionConsole terminalExecutionConsole;
     private ExecProcessHandler runHandler;
@@ -41,27 +41,24 @@ public class FuncActionTask implements IFuncAction {
     protected long endTime;
     protected Icon[] stateIcon;
     protected String[] state;
-    private int stepIndex;
     private final Consumer<FuncActionTask> doExecute;
 
-    public FuncActionTask(FuncActionPipeline actionFuncHandler, String actionName, Consumer<FuncActionTask> doExecute, int stepIndex){
-        this.actionFuncHandler = actionFuncHandler;
+    public FuncActionTask(String actionName, Consumer<FuncActionTask> doExecute) {
         this.actionName = actionName;
-        this.stepIndex = stepIndex;
         this.startTime = -1;
         this.endTime = -1;
         this.doExecute = doExecute;
-        init();
     }
 
     public void doExecute() {
         this.doExecute.consume(this);
     }
 
-    private void init() {
+    public void init(FuncActionPipeline pipeline) {
+        this.pipeline = pipeline;
         stateIcon = new Icon[]{ AllIcons.Actions.Profile };
         state = new String[]{"Waiting to start"};
-        TerminalExecutionConsole commonTerminalExecutionConsole = new TerminalExecutionConsole(actionFuncHandler.getProject(), null);
+        TerminalExecutionConsole commonTerminalExecutionConsole = new TerminalExecutionConsole(pipeline.getProject(), null);
         ProcessListener processListener = buildProcessListener();
         setProcessListener(processListener);
         setTerminalExecutionConsole(commonTerminalExecutionConsole);
@@ -76,7 +73,7 @@ public class FuncActionTask implements IFuncAction {
                 startTime = System.currentTimeMillis();
                 stateIcon = new Icon[]{new AnimatedIcon.FS()};
                 state = new String[]{""};
-                actionFuncHandler.fireChangeRunningStep();
+                FuncActionTask.this.pipeline.fireChangeRunningStep();
             }
 
             @Override
@@ -88,7 +85,7 @@ public class FuncActionTask implements IFuncAction {
                     stateIcon[0] = AllIcons.General.BalloonError;
                     state[0] = "failed";
                 }
-                actionFuncHandler.fireTerminatedStep(thisSupplier);
+                FuncActionTask.this.pipeline.fireTerminatedStep(thisSupplier);
                 setEndTime();
             }
         };
@@ -104,8 +101,8 @@ public class FuncActionTask implements IFuncAction {
         return actionName;
     }
 
-    public FuncActionPipeline getActionFuncHandler() {
-        return actionFuncHandler;
+    public FuncActionPipeline getPipeline() {
+        return pipeline;
     }
 
     public TerminalExecutionConsole getTerminalExecutionConsole() {
@@ -134,12 +131,12 @@ public class FuncActionTask implements IFuncAction {
 
     @Override
     public Project getProject() {
-        return actionFuncHandler.getProject();
+        return pipeline.getProject();
     }
 
     @Override
     public String getFuncName() {
-        return actionFuncHandler.getFuncName();
+        return pipeline.getFuncName();
     }
 
     public void setEndTime() {
@@ -147,10 +144,16 @@ public class FuncActionTask implements IFuncAction {
     }
 
     public Icon getStateIcon() {
+        if (stateIcon == null) {
+            return null;
+        }
         return stateIcon[0];
     }
 
     public String getState() {
+        if (state == null) {
+            return null;
+        }
         return state[0];
     }
 
@@ -178,15 +181,7 @@ public class FuncActionTask implements IFuncAction {
 
     @Override
     public Function getFunction() {
-        return actionFuncHandler.getFunction();
-    }
-
-    public int getStepIndex() {
-        return stepIndex;
-    }
-
-    public void setStepIndex(int stepIndex) {
-        this.stepIndex = stepIndex;
+        return pipeline.getFunction();
     }
 
     private void setProcessHandlerFunction() {

@@ -71,7 +71,7 @@ public class BuildAction extends KnAction {
             return;
         }
         TelemetryMessageBuilder.ActionMessage telemetry = createTelemetryBuild();
-        telemetry.property(PROP_CALLER_ACTION, buildStepHandler.getActionFuncHandler().getActionName());
+        telemetry.property(PROP_CALLER_ACTION, buildStepHandler.getPipeline().getActionName());
         BuildAction buildAction = (BuildAction) ActionManager.getInstance().getAction(ID);
         String image = function.getImage(), registry = "";
         if (Strings.isNullOrEmpty(image)) {

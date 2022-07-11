@@ -40,20 +40,17 @@ public class FuncActionPipelineBuilder {
     }
 
     public FuncActionPipelineBuilder withBuildTask(Consumer<FuncActionTask> doExecute) {
-        int taskIndex = tasks.size();
-        tasks.add(taskIndex, new BuildFuncActionTask(pipeline, doExecute, taskIndex));
+        tasks.add(new BuildFuncActionTask(doExecute));
         return this;
     }
 
     public FuncActionPipelineBuilder withRunTask(Consumer<FuncActionTask> doExecute) {
-        int taskIndex = tasks.size();
-        tasks.add(taskIndex, new RunFuncActionTask(pipeline, doExecute, taskIndex));
+        tasks.add(new RunFuncActionTask(doExecute));
         return this;
     }
 
     public FuncActionPipelineBuilder withTask(String name, Consumer<FuncActionTask> doExecute) {
-        int taskIndex = tasks.size();
-        tasks.add(taskIndex, new FuncActionTask(pipeline, name, doExecute, taskIndex));
+        tasks.add(new FuncActionTask(name, doExecute));
         return this;
     }
 

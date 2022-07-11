@@ -25,8 +25,8 @@ import java.util.function.Supplier;
 public class RunFuncActionTask extends FuncActionTask {
     private Runnable callbackWhenListeningReady;
 
-    public RunFuncActionTask(FuncActionPipeline actionFuncHandler, Consumer<FuncActionTask> doExecute, int stepIndex) {
-        super(actionFuncHandler, "runFunc", doExecute, stepIndex);
+    public RunFuncActionTask(Consumer<FuncActionTask> doExecute) {
+        super("runFunc", doExecute);
     }
 
     public void setCallbackWhenListeningReady(Runnable callbackWhenListeningReady) {
@@ -41,7 +41,7 @@ public class RunFuncActionTask extends FuncActionTask {
                 startTime = System.currentTimeMillis();
                 stateIcon = new Icon[]{new AnimatedIcon.FS()};
                 state = new String[]{""};
-                actionFuncHandler.fireChangeRunningStep();
+                pipeline.fireChangeRunningStep();
             }
 
             @Override
@@ -53,7 +53,7 @@ public class RunFuncActionTask extends FuncActionTask {
                     stateIcon[0] = AllIcons.General.BalloonError;
                     state[0] = "failed";
                 }
-                actionFuncHandler.fireTerminatedStep(thisSupplier);
+                pipeline.fireTerminatedStep(thisSupplier);
                 setEndTime();
             }
 

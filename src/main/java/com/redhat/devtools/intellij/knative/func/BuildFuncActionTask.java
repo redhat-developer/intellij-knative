@@ -19,14 +19,14 @@ import static com.redhat.devtools.intellij.knative.Constants.BUILDFUNC_CONTENT_N
 import static com.redhat.devtools.intellij.knative.Constants.BUILDFUNC_TOOLWINDOW_ID;
 
 public class BuildFuncActionTask extends FuncActionTask {
-    public BuildFuncActionTask(FuncActionPipeline actionFuncHandler, Consumer<FuncActionTask> doExecute, int stepIndex) {
-        super(actionFuncHandler, "buildImage", doExecute, stepIndex);
+    public BuildFuncActionTask(Consumer<FuncActionTask> doExecute) {
+        super("buildImage", doExecute);
     }
 
     @Override
     public void doExecute() {
-        if (!(actionFuncHandler instanceof BuildFuncActionPipeline)) {
-            ToolWindow toolWindow = ToolWindowManager.getInstance(actionFuncHandler.getProject()).getToolWindow(BUILDFUNC_TOOLWINDOW_ID);
+        if (!(pipeline instanceof BuildFuncActionPipeline)) {
+            ToolWindow toolWindow = ToolWindowManager.getInstance(pipeline.getProject()).getToolWindow(BUILDFUNC_TOOLWINDOW_ID);
             BuildFuncPanel buildOutputPanel = (BuildFuncPanel) toolWindow.getContentManager().findContent(BUILDFUNC_CONTENT_NAME);
             buildOutputPanel.drawFuncAction(this);
         }

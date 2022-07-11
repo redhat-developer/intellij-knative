@@ -11,6 +11,7 @@
 package com.redhat.devtools.intellij.knative;
 
 import com.intellij.openapi.project.Project;
+import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.kn.KnCli;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
@@ -66,6 +67,7 @@ public class BaseTest {
     protected TelemetryService telemetryService;
     protected TelemetryMessageBuilder telemetryMessageBuilder;
     protected TelemetryMessageBuilder.ActionMessage actionMessage;
+    protected Function function;
 
     @Before
     public void setUp() throws Exception {
@@ -89,7 +91,7 @@ public class BaseTest {
         knFunctionNode = mock(KnFunctionNode.class);
         telemetryMessageBuilder = mock(TelemetryMessageBuilder.class);
         actionMessage = mock(TelemetryMessageBuilder.ActionMessage.class);
-
+        function = mock(Function.class);
     }
 
     protected String load(String name) throws IOException {

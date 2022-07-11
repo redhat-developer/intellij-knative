@@ -64,6 +64,7 @@ public abstract class FuncActionPipeline implements IFuncActionPipeline {
 
     public void setTasks(List<FuncActionTask> tasks) {
         actionTasks = tasks;
+        tasks.forEach(task -> task.init(this));
         runningStep = actionTasks.get(0);
     }
 
@@ -72,12 +73,6 @@ public abstract class FuncActionPipeline implements IFuncActionPipeline {
             return;
         }
         actionTasks.remove(index);
-        actionTasks.forEach(task -> {
-            int curIndex = task.getStepIndex();
-            if (curIndex > index) {
-                task.setStepIndex(--curIndex);
-            }
-        });
         runningStep = actionTasks.get(0);
     }
 
@@ -147,17 +142,28 @@ public abstract class FuncActionPipeline implements IFuncActionPipeline {
     public void fireTerminatedStep(Supplier<FuncActionTask> stepHandlerSupplier) {
         // if last step is terminated or any step failed set end time and update icon
         FuncActionTask stepHandler = stepHandlerSupplier.get();
-        if ((actionTasks.size() - 1) == stepHandler.getStepIndex()
+        if (actionTasks.get(actionTasks.size() - 1).equals(stepHandler)
                 || !stepHandler.isSuccessfullyCompleted()) {
             stateIcon[0] = stepHandler.getStateIcon();
             state[0] = stepHandler.getState();
             setEndTime();
-            skipNextSteps(stepHandler.getStepIndex());
+            skipNextSteps(getTaskIndex(stepHandler));
         } else {
-            FuncActionTask nextStepHandler = actionTasks.get(stepHandler.getStepIndex() + 1);
+            FuncActionTask nextStepHandler = actionTasks.get(getTaskIndex(stepHandler) + 1);
             runningStep = nextStepHandler;
             nextStepHandler.doExecute();
         }
+    }
+
+    private int getTaskIndex(FuncActionTask task) {
+        int index = -1;
+        for (FuncActionTask taskInPipeline: actionTasks) {
+            ++index;
+            if (taskInPipeline.equals(task)) {
+                return index;
+            }
+        }
+        return index;
     }
 
     private void skipNextSteps(int currentStep) {
