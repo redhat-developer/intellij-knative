@@ -8,7 +8,7 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.runFuncWindowTab;
+package com.redhat.devtools.intellij.knative.func;
 
 import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
@@ -17,8 +17,6 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.util.Key;
 import com.intellij.ui.AnimatedIcon;
 import com.intellij.util.Consumer;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionPipeline;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionTask;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;

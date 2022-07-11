@@ -8,7 +8,7 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow;
+package com.redhat.devtools.intellij.knative.func;
 
 public interface IFuncActionPipeline extends IFuncAction {
 

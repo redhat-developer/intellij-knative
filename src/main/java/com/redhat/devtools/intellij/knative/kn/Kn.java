@@ -12,11 +12,10 @@ package com.redhat.devtools.intellij.knative.kn;
 
 import com.intellij.execution.process.ProcessListener;
 import com.intellij.execution.ui.ConsoleView;
-import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.common.model.ProcessHandlerInput;
 import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
 import com.redhat.devtools.intellij.common.utils.ExecProcessHandler;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionPipelineManager;
+import com.redhat.devtools.intellij.knative.func.FuncActionPipelineManager;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
 import io.fabric8.kubernetes.client.Watch;

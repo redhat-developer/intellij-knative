@@ -8,21 +8,33 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.deployFuncWindowTab;
+package com.redhat.devtools.intellij.knative.func;
 
 import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.knative.kn.Function;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionPipeline;
 
-import static com.redhat.devtools.intellij.knative.Constants.DEPLOYFUNC_CONTENT_NAME;
+import javax.swing.Icon;
 
-public class DeployFuncActionPipeline extends FuncActionPipeline {
-    public DeployFuncActionPipeline(Project project, Function function) {
-        super("Deploy", project, function);
-    }
+public interface IFuncAction {
+    long getStartTime();
 
-    @Override
-    protected String getTabName() {
-        return DEPLOYFUNC_CONTENT_NAME;
-    }
+    long getEndTime();
+
+    Project getProject();
+
+    String getFuncName();
+
+    Icon getStateIcon();
+
+    String getState();
+
+    boolean isFinished();
+
+    boolean isSuccessfullyCompleted();
+
+    Function getFunction();
+
+    String getStartingDate();
+
+    void stop();
 }

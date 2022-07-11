@@ -8,7 +8,7 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow;
+package com.redhat.devtools.intellij.knative.func;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
@@ -16,6 +16,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.AnimatedIcon;
 import com.redhat.devtools.intellij.knative.kn.Function;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.BuildRunDeployFuncPanel;
 
 import javax.swing.Icon;
 import java.text.DateFormat;

@@ -25,7 +25,7 @@ import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.ExecProcessHandler;
 import com.redhat.devtools.intellij.common.utils.NetworkUtils;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionPipelineManager;
+import com.redhat.devtools.intellij.knative.func.FuncActionPipelineManager;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;

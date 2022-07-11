@@ -8,16 +8,11 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow;
+package com.redhat.devtools.intellij.knative.func;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.util.Consumer;
 import com.redhat.devtools.intellij.knative.kn.Function;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.buildFuncWindowTab.BuildFuncActionPipeline;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.buildFuncWindowTab.BuildFuncActionTask;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.deployFuncWindowTab.DeployFuncActionPipeline;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.runFuncWindowTab.RunFuncActionPipeline;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.runFuncWindowTab.RunFuncActionTask;
 
 import java.util.ArrayList;
 import java.util.List;

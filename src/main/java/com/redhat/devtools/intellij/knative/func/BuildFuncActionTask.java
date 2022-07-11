@@ -8,13 +8,12 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.buildFuncWindowTab;
+package com.redhat.devtools.intellij.knative.func;
 
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.util.Consumer;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionPipeline;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionTask;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.buildFuncWindowTab.BuildFuncPanel;
 
 import static com.redhat.devtools.intellij.knative.Constants.BUILDFUNC_CONTENT_NAME;
 import static com.redhat.devtools.intellij.knative.Constants.BUILDFUNC_TOOLWINDOW_ID;
