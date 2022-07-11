@@ -25,6 +25,8 @@ import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionPi
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionTask;
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionPipelineBuilder;
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.IFuncActionPipeline;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.runFuncWindowTab.RunFuncActionPipeline;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.runFuncWindowTab.RunFuncActionTask;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +39,7 @@ import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.an
 
 public class RunAction extends KnAction {
     private static final Logger logger = LoggerFactory.getLogger(RunAction.class);
+    private static final TelemetryMessageBuilder.ActionMessage telemetry = TelemetryService.instance().action(NAME_PREFIX_MISC + "run func");
 
     public RunAction() {
         super(KnFunctionNode.class);
@@ -44,7 +47,7 @@ public class RunAction extends KnAction {
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent, TreePath path, Object selected, Kn knCli) {
-        TelemetryMessageBuilder.ActionMessage telemetry = TelemetryService.instance().action(NAME_PREFIX_MISC + "run func");
+
         ParentableNode node = getElement(selected);
         String name = node.getName();
         String namespace = knCli.getNamespace();
@@ -61,9 +64,23 @@ public class RunAction extends KnAction {
         IFuncActionPipeline runPipeline = new FuncActionPipelineBuilder()
                 .createRunPipeline(project, function)
                 .withBuildTask((task) -> doBuild(knCli, task))
-                .withTask("runFunc", (task) -> doRun(name, knCli, task, telemetry))
+                .withRunTask((task) -> doRun(name, knCli, task, telemetry))
                 .build();
 
+        doRunPipeline(project, knCli, runPipeline, name);
+    }
+
+    public static void Run(Project project, Function function, Kn knCli, String name, Runnable callbackWhenListeningReady) {
+        RunFuncActionPipeline runPipeline = (RunFuncActionPipeline) new FuncActionPipelineBuilder()
+                .createRunPipeline(project, function)
+                .withRunTask((task) -> doRun(name, knCli, task, telemetry))
+                .build();
+        RunFuncActionTask runTask = (RunFuncActionTask) runPipeline.getSteps().get(0);
+        runTask.setCallbackWhenListeningReady(callbackWhenListeningReady);
+        doRunPipeline(project, knCli, runPipeline, name);
+    }
+
+    private static void doRunPipeline(Project project, Kn knCli, IFuncActionPipeline runPipeline, String name) {
         boolean isStarted = knCli.getFuncActionPipelineManager().start(runPipeline);
         if (!isStarted) {
             int response = Messages.showYesNoDialog(
@@ -75,13 +92,12 @@ public class RunAction extends KnAction {
                     AllIcons.General.QuestionDialog
             );
             if (response == Messages.YES) {
-               knCli.getFuncActionPipelineManager().stopAndRerun(runPipeline);
+                knCli.getFuncActionPipelineManager().stopAndRerun(runPipeline);
             }
         }
-
     }
 
-    private void doBuild(Kn knCli, FuncActionTask funcActionTask) {
+    private static void doBuild(Kn knCli, FuncActionTask funcActionTask) {
         ExecHelper.submit(() -> BuildAction.execute(
                 funcActionTask.getProject(),
                 funcActionTask.getFunction(),
@@ -90,7 +106,7 @@ public class RunAction extends KnAction {
         );
     }
 
-    private void doRun(String name, Kn knCli, FuncActionTask funcActionTask, TelemetryMessageBuilder.ActionMessage telemetry) {
+    private static void doRun(String name, Kn knCli, FuncActionTask funcActionTask, TelemetryMessageBuilder.ActionMessage telemetry) {
         ExecHelper.submit(() -> {
             try {
                 knCli.runFunc(funcActionTask.getFunction().getLocalPath(), funcActionTask.getTerminalExecutionConsole(),

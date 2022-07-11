@@ -10,17 +10,23 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.actions.func;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
+import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.knative.actions.KnAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.runFuncWindowTab.RunFuncActionPipeline;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.runFuncWindowTab.RunFuncActionTask;
 import com.redhat.devtools.intellij.knative.ui.invokeFunc.InvokeDialog;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
@@ -50,6 +56,7 @@ public class InvokeAction extends KnAction {
         String name = node.getName();
         String namespace = knCli.getNamespace();
         Function function = ((KnFunctionNode) node).getFunction();
+        Project project = getEventProject(anActionEvent);
 
         if (function.getLocalPath().isEmpty()) {
             telemetry
@@ -62,31 +69,15 @@ public class InvokeAction extends KnAction {
         model.setNamespace(namespace);
         model.setPath(function.getLocalPath());
 
-        InvokeDialog dialog = new InvokeDialog("Invoke", getEventProject(anActionEvent), function, model);
+        InvokeDialog dialog = new InvokeDialog("Invoke", project, function, model);
         dialog.show();
 
         if (dialog.isOK()) {
             ExecHelper.submit(() -> {
                 try {
-                    String id = knCli.invokeFunc(model);
-                    Notification notification = new Notification(NOTIFICATION_ID,
-                            "Invoked successfully",
-                            "Function " + name + " has been successfully invoked with execution id " + id + " !",
-                            NotificationType.INFORMATION);
-                    Notifications.Bus.notify(notification);
-                    telemetry
-                            .result(anonymizeResource(name, namespace, "Invoked function " + name))
-                            .send();
+                    doInvokeWithRetry(project, knCli, model, function);
                 } catch (IOException e) {
-                    Notification notification = new Notification(NOTIFICATION_ID,
-                            "Invoking function " + name + " failed",
-                            e.getLocalizedMessage(),
-                            NotificationType.ERROR);
-                    Notifications.Bus.notify(notification);
-                    logger.warn(e.getLocalizedMessage(), e);
-                    telemetry
-                            .error(anonymizeResource(name, namespace, e.getLocalizedMessage()))
-                            .send();
+                    doInvokeExceptionHandler(e, name, namespace);
                 }
             });
         } else {
@@ -94,6 +85,59 @@ public class InvokeAction extends KnAction {
                     .result(anonymizeResource(name, namespace, "Invoked function " + name + " operation has been cancelled"))
                     .send();
         }
+    }
+
+    private void doInvokeWithRetry(Project project, Kn knCli, InvokeModel model, Function function) throws IOException {
+        String name = function.getName();
+        try {
+            doInvoke(knCli, model, name);
+        } catch (IOException e) {
+            if (e.getLocalizedMessage().contains("function not running")) {
+                int response = UIHelper.executeInUI(() -> Messages.showYesNoDialog(
+                        project,
+                        "Cannot invoke a function if it is not running.\nRun function " + name + "?",
+                        "Unable to invoke func " + name,
+                        "Run",
+                        "Cancel",
+                        AllIcons.General.QuestionDialog
+                ));
+                if (response == Messages.YES) {
+                    UIHelper.executeInUI(() -> RunAction.Run(project, function, knCli, name, () -> {
+                        try {
+                            doInvoke(knCli, model, name);
+                        } catch (IOException ex) {
+                            doInvokeExceptionHandler(ex, name, knCli.getNamespace());
+                        }
+                    }));
+                    return;
+                }
+            }
+            throw e;
+        }
+    }
+
+    private void doInvoke(Kn knCli, InvokeModel model, String name) throws IOException{
+        String id = knCli.invokeFunc(model);
+        Notification notification = new Notification(NOTIFICATION_ID,
+                "Invoked successfully",
+                "Function " + name + " has been successfully invoked with execution id " + id + " !",
+                NotificationType.INFORMATION);
+        Notifications.Bus.notify(notification);
+        telemetry
+                .result(anonymizeResource(name, model.getNamespace(), "Invoked function " + name))
+                .send();
+    }
+
+    private void doInvokeExceptionHandler(IOException ex, String name, String namespace) {
+        Notification notification = new Notification(NOTIFICATION_ID,
+                "Invoking function " + name + " failed",
+                ex.getLocalizedMessage(),
+                NotificationType.ERROR);
+        Notifications.Bus.notify(notification);
+        logger.warn(ex.getLocalizedMessage(), ex);
+        telemetry
+                .error(anonymizeResource(name, namespace, ex.getLocalizedMessage()))
+                .send();
     }
 
     protected TelemetryMessageBuilder.ActionMessage createTelemetry() {
