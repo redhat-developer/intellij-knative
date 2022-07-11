@@ -13,7 +13,7 @@ targetCompatibility = 1.8
 repositories {
     mavenCentral()
     mavenLocal()
-    /*maven { url 'https://repository.jboss.org' }*/
+    maven { url 'https://repository.jboss.org' }
 }
 
 def versionsMap = ['IU-2021.1':'211.6693.108', 'IU-2021.2':'212.4746.57', 'IU-2021.3':'213.5744.122', 'IU-2022.1':'221.5080.1']
