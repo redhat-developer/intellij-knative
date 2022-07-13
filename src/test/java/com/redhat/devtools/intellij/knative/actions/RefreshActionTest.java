@@ -57,9 +57,10 @@ public class RefreshActionTest extends ActionTest {
         AnAction action = new RefreshAction();
         AnActionEvent anActionEvent = createRefreshActionEvent(knTreeStructure);
         when(anActionEvent.getPlace()).thenReturn(Constants.TOOLBAR_PLACE);
-
+        when(knTreeStructure.getRootElement()).thenReturn(knRootNode);
         action.actionPerformed(anActionEvent);
-        verify(knTreeStructure).fireModified(any());
+        verify(knTreeStructure).getRootElement();
+        verify(knTreeStructure).fireModified(knRootNode);
     }
 
     @Test

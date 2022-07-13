@@ -58,14 +58,11 @@ public class RefreshAction extends StructureTreeAction {
                     .send();
             return;
         }
-        Object node = getElement(selected);
-        if (Constants.TOOLBAR_PLACE.equals(anActionEvent.getPlace())) {
-            structure.fireModified(structure.getRootElement());
-        } else {
+        Object node = Constants.TOOLBAR_PLACE.equals(anActionEvent.getPlace()) ? structure.getRootElement() : getElement(selected);
+        if (node != null) {
             structure.fireModified(node);
+            sendTelemetry(telemetry, node);
         }
-        sendTelemetry(telemetry, node);
-
     }
 
     private void sendTelemetry(TelemetryMessageBuilder.ActionMessage telemetry, Object node) {
