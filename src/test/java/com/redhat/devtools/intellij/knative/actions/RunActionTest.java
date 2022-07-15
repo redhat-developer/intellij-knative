@@ -17,9 +17,9 @@ import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.actions.func.RunAction;
 import com.redhat.devtools.intellij.knative.kn.Function;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionTask;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.IFuncActionPipeline;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.runFuncWindowTab.RunFuncActionPipeline;
+import com.redhat.devtools.intellij.knative.func.FuncActionTask;
+import com.redhat.devtools.intellij.knative.func.IFuncActionPipeline;
+import com.redhat.devtools.intellij.knative.func.RunFuncActionPipeline;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 
 import java.io.IOException;

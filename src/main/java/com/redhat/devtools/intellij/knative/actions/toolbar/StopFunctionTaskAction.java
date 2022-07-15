@@ -14,7 +14,7 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.BuildRunDeployFuncPanel;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.IFuncAction;
+import com.redhat.devtools.intellij.knative.func.IFuncAction;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;

@@ -33,10 +33,9 @@ import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionPipelineManager;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionTask;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionPipelineBuilder;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.IFuncActionPipeline;
+import com.redhat.devtools.intellij.knative.func.FuncActionTask;
+import com.redhat.devtools.intellij.knative.func.FuncActionPipelineBuilder;
+import com.redhat.devtools.intellij.knative.func.IFuncActionPipeline;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import org.slf4j.Logger;
@@ -72,7 +71,7 @@ public class BuildAction extends KnAction {
             return;
         }
         TelemetryMessageBuilder.ActionMessage telemetry = createTelemetryBuild();
-        telemetry.property(PROP_CALLER_ACTION, buildStepHandler.getActionFuncHandler().getActionName());
+        telemetry.property(PROP_CALLER_ACTION, buildStepHandler.getPipeline().getActionName());
         BuildAction buildAction = (BuildAction) ActionManager.getInstance().getAction(ID);
         String image = function.getImage(), registry = "";
         if (Strings.isNullOrEmpty(image)) {

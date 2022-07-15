@@ -8,7 +8,7 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.runFuncWindowTab;
+package com.redhat.devtools.intellij.knative.func;
 
 import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
@@ -17,17 +17,16 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.util.Key;
 import com.intellij.ui.AnimatedIcon;
 import com.intellij.util.Consumer;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionPipeline;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.FuncActionTask;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;
+import java.util.function.Supplier;
 
 public class RunFuncActionTask extends FuncActionTask {
     private Runnable callbackWhenListeningReady;
 
-    public RunFuncActionTask(FuncActionPipeline actionFuncHandler, Consumer<FuncActionTask> doExecute, int stepIndex) {
-        super(actionFuncHandler, "runFunc", doExecute, stepIndex);
+    public RunFuncActionTask(Consumer<FuncActionTask> doExecute) {
+        super("runFunc", doExecute);
     }
 
     public void setCallbackWhenListeningReady(Runnable callbackWhenListeningReady) {
@@ -35,14 +34,14 @@ public class RunFuncActionTask extends FuncActionTask {
     }
 
     protected ProcessListener buildProcessListener() {
-        FuncActionTask that = this;
+        Supplier<FuncActionTask> thisSupplier = () -> this;
         return new ProcessAdapter() {
             @Override
             public void startNotified(@NotNull ProcessEvent event) {
                 startTime = System.currentTimeMillis();
                 stateIcon = new Icon[]{new AnimatedIcon.FS()};
                 state = new String[]{""};
-                actionFuncHandler.fireChangeRunningStep();
+                pipeline.fireChangeRunningStep();
             }
 
             @Override
@@ -54,7 +53,7 @@ public class RunFuncActionTask extends FuncActionTask {
                     stateIcon[0] = AllIcons.General.BalloonError;
                     state[0] = "failed";
                 }
-                actionFuncHandler.fireTerminatedStep(that);
+                pipeline.fireTerminatedStep(thisSupplier);
                 setEndTime();
             }
 

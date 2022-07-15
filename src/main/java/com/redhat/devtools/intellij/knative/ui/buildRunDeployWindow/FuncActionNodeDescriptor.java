@@ -13,6 +13,7 @@ package com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
+import com.redhat.devtools.intellij.knative.func.IFuncAction;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;

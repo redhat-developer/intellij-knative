@@ -29,7 +29,10 @@ import com.intellij.util.ui.UIUtil;
 import com.intellij.util.ui.tree.TreeUtil;
 import com.redhat.devtools.intellij.knative.actions.toolbar.ShowFunctionTaskHistoryAction;
 import com.redhat.devtools.intellij.knative.actions.toolbar.StopFunctionTaskAction;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.buildFuncWindowTab.BuildFuncActionTask;
+import com.redhat.devtools.intellij.knative.func.FuncActionPipeline;
+import com.redhat.devtools.intellij.knative.func.FuncActionTask;
+import com.redhat.devtools.intellij.knative.func.IFuncAction;
+import com.redhat.devtools.intellij.knative.func.BuildFuncActionTask;
 import com.redhat.devtools.intellij.knative.utils.UIUtils;
 
 import javax.swing.Icon;

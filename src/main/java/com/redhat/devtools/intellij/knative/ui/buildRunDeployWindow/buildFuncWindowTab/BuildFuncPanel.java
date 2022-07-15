@@ -11,8 +11,10 @@
 package com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.buildFuncWindowTab;
 
 import com.intellij.openapi.wm.ToolWindow;
+import com.redhat.devtools.intellij.knative.func.BuildFuncActionPipeline;
+import com.redhat.devtools.intellij.knative.func.BuildFuncActionTask;
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.BuildRunDeployFuncPanel;
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.IFuncAction;
+import com.redhat.devtools.intellij.knative.func.IFuncAction;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.List;

@@ -8,7 +8,7 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow;
+package com.redhat.devtools.intellij.knative.func;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
@@ -16,6 +16,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.AnimatedIcon;
 import com.redhat.devtools.intellij.knative.kn.Function;
+import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.BuildRunDeployFuncPanel;
 
 import javax.swing.Icon;
 import java.text.DateFormat;
@@ -23,6 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static com.redhat.devtools.intellij.knative.Constants.BUILDFUNC_TOOLWINDOW_ID;
 
@@ -62,6 +64,15 @@ public abstract class FuncActionPipeline implements IFuncActionPipeline {
 
     public void setTasks(List<FuncActionTask> tasks) {
         actionTasks = tasks;
+        tasks.forEach(task -> task.init(this));
+        runningStep = actionTasks.get(0);
+    }
+
+    public void removeTask(int index) {
+        if (actionTasks.size() == 1) {
+            return;
+        }
+        actionTasks.remove(index);
         runningStep = actionTasks.get(0);
     }
 
@@ -128,19 +139,31 @@ public abstract class FuncActionPipeline implements IFuncActionPipeline {
         notifyListeners();
     }
 
-    public void fireTerminatedStep(FuncActionTask stepHandler) {
+    public void fireTerminatedStep(Supplier<FuncActionTask> stepHandlerSupplier) {
         // if last step is terminated or any step failed set end time and update icon
-        if ((actionTasks.size() - 1) == stepHandler.getStepIndex()
+        FuncActionTask stepHandler = stepHandlerSupplier.get();
+        if (actionTasks.get(actionTasks.size() - 1).equals(stepHandler)
                 || !stepHandler.isSuccessfullyCompleted()) {
             stateIcon[0] = stepHandler.getStateIcon();
             state[0] = stepHandler.getState();
             setEndTime();
-            skipNextSteps(stepHandler.getStepIndex());
+            skipNextSteps(getTaskIndex(stepHandler));
         } else {
-            FuncActionTask nextStepHandler = actionTasks.get(stepHandler.getStepIndex() + 1);
+            FuncActionTask nextStepHandler = actionTasks.get(getTaskIndex(stepHandler) + 1);
             runningStep = nextStepHandler;
             nextStepHandler.doExecute();
         }
+    }
+
+    private int getTaskIndex(FuncActionTask task) {
+        int index = -1;
+        for (FuncActionTask taskInPipeline: actionTasks) {
+            ++index;
+            if (taskInPipeline.equals(task)) {
+                return index;
+            }
+        }
+        return index;
     }
 
     private void skipNextSteps(int currentStep) {

@@ -8,11 +8,13 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow;
+package com.redhat.devtools.intellij.knative.func;
 
-import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.runFuncWindowTab.RunFuncActionPipeline;
+import com.redhat.devtools.intellij.knative.listener.KnFileListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,14 +23,17 @@ import java.util.Optional;
 public class FuncActionPipelineManager {
 
     private final Map<String, List<IFuncActionPipeline>> pipelines;
+    private final Map<String, List<IFuncActionPipeline>> allPipelinesHistory;
 
     public FuncActionPipelineManager(){
         pipelines = new HashMap<>();
+        allPipelinesHistory = new HashMap<>();
     }
 
     public boolean start(IFuncActionPipeline pipeline) {
         if (canBeStarted(pipeline)) {
-            ((FuncActionPipeline)pipeline).start();
+            IFuncActionPipeline optimized = optimizePipeline(pipeline);
+            ((FuncActionPipeline)optimized).start();
             return true;
         }
         return false;
@@ -65,6 +70,10 @@ public class FuncActionPipelineManager {
         }
         pipelinesFunction.add(pipeline);
         pipelines.put(pipeline.getFuncName(), pipelinesFunction);
+
+        List<IFuncActionPipeline> allPipelineList = allPipelinesHistory.getOrDefault(pipeline.getFuncName(), new ArrayList<>());
+        allPipelineList.add(0, pipeline);
+        allPipelinesHistory.put(pipeline.getFuncName(), allPipelineList);
         return true;
     }
 
@@ -74,5 +83,20 @@ public class FuncActionPipelineManager {
                 pipeline.stop();
             }
         }));
+    }
+
+    public IFuncActionPipeline optimizePipeline(IFuncActionPipeline pipeline) {
+        for (IFuncActionPipeline oldPipeline: allPipelinesHistory.getOrDefault(pipeline.getFuncName(), Collections.emptyList())) {
+            for (FuncActionTask task: ((FuncActionPipeline)oldPipeline).getSteps()) {
+                if (task instanceof BuildFuncActionTask && task.isSuccessfullyCompleted()) {
+                    Date lastBuildDate = new Date(task.getEndTime());
+                    if (!KnFileListener.isFuncChangedSinceLastBuild(pipeline.getFunction().getLocalPath(), lastBuildDate)) {
+                        ((FuncActionPipeline)pipeline).removeTask(0);
+                        return pipeline;
+                    }
+                }
+            }
+        }
+        return pipeline;
     }
 }

@@ -46,6 +46,7 @@
         <moduleBuilder builderClass="com.redhat.devtools.intellij.knative.ui.createFunc.FunctionModuleBuilder"/>
         <nonProjectFileWritingAccessExtension id="com.redhat.devtools.intellij.common.editor.AllowNonProjectEditing" implementation="com.redhat.devtools.intellij.common.editor.AllowNonProjectEditing" />
         <directoryProjectGenerator implementation="com.redhat.devtools.intellij.knative.ui.createFunc.FunctionProjectBuilder"/>
+        <vfs.asyncListener id="com.redhat.devtools.intellij.knative.listener.KnFileListener" implementation="com.redhat.devtools.intellij.knative.listener.KnFileListener"/>
     </extensions>
 
     <actions>
