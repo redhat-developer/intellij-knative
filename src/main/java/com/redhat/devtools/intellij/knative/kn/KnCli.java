@@ -393,7 +393,7 @@ public class KnCli implements Kn {
     public void runFunc(String path, ConsoleView terminalExecutionConsole,
                         java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> processHandlerFunction,
                         ProcessListener processListener) throws IOException {
-        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, processHandlerFunction, processListener, funcCommand, "run", "-p", path);
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, processHandlerFunction, processListener, funcCommand, "run", "-p", path, "-b=false");
     }
 
     @Override

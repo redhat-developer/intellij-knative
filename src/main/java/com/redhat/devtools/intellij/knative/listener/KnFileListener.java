@@ -41,7 +41,7 @@ public class KnFileListener implements AsyncFileListener {
     public @Nullable ChangeApplier prepareChange(@NotNull List<? extends VFileEvent> events) {
         events.forEach(event -> {
             if (event instanceof VFileContentChangeEvent) {
-                if (new File(event.getPath()).getName().equalsIgnoreCase("func.yaml")) {
+                if (isFuncYaml(event.getPath()) || isHiddenFileOrFolder(event.getPath())) {
                     return;
                 }
                 Date editDate = ((VFileContentChangeEvent) event).getModificationStamp() > 0 ? new Date() : null;
@@ -53,5 +53,20 @@ public class KnFileListener implements AsyncFileListener {
             }
         });
         return null;
+    }
+
+    private boolean isFuncYaml(String path) {
+        return new File(path).getName().equalsIgnoreCase("func.yaml");
+    }
+
+    private boolean isHiddenFileOrFolder(String path) {
+        File file = new File(path);
+        while(file != null) {
+            if (file.isHidden()) {
+                return true;
+            }
+            file = file.getParentFile();
+        }
+        return false;
     }
 }

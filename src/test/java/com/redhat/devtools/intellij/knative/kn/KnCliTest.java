@@ -537,7 +537,10 @@ public class KnCliTest extends BaseTest {
             kn.runFunc("path", commonTerminalExecutionConsole, processHandlerFunction, processListener);
             execHelperMockedStatic.verify(() ->
                     ExecHelper.executeWithTerminal(eq(null), anyString(), anyMap(),
-                            any(CommonTerminalExecutionConsole.class), any(java.util.function.Function.class), any(ProcessListener.class), anyString(), eq("run"), eq("-p"), eq("path")));
+                            any(CommonTerminalExecutionConsole.class), any(java.util.function.Function.class),
+                            any(ProcessListener.class), anyString(), eq("run"), eq("-p"), eq("path"),
+                            eq("-b=false")
+                    ));
         }
     }
 
