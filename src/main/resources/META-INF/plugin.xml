@@ -16,6 +16,8 @@
       <p>New ToolWindow for Functions to easily check the execution status of a build/run/deploy action.<p>
       <p>History view to visualize the latest 10 build/run/deploy executions</p>
       <p>New stop toolbar action</p>
+      <p>The build step is skipped if the function has not been updated since last build.</p>
+      <p>When invoking a function, which is not actually running, the user is informed of it and asked what to do</p>
       <p>Fix creation of cloudevent trigger function</p>
       <p>Fix import issue when new function module is created from JetBrains wizard</p>
       <p><b>1.1.0</b></p>
