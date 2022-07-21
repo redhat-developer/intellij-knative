@@ -13,7 +13,35 @@ A JetBrains IntelliJ plugin for interacting with Knative & Serverless Functions.
 
 ## New and Noteworthy
 
-The plugin works by using `kn` CLI 1.3.1 and `func` CLI 0.23.1. 
+The minimum JetBrains IDEs version supported by the plugin has been increased to 2021.1
+The plugin works by using `kn` CLI 1.5.0 and `func` CLI 0.25.0
+
+### New ToolWindow for build/deploy/run actions
+
+- The plugin now provides a custom ToolWindow to showcase the command execution
+- This currently supports the execution of the Run, Build and Deploy Function command
+- It also supports History View to visualise the old command logs
+- Currently, users can only view _the last 10 logs_ of the associated Function command
+
+![](images/1.2.0/knative1.gif)
+
+### Stop function execution and limit running sessions
+
+It is possible to stop a running function execution directly from the IDE UI.
+
+![](images/1.2.0/knative2.gif)
+
+### Smarter workflow execution
+
+The plugin skips building a function if it has not been updated since last build.
+
+### Inform user if the function is not running when invoking it
+
+The user is prompted to run the function first before invoking it, if the function is not running. This improves the overall experience during invoke calls.
+
+## Previous releases
+
+### 1.1.0
 
 ### Invoke fuction
 
@@ -27,14 +55,12 @@ The `New Function` action have been extended to all JetBrains IDEs
 
 ### Discovering existing CLIs and downloading missing ones have been improved
 
-The CLIs needed for the plugin to work are now downloaded on background without freezing the IDE. 
+The CLIs needed for the plugin to work are now downloaded on background without freezing the IDE.
 It has also been enhanced the way already-installed CLIs are discovered.
 
 ### Known issues discovered by using `func` CLI 0.23.1
 
 To overcome a visualization issue during the execution of the deploy command, this is run with the `-v` verbose flag [#974](https://github.com/knative-sandbox/kn-plugin-func/issues/974)
-
-## Previous releases
 
 ### 1.0.0
 

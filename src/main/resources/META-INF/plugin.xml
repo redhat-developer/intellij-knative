@@ -11,6 +11,16 @@
     ]]></description>
 
     <change-notes><![CDATA[
+      <p><b>1.2.0</b></p>
+      <p>The minimum JetBrains IDEs version supported by the plugin has been increased to 2021.1</p>
+      <p>The plugin now provides a custom ToolWindow to showcase the command execution</p>
+      <p>This currently supports the execution of the Run, Build and Deploy Function command</p>
+      <p>The plugin now supports History View (eye icon) to visualise the old command logs</p>
+      <p>Currently, users can only view _the last 10 logs_ of the associated Function command</p>
+      <p>Provide a Stop button in the toolbar, to stop the running function command from UI</p>
+      <p>Fix import issue when new function module is created from JetBrains wizard</p>
+      <p>Provide better execution during run command allowing to skip build if the function is not updated since last build</p>
+      <p>The user is prompted to run the function first before invoking it, if the function is not running.</p>
       <p><b>1.1.0</b></p>
       <p>Add support for invoking Knative Functions</p>
       <p>Extends new Knative Function action to all JetBrains IDEs<p>
