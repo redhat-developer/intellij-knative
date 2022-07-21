@@ -12,7 +12,7 @@
 
     <change-notes><![CDATA[
       <p><b>1.2.0</b></p>
-      <p>The minimum IDEA version supported by the plugin has been increased to 2021.1</p>
+      <p>The minimum JetBrains IDEs version supported by the plugin has been increased to 2021.1</p>
       <p>New ToolWindow for Functions to easily check the execution status of a build/run/deploy action.<p>
       <p>History view to visualize the latest 10 build/run/deploy executions</p>
       <p>New stop toolbar action</p>
