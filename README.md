@@ -33,7 +33,7 @@ It is possible to stop a running function execution directly from the IDE UI.
 
 The plugin skips building a function if it has not been updated since last build.
 
-### Inform user if func is not running when invoking it
+### Inform user if the function is not running when invoking it
 
 When invoking a function, which is not actually running, the user is informed of it, and she is asked to run it.
 
