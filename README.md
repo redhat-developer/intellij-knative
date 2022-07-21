@@ -35,7 +35,7 @@ The plugin skips building a function if it has not been updated since last build
 
 ### Inform user if the function is not running when invoking it
 
-When invoking a function, which is not actually running, the user is informed of it, and she is asked to run it.
+The user is prompted to run the function first before invoking it, if the function is not running. This improves the overall experience during invoke calls.
 
 ## Previous releases
 
