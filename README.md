@@ -18,7 +18,10 @@ The plugin works by using `kn` CLI 1.5.0 and `func` CLI 0.25.0
 
 ### New ToolWindow for build/deploy/run actions
 
-It offers a custom ToolWindow for Functions to easily check the execution status of a build/run/deploy action.
+- The plugin now provides a custom ToolWindow to showcase the command execution
+- This currently supports the execution of the Run, Build and Deploy Function command
+- It also supports History View to visualise the old command logs
+- Currently, users can only view _the last 10 logs_ of the associated Function command
 It is also possible to enable the history view to visualize the last 10 logs of build/run/deploy executions. 
 
 ![](images/1.2.0/knative1.gif)
