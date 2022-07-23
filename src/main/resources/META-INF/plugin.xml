@@ -12,27 +12,38 @@
 
     <change-notes><![CDATA[
       <p><b>1.2.0</b></p>
-      <p>The minimum JetBrains IDEs version supported by the plugin has been increased to 2021.1</p>
-      <p>The plugin now provides a custom ToolWindow to showcase the command execution</p>
-      <p>This currently supports the execution of the Run, Build and Deploy Function command</p>
-      <p>The plugin now supports History View (eye icon) to visualise the old command logs</p>
-      <p>Currently, users can only view _the last 10 logs_ of the associated Function command</p>
-      <p>Provide a Stop button in the toolbar, to stop the running function command from UI</p>
-      <p>Fix import issue when new function module is created from JetBrains wizard</p>
-      <p>Provide better execution during run command allowing to skip build if the function is not updated since last build</p>
-      <p>The user is prompted to run the function first before invoking it, if the function is not running.</p>
+      <ul>
+        <li>The minimum JetBrains IDEs version supported by the plugin has been increased to 2021.1</li>
+        <li>The plugin now provides a custom ToolWindow to showcase the command execution</li>
+        <li>This currently supports the execution of the Run, Build and Deploy Function command</li>
+        <li>The plugin now supports History View (eye icon) to visualise the old command logs</li>
+        <li>Currently, users can only view _the last 10 logs_ of the associated Function command</li>
+        <li>Provide a Stop button in the toolbar, to stop the running function command from UI</li>
+        <li>Fix import issue when new function module is created from JetBrains wizard</li>
+        <li>Provide better execution during run command allowing to skip build if the function is not updated since last build</li>
+        <li>The user is prompted to run the function first before invoking it, if the function is not running.</li>
+      </ul>
+      </br>
       <p><b>1.1.0</b></p>
-      <p>Add support for invoking Knative Functions</p>
-      <p>Extends new Knative Function action to all JetBrains IDEs<p>
-      <p>CLIs are now downloaded on background without freezing the IDE</p>
-      <p>The discovery of already-installed CLIs have been improved</p>
+      <ul>
+        <li>Add support for invoking Knative Functions</li>
+        <li>Extends new Knative Function action to all JetBrains IDEs<li>
+        <li>CLIs are now downloaded on background without freezing the IDE</li>
+        <li>The discovery of already-installed CLIs have been improved</li>
+      </ul>
+      </br>
       <p><b>1.0.0</b></p>
-      <p>Add support for Knative Functions</p>
-      <p>Extends native IntelliJ new Project/Module action to enable creation of Knative Function<p>
-      <p>Add actions to build, run, deploy, undeploy, open in browser a function</p>
+      <ul>
+        <li>Add support for Knative Functions</li>
+        <li>Extends native IntelliJ new Project/Module action to enable creation of Knative Function</li>
+        <li>Add actions to build, run, deploy, undeploy, open in browser a function</li>
+      </ul>
+      </br>
       <p><b>0.1.0</b></p>
-      <p>Initial release</p>
-      <p>Allow to create, edit, delete and open in browser services and revisions</p>
+      <ul>
+        <li>Initial release</li>
+        <li>Allow to create, edit, delete and open in browser services and revisions</li>
+      </ul>
     ]]>
     </change-notes>
 
