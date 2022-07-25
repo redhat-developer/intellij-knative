@@ -11,6 +11,11 @@
     ]]></description>
 
     <change-notes><![CDATA[
+      <p><b>1.2.1</b></p>
+      <ul>
+        <li>Update description in JetBrains marketplace</li>
+        <li>Update intellij-common to 1.7.1</li>
+      </ul>
       <p><b>1.2.0</b></p>
       <ul>
         <li>The minimum JetBrains IDEs version supported by the plugin has been increased to 2021.1</li>
