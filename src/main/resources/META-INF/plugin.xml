@@ -14,7 +14,7 @@
       <p><b>1.2.1</b></p>
       <ul>
         <li>Update plugin overview information in JetBrains Marketplace</li>
-        <li>Update intellij-common to 1.7.1</li>
+        <li>Update dependency of intellij-common to 1.7.1</li>
       </ul>
       <p><b>1.2.0</b></p>
       <ul>
