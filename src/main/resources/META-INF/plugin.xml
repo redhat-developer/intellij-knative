@@ -73,8 +73,8 @@
         <nonProjectFileWritingAccessExtension id="com.redhat.devtools.intellij.common.editor.AllowNonProjectEditing" implementation="com.redhat.devtools.intellij.common.editor.AllowNonProjectEditing" />
         <directoryProjectGenerator implementation="com.redhat.devtools.intellij.knative.ui.createFunc.FunctionProjectBuilder"/>
         <vfs.asyncListener id="com.redhat.devtools.intellij.knative.listener.KnFileListener" implementation="com.redhat.devtools.intellij.knative.listener.KnFileListener"/>
+        <toolWindow id="KnativeGettingStarted" anchor="right" factoryClass="com.redhat.devtools.intellij.knative.ui.welcomeScreen.GettingStartedToolWindow" canCloseContents="false" />
     </extensions>
-
     <actions>
         <group id="com.redhat.devtools.intellij.knative.tree" popup="true">
             <action id="com.redhat.devtools.intellij.knative.actions.CreateServiceAction" class="com.redhat.devtools.intellij.knative.actions.CreateServiceAction" text="New Service"/>
@@ -88,6 +88,9 @@
                     class="com.redhat.devtools.intellij.knative.actions.RefreshAction"
                     text="Refresh" icon="AllIcons.Actions.Refresh"
                     use-shortcut-of="Refresh"/>
+            <action id="com.redhat.devtools.intellij.knative.actions.OpenGettingStartedAction"
+                    class="com.redhat.devtools.intellij.knative.actions.OpenGettingStartedAction"
+                    text="Getting Started" />
         </group>
 
         <group id="com.redhat.devtools.intellij.knative.tree.functions" popup="true">
@@ -128,6 +131,7 @@
                     class="com.redhat.devtools.intellij.knative.actions.func.UndeployAction"
                     text="Undeploy"/>
             <reference id="com.redhat.devtools.intellij.knative.refresh"/>
+            <reference id="com.redhat.devtools.intellij.knative.actions.OpenGettingStartedAction"/>
         </group>
 
         <group id="com.redhat.devtools.intellij.knative.view.actionsToolbar">
