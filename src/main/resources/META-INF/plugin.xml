@@ -73,7 +73,8 @@
         <nonProjectFileWritingAccessExtension id="com.redhat.devtools.intellij.common.editor.AllowNonProjectEditing" implementation="com.redhat.devtools.intellij.common.editor.AllowNonProjectEditing" />
         <directoryProjectGenerator implementation="com.redhat.devtools.intellij.knative.ui.createFunc.FunctionProjectBuilder"/>
         <vfs.asyncListener id="com.redhat.devtools.intellij.knative.listener.KnFileListener" implementation="com.redhat.devtools.intellij.knative.listener.KnFileListener"/>
-        <toolWindow id="KnativeGettingStarted" anchor="right" factoryClass="com.redhat.devtools.intellij.knative.ui.welcomeScreen.GettingStartedToolWindow" canCloseContents="false" />
+        <toolWindow id="KnativeGettingStarted" anchor="right" factoryClass="com.redhat.devtools.intellij.knative.ui.toolwindow.GettingStartedToolWindow" canCloseContents="false" />
+        <applicationService id="com.redhat.devtools.intellij.knative.settings.SettingsState" serviceImplementation="com.redhat.devtools.intellij.knative.settings.SettingsState"/>
     </extensions>
     <actions>
         <group id="com.redhat.devtools.intellij.knative.tree" popup="true">

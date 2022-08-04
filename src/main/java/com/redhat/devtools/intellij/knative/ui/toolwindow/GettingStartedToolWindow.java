@@ -8,17 +8,23 @@
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
-package com.redhat.devtools.intellij.knative.ui.welcomeScreen;
+package com.redhat.devtools.intellij.knative.ui.toolwindow;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.project.ProjectManagerListener;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
+import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.openapi.wm.ex.ToolWindowManagerListener;
+import com.intellij.openapi.wm.impl.ToolWindowManagerImpl;
 import com.redhat.devtools.intellij.common.gettingstarted.GettingStartedContent;
 import com.redhat.devtools.intellij.common.gettingstarted.GettingStartedCourse;
 import com.redhat.devtools.intellij.common.gettingstarted.GettingStartedCourseBuilder;
 import com.redhat.devtools.intellij.common.gettingstarted.GettingStartedGroupLessons;
 import com.redhat.devtools.intellij.common.gettingstarted.GettingStartedLesson;
+import com.redhat.devtools.intellij.knative.settings.SettingsState;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.MalformedURLException;
@@ -27,16 +33,36 @@ import java.util.Collections;
 
 public class GettingStartedToolWindow implements ToolWindowFactory {
 
+    private GettingStartedCourse course;
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         toolWindow.setIcon(AllIcons.Toolwindows.Documentation);
         toolWindow.setStripeTitle("Getting Started");
+        ((ToolWindowManagerImpl)ToolWindowManager.getInstance(project)).addToolWindowManagerListener(new ToolWindowManagerListener() {
+            @Override
+            public void stateChanged(@NotNull ToolWindowManager toolWindowManager) {
+                if (hasToShowToolWindow()) {
+                    toolWindow.show();
+                }
+            }
+        });
+    }
+
+    private boolean hasToShowToolWindow() {
+        String version = course.getVersion();
+        if (SettingsState.getInstance().courseVersion.equals(version)) {
+            return false;
+        }
+        SettingsState.getInstance().courseVersion = version;
+        return true;
     }
 
     @Override
     public void init(@NotNull ToolWindow toolWindow) {
-        GettingStartedCourse course = new GettingStartedCourseBuilder()
+        final String version = "1.0";
+        course = new GettingStartedCourseBuilder()
                 .createGettingStartedCourse(
+                        version,
                         "Learn IDE Features for Knative",
                         "Start deploying, running, and managing serverless applications on OpenShift and Kubernetes",
                         getFeedbackURL())
