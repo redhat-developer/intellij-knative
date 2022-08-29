@@ -112,7 +112,7 @@ public class GettingStartedToolWindow implements ToolWindowFactory {
         GettingStartedLesson runFuncLesson = new GettingStartedLesson(
                 "Run function",
                 "<html><p>Run your function to see how it works locally before to push it on your cluster.</p>" +
-                        "<p>Only a function which has the source code opened in the IDE can be run." +
+                        "<p>Only a function which has the source code opened in the IDE can be run. " +
                         "Right click on the function you want to run (look for its node in the Functions tree), open the context menu (right-click on the node) " +
                         "and click on \"Run\". " +
                         "The Run tool window will show up where you can see the logs or stop the run execution</p></html>",
@@ -124,7 +124,7 @@ public class GettingStartedToolWindow implements ToolWindowFactory {
         GettingStartedLesson deployFuncLesson = new GettingStartedLesson(
                 "Deploy function",
                 "<html><p>Deploy your function to your cluster directly from your preferred IDE.</p>" +
-                        "<p>Only a function which has the source code opened in the IDE can be pushed." +
+                        "<p>Only a function which has the source code opened in the IDE can be pushed. " +
                         "Right click on the function you want to deploy (look for its node in the Functions tree), open the context menu (right-click on the node) " +
                         "and click on \"Deploy\"." +
                         "The Deploy tool window will show up where you can see the logs or stop the deploy execution</p></html>",
