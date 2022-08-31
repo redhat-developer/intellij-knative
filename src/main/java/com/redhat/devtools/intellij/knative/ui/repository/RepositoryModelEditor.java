@@ -37,23 +37,23 @@ public class RepositoryModelEditor extends ListModelEditorBase<Repository> {
         super(itemEditor);
 
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        list.setCellRenderer(SimpleListCellRenderer.create("", o -> itemEditor.getName(o)));
+        list.setCellRenderer(SimpleListCellRenderer.create("", itemEditor::getName));
 
         toolbarDecorator = ToolbarDecorator.createDecorator(list, model)
-                .setAddAction(button -> {
-                    if (!model.isEmpty()) {
-                        Repository lastItem = model.getElementAt(model.getSize() - 1);
-                        if (RepositoryModelEditor.this.itemEditor.isEmpty(lastItem)) {
-                            ScrollingUtil.selectItem(list, ContainerUtil.indexOfIdentity(model.getItems(), lastItem));
-                            return;
-                        }
-                    }
-
+                .setAddAction(action -> {
                     Repository item = createElement();
-                    model.add(item);
-                    ScrollingUtil.selectItem(list, ContainerUtil.indexOfIdentity(model.getItems(), item));
+                    if (item != null) {
+                        model.add(item);
+                        itemEditor.clone(item, false);
+                        ScrollingUtil.selectItem(list, ContainerUtil.indexOfIdentity(model.getItems(), item));
+                    }
                 })
-                .setRemoveActionUpdater(e -> areSelectedItemsRemovable(list.getSelectionModel()));
+                .setRemoveAction(action -> {
+                    Repository repositoryToDelete = list.getSelectedValue();
+                    if (itemEditor.isRemovable(repositoryToDelete)) {
+                        model.remove(repositoryToDelete);
+                    }
+                });
     }
 
     @Override
@@ -90,6 +90,6 @@ public class RepositoryModelEditor extends ListModelEditorBase<Repository> {
 
     @Override
     protected void removeEmptyItem(int i) {
-        ListUtil.removeIndices(getList(), new int[]{i});
+        ListUtil.removeIndices(list, new int[]{i});
     }
 }

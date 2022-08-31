@@ -309,6 +309,14 @@ public interface Kn {
     void removeVolume(String path) throws IOException;
 
     /**
+     * List all templates availabl
+     *
+     * @return list of all templates available
+     * @throws IOException if communication errored
+     */
+    Map<String, List<String>> getFuncTemplates() throws IOException;
+
+    /**
      * Set a watch on Service resource with label
      *
      * @param key     key label

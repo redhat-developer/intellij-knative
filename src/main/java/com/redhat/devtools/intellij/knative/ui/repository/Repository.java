@@ -1,5 +1,7 @@
 package com.redhat.devtools.intellij.knative.ui.repository;
 
+import java.util.Objects;
+
 /*******************************************************************************
  * Copyright (c) 2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
@@ -42,5 +44,18 @@ public class Repository {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Repository that = (Repository) o;
+        return Objects.equals(name, that.name) && Objects.equals(url, that.url);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, url);
     }
 }

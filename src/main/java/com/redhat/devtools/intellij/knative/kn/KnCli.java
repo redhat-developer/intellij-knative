@@ -52,6 +52,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -410,10 +411,17 @@ public class KnCli implements Kn {
 
     @Override
     public List<Repository> getRepos() throws IOException {
-        String list = ExecHelper.execute(funcCommand, envVars, "repository", "list");
+        String list = ExecHelper.execute(funcCommand, envVars, "repository", "list", "-v");
         return Arrays.stream(list.split("\n"))
-                .filter(name -> !name.trim().equalsIgnoreCase("default") && !name.trim().isEmpty())
-                .map(Repository::new)
+                .filter(row -> !row.trim().equalsIgnoreCase("default") && !row.trim().isEmpty())
+                .map(row -> {
+                    String[] nameUrl = row.split("\\s+");
+                    if (nameUrl.length > 1 && !nameUrl[0].trim().isEmpty() && !nameUrl[1].trim().isEmpty()) {
+                        return new Repository(nameUrl[0], nameUrl[1]);
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
@@ -435,6 +443,12 @@ public class KnCli implements Kn {
     @Override
     public void removeVolume(String path) throws IOException {
         ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars,funcCommand, "config", "volumes", "remove", "-p", path);
+    }
+
+    @Override
+    public Map<String, List<String>> getFuncTemplates() throws IOException {
+        String list = ExecHelper.execute(funcCommand, envVars, "templates", "--json");
+        return JSON_MAPPER.readValue(list, Map.class);
     }
 
     @Override

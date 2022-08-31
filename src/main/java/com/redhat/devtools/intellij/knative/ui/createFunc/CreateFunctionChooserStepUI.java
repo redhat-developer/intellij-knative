@@ -13,6 +13,8 @@ package com.redhat.devtools.intellij.knative.ui.createFunc;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
+import com.redhat.devtools.intellij.knative.kn.Kn;
+import com.redhat.devtools.intellij.knative.utils.MimeTypes;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Box;
@@ -24,8 +26,14 @@ import javax.swing.JScrollPane;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static com.redhat.devtools.intellij.knative.Constants.GO_RUNTIME;
 import static com.redhat.devtools.intellij.knative.Constants.NODE_RUNTIME;
@@ -58,18 +66,51 @@ public class CreateFunctionChooserStepUI {
 
     private JScrollPane create() {
         Box verticalBox = Box.createVerticalBox();
+        try {
+            Kn kn = FunctionBuilderUtils.getKn();
+            if (kn == null) {
+                verticalBox.add(
+                        new JLabel(
+                                "An error occurred while connecting to the cluster. " +
+                                    "Please verify your cluster is active and working")
+                );
+                throw new IOException("");
+            }
 
-        JPanel runtimeLabel = createLabelInFlowPanel("Runtime", "Function runtime language/framework");
-        verticalBox.add(runtimeLabel);
+            Map<String, List<String>> templates = kn.getFuncTemplates();
 
-        cmbRuntime = createComboBox(Arrays.asList(NODE_RUNTIME, GO_RUNTIME, PYTHON_RUNTIME, QUARKUS_RUNTIME, RUST_RUNTIME, SPRINGBOOT_RUNTIME, TYPESCRIPT_RUNTIME));
-        verticalBox.add(cmbRuntime);
+            JPanel runtimeLabel = createLabelInFlowPanel("Runtime", "Function runtime language/framework");
+            verticalBox.add(runtimeLabel);
+            cmbRuntime = createComboBox(new ArrayList<>(templates.keySet()));
+            verticalBox.add(cmbRuntime);
 
-        JPanel imageLabel = createLabelInFlowPanel("Template", "Function template.");
-        verticalBox.add(imageLabel);
+            JPanel imageLabel = createLabelInFlowPanel("Template", "Function template.");
+            verticalBox.add(imageLabel);
 
-        cmbTemplate = createComboBox(Arrays.asList("http", "cloudevents"));
-        verticalBox.add(cmbTemplate);
+            List<String> initialTemplateList = cmbRuntime.getSelectedItem() == null || cmbRuntime.getSelectedItem().toString().isEmpty()
+                    ? Collections.emptyList()
+                    : templates.get(cmbRuntime.getSelectedItem().toString());
+            cmbTemplate = createComboBox(initialTemplateList);
+            cmbRuntime.addItemListener(itemEvent -> {
+                // when combo box value change
+                if (itemEvent.getStateChange() == 1) {
+                    String runtimeSelected = (String) itemEvent.getItem();
+                    fillComboBox(cmbTemplate, templates.get(runtimeSelected));
+                    scroll.invalidate();
+                }
+            });
+            verticalBox.add(cmbTemplate);
+
+
+        } catch (IOException e) {
+            verticalBox.add(
+                    new JLabel(
+                            "An error occurred while connecting to the cluster. " +
+                                    "Please verify your cluster is active and working")
+            );
+        }
+
+
 
         verticalBox.add(new JPanel(new BorderLayout())); // hack to push components to the top
 
@@ -81,8 +122,13 @@ public class CreateFunctionChooserStepUI {
 
     private JComboBox createComboBox(List<String> options) {
         JComboBox comboBox = new ComboBox();
-        options.forEach(comboBox::addItem);
+        fillComboBox(comboBox, options);
         return comboBox;
+    }
+
+    private void fillComboBox(JComboBox comboBox, List<String> options) {
+        comboBox.removeAllItems();
+        options.forEach(comboBox::addItem);
     }
 
     private JPanel createLabelInFlowPanel(String name, String tooltip) {
