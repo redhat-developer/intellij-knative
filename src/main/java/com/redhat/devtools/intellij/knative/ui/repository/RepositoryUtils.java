@@ -17,19 +17,21 @@ import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.border.EmptyBorder;
+import javax.swing.SwingConstants;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
 
 public class RepositoryUtils {
+    public static final String NATIVE_NAME = "native_name";
+
     public enum Operation {
         CREATE,
+        RENAME,
         DELETE
-    }
-
-    public static JPanel createPanelRepository(JTextField txtName, JTextField txtUrl) {
-        return createPanelRepository(txtName, null, txtUrl, null);
     }
 
     public static JPanel createPanelRepository(JTextField txtName, JLabel lblNameError, JTextField txtUrl, JLabel lblUrlError) {
@@ -54,10 +56,9 @@ public class RepositoryUtils {
         panel.setMaximumSize(ROW_DIMENSION);
         wrapper.add(panel);
         if (errorLabel != null) {
-            errorLabel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 20));
-            errorLabel.setMinimumSize(new Dimension(Integer.MAX_VALUE, 20));
+            errorLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
             errorLabel.setForeground(UIConstants.RED);
-            errorLabel.setBorder(JBUI.Borders.emptyLeft(60));
+            errorLabel.setHorizontalAlignment(SwingConstants.LEFT);
             wrapper.add(errorLabel);
         }
         return wrapper;
@@ -83,5 +84,21 @@ public class RepositoryUtils {
         public RepositoryChange clone() {
             return new RepositoryChange(getRepository(), getOperation());
         }
+    }
+
+    public static boolean isValidRepositoryName(String name, String nativeName, List<Repository> existingRepos) {
+        return !name.trim().isEmpty()
+                && (name.equals(nativeName)
+                || existingRepos.stream().noneMatch(repo -> repo.getName().equalsIgnoreCase(name)));
+    }
+
+    public static boolean isValidRepositoryUrl(String url) {
+        try {
+            URL u = new URL(url);
+            u.toURI();
+        } catch (MalformedURLException | URISyntaxException e) {
+            return false;
+        }
+        return true;
     }
 }

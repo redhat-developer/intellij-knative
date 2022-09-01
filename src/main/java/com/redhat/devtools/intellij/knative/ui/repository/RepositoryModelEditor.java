@@ -26,14 +26,14 @@ import javax.swing.JComponent;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import java.util.List;
-
+import java.util.function.Supplier;
 
 public class RepositoryModelEditor extends ListModelEditorBase<Repository> {
     private final ToolbarDecorator toolbarDecorator;
 
     private final JBList<Repository> list = new JBList<>(model);
 
-    public RepositoryModelEditor(@NotNull ListItemEditor<Repository> itemEditor) {
+    public RepositoryModelEditor(@NotNull ListItemEditor<Repository> itemEditor, Supplier<List<Repository>> existingRepos) {
         super(itemEditor);
 
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -41,7 +41,7 @@ public class RepositoryModelEditor extends ListModelEditorBase<Repository> {
 
         toolbarDecorator = ToolbarDecorator.createDecorator(list, model)
                 .setAddAction(action -> {
-                    Repository item = createElement();
+                    Repository item = createElement(existingRepos);
                     if (item != null) {
                         model.add(item);
                         itemEditor.clone(item, false);
@@ -56,10 +56,9 @@ public class RepositoryModelEditor extends ListModelEditorBase<Repository> {
                 });
     }
 
-    @Override
-    public Repository createElement() {
+    public Repository createElement(Supplier<List<Repository>> existingRepos) {
         Repository repository = new Repository();
-        CreateRepositoryDialog createRepositoryDialog = new CreateRepositoryDialog(repository);
+        CreateRepositoryDialog createRepositoryDialog = new CreateRepositoryDialog(repository, existingRepos);
         createRepositoryDialog.show();
         if (createRepositoryDialog.isOK()) {
             return repository;

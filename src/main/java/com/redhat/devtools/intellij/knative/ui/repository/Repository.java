@@ -1,7 +1,3 @@
-package com.redhat.devtools.intellij.knative.ui.repository;
-
-import java.util.Objects;
-
 /*******************************************************************************
  * Copyright (c) 2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
@@ -12,22 +8,32 @@ import java.util.Objects;
  * Contributors:
  * Red Hat, Inc.
  ******************************************************************************/
+package com.redhat.devtools.intellij.knative.ui.repository;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+import static com.redhat.devtools.intellij.knative.ui.repository.RepositoryUtils.NATIVE_NAME;
+
 public class Repository {
 
     private String name, url;
+    private Map<String, String> attributes;
 
     public Repository() {
-
+        this("", "");
     }
 
     public Repository(String name) {
-        this.name = name;
-        this.url = "";
+        this(name, "");
     }
 
     public Repository(String name, String url) {
         this.name = name;
         this.url = url;
+        this.attributes = new HashMap<>();
+        this.attributes.put(NATIVE_NAME, name);
     }
 
     public String getName() {
@@ -46,6 +52,14 @@ public class Repository {
         this.url = url;
     }
 
+    public void setAttribute(String key, String value) {
+        attributes.put(key, value);
+    }
+
+    public String getAttribute(String key) {
+        return attributes.get(key);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -57,5 +71,9 @@ public class Repository {
     @Override
     public int hashCode() {
         return Objects.hash(name, url);
+    }
+
+    public Repository clone() {
+        return new Repository(getName(), getUrl());
     }
 }

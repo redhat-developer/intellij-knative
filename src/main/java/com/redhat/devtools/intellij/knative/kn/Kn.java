@@ -261,6 +261,14 @@ public interface Kn {
     void addRepo(Repository repository) throws IOException;
 
     /**
+     * Rename a repo
+     *
+     * @param repository repository to rename remotely
+     * @throws IOException if communication errored
+     */
+    void renameRepo(Repository repository) throws IOException;
+
+    /**
      * Remove a Function repository
      *
      * @param repository repository to be removed

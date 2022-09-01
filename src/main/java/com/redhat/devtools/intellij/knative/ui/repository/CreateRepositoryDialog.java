@@ -11,24 +11,17 @@
 package com.redhat.devtools.intellij.knative.ui.repository;
 
 import com.intellij.openapi.ui.DialogWrapper;
-import com.intellij.ui.components.JBScrollPane;
 import com.redhat.devtools.intellij.knative.ui.DeleteDialog;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.Box;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Arrays;
+import java.util.List;
+import java.util.function.Supplier;
 
 import static com.redhat.devtools.intellij.knative.ui.UIConstants.RED_BORDER_SHOW_ERROR;
 
@@ -37,10 +30,12 @@ public class CreateRepositoryDialog extends DialogWrapper {
     private JTextField txtName, txtUrl;
     private JLabel lblNameError, lblUrlError;
     private Repository repository;
+    private Supplier<List<Repository>> existingRepos;
 
-    public CreateRepositoryDialog(Repository repository) {
+    public CreateRepositoryDialog(Repository repository, Supplier<List<Repository>> existingRepos) {
         super(null, null, false, DialogWrapper.IdeModalityType.IDE);
         this.repository = repository;
+        this.existingRepos = existingRepos;
         setTitle("New Repository");
         setOKButtonText("Create");
         fillContainer();
@@ -56,10 +51,10 @@ public class CreateRepositoryDialog extends DialogWrapper {
 
     @Override
     protected void doOKAction() {
-        String name = txtName.getText();
-        String url = txtUrl.getText();
-        boolean validName = isValidName(name);
-        boolean validUrl = isValidUrl(url);
+        String name = txtName.getText().trim();
+        String url = txtUrl.getText().trim();
+        boolean validName = RepositoryUtils.isValidRepositoryName(name, "", existingRepos.get());
+        boolean validUrl = RepositoryUtils.isValidRepositoryUrl(url);
 
         if (validName && validUrl) {
             repository.setName(name);
@@ -76,20 +71,6 @@ public class CreateRepositoryDialog extends DialogWrapper {
 
     }
 
-    private boolean isValidName(String name) {
-        return !name.trim().isEmpty();
-    }
-
-    private boolean isValidUrl(String url) {
-        try {
-            URL u = new URL(url);
-            u.toURI();
-        } catch (MalformedURLException | URISyntaxException e) {
-            return false;
-        }
-        return true;
-    }
-
     @Nullable
     @Override
     protected JComponent createCenterPanel() {
@@ -103,7 +84,7 @@ public class CreateRepositoryDialog extends DialogWrapper {
         myContentPanel = new JPanel(new BorderLayout());
         txtName = new JTextField();
         txtUrl = new JTextField();
-        lblNameError = new JLabel("Name cannot be empty");
+        lblNameError = new JLabel("Name cannot be empty and it must be unique. Verify it has not yet been used.");
         lblNameError.setVisible(false);
         lblUrlError = new JLabel("Url format not valid. Only file uri scheme is supported.");
         lblUrlError.setVisible(false);

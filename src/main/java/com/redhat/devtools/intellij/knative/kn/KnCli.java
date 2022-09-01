@@ -60,6 +60,7 @@ import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_TOOL_WINDOW
 import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.IS_OPENSHIFT;
 import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.KUBERNETES_VERSION;
 import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.OPENSHIFT_VERSION;
+import static com.redhat.devtools.intellij.knative.ui.repository.RepositoryUtils.NATIVE_NAME;
 
 
 public class KnCli implements Kn {
@@ -307,7 +308,7 @@ public class KnCli implements Kn {
 
     @Override
     public void createFunc(CreateFuncModel model) throws IOException {
-        ExecHelper.execute(funcCommand, envVars, "create", model.getPath(), "-l", model.getRuntime(), "-t", model.getTemplate());
+        ExecHelper.execute(funcCommand, envVars, "create", model.getPath(), "-l", model.getRuntime(), "-t", model.getTemplate(), "-n", getNamespace());
     }
 
     @Override
@@ -401,12 +402,17 @@ public class KnCli implements Kn {
 
     @Override
     public void addRepo(Repository repository) throws IOException {
-        ExecHelper.execute(funcCommand, envVars, "repository", "add", repository.getName(), repository.getUrl());
+        ExecHelper.execute(funcCommand, envVars, "repository", "add", repository.getName(), repository.getUrl(), "-n", getNamespace());
+    }
+
+    @Override
+    public void renameRepo(Repository repository) throws IOException {
+        ExecHelper.execute(funcCommand, envVars, "repository", "rename", repository.getAttribute(NATIVE_NAME), repository.getName(), "-n", getNamespace());
     }
 
     @Override
     public void removeRepo(Repository repository) throws IOException {
-        ExecHelper.execute(funcCommand, envVars, "repository", "remove", repository.getName());
+        ExecHelper.execute(funcCommand, envVars, "repository", "remove", repository.getName(), "-n", getNamespace());
     }
 
     @Override
@@ -447,7 +453,7 @@ public class KnCli implements Kn {
 
     @Override
     public Map<String, List<String>> getFuncTemplates() throws IOException {
-        String list = ExecHelper.execute(funcCommand, envVars, "templates", "--json");
+        String list = ExecHelper.execute(funcCommand, envVars, "templates", "--json", "-n", getNamespace());
         return JSON_MAPPER.readValue(list, Map.class);
     }
 
