@@ -219,6 +219,7 @@ public class RepositoryDialog extends DialogWrapper {
                 if (validName) {
                     repo.setName(name);
                     itemEditor.clone(repo, true);
+                    editor.invalidate();
                 }
                 setError(!validName);
             }

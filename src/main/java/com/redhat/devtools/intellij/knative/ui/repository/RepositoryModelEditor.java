@@ -91,4 +91,8 @@ public class RepositoryModelEditor extends ListModelEditorBase<Repository> {
     protected void removeEmptyItem(int i) {
         ListUtil.removeIndices(list, new int[]{i});
     }
+
+    protected void invalidate() {
+        model.update();
+    }
 }
