@@ -398,7 +398,7 @@ public class KnCliTest extends BaseTest {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.createFunc(model);
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.execute(anyString(), anyMap(), eq("create"), eq("path"), eq("-l"), eq("runtime"), eq("-t"), eq("template")));
+                    ExecHelper.execute(anyString(), anyMap(), eq("create"), eq("path"), eq("-l"), eq("runtime"), eq("-t"), eq("template"), eq("-n"), anyString()));
         }
     }
 

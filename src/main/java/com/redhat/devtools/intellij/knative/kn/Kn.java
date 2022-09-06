@@ -18,6 +18,7 @@ import com.redhat.devtools.intellij.common.utils.ExecProcessHandler;
 import com.redhat.devtools.intellij.knative.func.FuncActionPipelineManager;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
+import com.redhat.devtools.intellij.knative.ui.repository.Repository;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
@@ -252,6 +253,38 @@ public interface Kn {
                  ProcessListener processListener) throws IOException;
 
     /**
+     * Create a new repository to retrieve new Function templates
+     *
+     * @param repository repository to be added
+     * @throws IOException if communication errored
+     */
+    void addRepo(Repository repository) throws IOException;
+
+    /**
+     * Rename a repo
+     *
+     * @param repository repository to rename remotely
+     * @throws IOException if communication errored
+     */
+    void renameRepo(Repository repository) throws IOException;
+
+    /**
+     * Remove a Function repository
+     *
+     * @param repository repository to be removed
+     * @throws IOException if communication errored
+     */
+    void removeRepo(Repository repository) throws IOException;
+
+    /**
+     * Return a list of Function repositories
+     *
+     * @return a list of Function repositories
+     * @throws IOException if communication errored
+     */
+    List<Repository> getRepos() throws IOException;
+
+    /**
      * Add environment variable to the function configuration
      *
      * @param path path where the function is stored
@@ -282,6 +315,14 @@ public interface Kn {
      * @throws IOException if communication errored
      */
     void removeVolume(String path) throws IOException;
+
+    /**
+     * List all templates availabl
+     *
+     * @return list of all templates available
+     * @throws IOException if communication errored
+     */
+    Map<String, List<String>> getFuncTemplates() throws IOException;
 
     /**
      * Set a watch on Service resource with label

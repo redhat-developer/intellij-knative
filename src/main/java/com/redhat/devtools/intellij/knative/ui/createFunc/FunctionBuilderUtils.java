@@ -49,7 +49,7 @@ public class FunctionBuilderUtils {
 
     }
 
-    private static Kn getKn() {
+    public static Kn getKn() {
         Project[] projects = ProjectManager.getInstance().getOpenProjects();
         for (Project project: projects) {
             Kn kn = TreeHelper.getKn(project);

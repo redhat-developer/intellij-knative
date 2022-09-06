@@ -28,6 +28,7 @@ import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.func.FuncActionPipelineManager;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
+import com.redhat.devtools.intellij.knative.ui.repository.Repository;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import io.fabric8.knative.client.KnativeClient;
 import io.fabric8.kubernetes.client.ConfigBuilder;
@@ -51,12 +52,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_TOOL_WINDOW_ID;
 import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.IS_OPENSHIFT;
 import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.KUBERNETES_VERSION;
 import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.OPENSHIFT_VERSION;
+import static com.redhat.devtools.intellij.knative.ui.repository.RepositoryUtils.NATIVE_NAME;
 
 
 public class KnCli implements Kn {
@@ -304,7 +308,7 @@ public class KnCli implements Kn {
 
     @Override
     public void createFunc(CreateFuncModel model) throws IOException {
-        ExecHelper.execute(funcCommand, envVars, "create", model.getPath(), "-l", model.getRuntime(), "-t", model.getTemplate());
+        ExecHelper.execute(funcCommand, envVars, "create", model.getPath(), "-l", model.getRuntime(), "-t", model.getTemplate(), "-n", getNamespace());
     }
 
     @Override
@@ -397,6 +401,37 @@ public class KnCli implements Kn {
     }
 
     @Override
+    public void addRepo(Repository repository) throws IOException {
+        ExecHelper.execute(funcCommand, envVars, "repository", "add", repository.getName(), repository.getUrl(), "-n", getNamespace());
+    }
+
+    @Override
+    public void renameRepo(Repository repository) throws IOException {
+        ExecHelper.execute(funcCommand, envVars, "repository", "rename", repository.getAttribute(NATIVE_NAME), repository.getName(), "-n", getNamespace());
+    }
+
+    @Override
+    public void removeRepo(Repository repository) throws IOException {
+        ExecHelper.execute(funcCommand, envVars, "repository", "remove", repository.getName(), "-n", getNamespace());
+    }
+
+    @Override
+    public List<Repository> getRepos() throws IOException {
+        String list = ExecHelper.execute(funcCommand, envVars, "repository", "list", "-v");
+        return Arrays.stream(list.split("\n"))
+                .filter(row -> !row.trim().equalsIgnoreCase("default") && !row.trim().isEmpty())
+                .map(row -> {
+                    String[] nameUrl = row.split("\\s+");
+                    if (nameUrl.length > 1 && !nameUrl[0].trim().isEmpty() && !nameUrl[1].trim().isEmpty()) {
+                        return new Repository(nameUrl[0], nameUrl[1]);
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void addEnv(String path) throws IOException {
         ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars,funcCommand, "config", "envs", "add", "-p", path);
     }
@@ -414,6 +449,12 @@ public class KnCli implements Kn {
     @Override
     public void removeVolume(String path) throws IOException {
         ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars,funcCommand, "config", "volumes", "remove", "-p", path);
+    }
+
+    @Override
+    public Map<String, List<String>> getFuncTemplates() throws IOException {
+        String list = ExecHelper.execute(funcCommand, envVars, "templates", "--json", "-n", getNamespace());
+        return JSON_MAPPER.readValue(list, Map.class);
     }
 
     @Override

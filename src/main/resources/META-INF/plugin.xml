@@ -136,6 +136,9 @@
 
         <group id="com.redhat.devtools.intellij.knative.view.actionsFunctionToolbar">
             <reference id="com.redhat.devtools.intellij.knative.refresh"/>
+            <action id="com.redhat.devtools.intellij.knative.actions.func.RepositoryAction"
+                    class="com.redhat.devtools.intellij.knative.actions.func.RepositoryAction"
+                    text="Manage Repositories" icon="AllIcons.Actions.ListChanges"/>
         </group>
     </actions>
 </idea-plugin>
