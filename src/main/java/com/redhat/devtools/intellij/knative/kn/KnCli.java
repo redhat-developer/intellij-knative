@@ -27,6 +27,7 @@ import com.redhat.devtools.intellij.common.utils.NetworkUtils;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.func.FuncActionPipelineManager;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
+import com.redhat.devtools.intellij.knative.utils.model.ImageRegistryModel;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
 import com.redhat.devtools.intellij.knative.ui.repository.Repository;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
@@ -312,38 +313,51 @@ public class KnCli implements Kn {
     }
 
     @Override
-    public void buildFunc(String path, String registry, String image, ConsoleView terminalExecutionConsole,
+    public void buildFunc(String path, ImageRegistryModel model, ConsoleView terminalExecutionConsole,
                           java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> processHandlerFunction,
                           ProcessListener processListener) throws IOException {
         ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole,
-                processHandlerFunction, processListener, getBuildDeployArgs("build", "", path, registry, image, true));
+                processHandlerFunction, processListener, getBuildDeployArgs("build", "", path, model, "", true));
     }
 
     @Override
-    public void deployFunc(String namespace, String path, String registry, String image, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException {
-        String[] args = getBuildDeployArgs("deploy", namespace, path, registry, image, true);
+    public void deployFunc(String namespace, String path, ImageRegistryModel model, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException {
+        String[] args = getBuildDeployArgs("deploy", namespace, path, model, "", true);
         List<String> argsList = new ArrayList<>(Arrays.asList(args));
         argsList.addAll(Arrays.asList("-b", "disabled"));
         ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, processListener, argsList.toArray(new String[0]));
     }
 
-    private String[] getBuildDeployArgs(String command, String namespace, String path, String registry, String image, boolean verbose) {
+    @Override
+    public void onClusterBuildFunc(String namespace, String path, String repo, ImageRegistryModel model, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException {
+        String[] args = getBuildDeployArgs("deploy", namespace, path, model, repo, true);
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, processListener, args);
+    }
+
+    private String[] getBuildDeployArgs(String command, String namespace, String path, ImageRegistryModel model, String remoteRepo, boolean verbose) {
         List<String> args = new ArrayList<>(Arrays.asList(funcCommand, command));
-        if (image.isEmpty()) {
-            args.addAll(Arrays.asList("-r", registry));
-        } else {
-            args.addAll(Arrays.asList("-i", image));
-            if (client.isAdaptable(OpenShiftClient.class)) {
-                args.addAll(Arrays.asList("-r", ""));
+        if (!model.isAutoDiscovery()) {
+            if (model.getImage().isEmpty()) {
+                args.addAll(Arrays.asList("-r", model.getRegistry()));
+            } else {
+                args.addAll(Arrays.asList("-i", model.getImage()));
+                if (client.isAdaptable(OpenShiftClient.class)) {
+                    args.addAll(Arrays.asList("-r", ""));
+                }
             }
         }
         if (!namespace.isEmpty()) {
             args.addAll(Arrays.asList("-n", namespace));
         }
         args.addAll(Arrays.asList("-p", path));
+
+        if (!remoteRepo.isEmpty()) {
+            args.addAll(Arrays.asList("--remote", "--git-url", remoteRepo));
+        }
         if (verbose) {
             args.addAll(Collections.singletonList("-v"));
         }
+
         return args.toArray(new String[0]);
     }
 

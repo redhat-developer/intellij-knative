@@ -25,6 +25,7 @@ import com.redhat.devtools.intellij.knative.func.FuncActionPipelineBuilder;
 import com.redhat.devtools.intellij.knative.func.FuncActionTask;
 import com.redhat.devtools.intellij.knative.func.IFuncActionPipeline;
 import com.redhat.devtools.intellij.knative.utils.FuncUtils;
+import com.redhat.devtools.intellij.knative.utils.model.ImageRegistryModel;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,24 +54,24 @@ public class DeployAction extends BuildAction {
         TelemetryMessageBuilder.ActionMessage telemetry = createTelemetry();
         Project project = getEventProject(anActionEvent);
 
-        Pair<String, String> registryAndImage = confirmAndGetRegistryImage(project, function, knCli, telemetry);
-        if (registryAndImage == null) {
+        ImageRegistryModel model = confirmAndGetRegistryImage(project, function, knCli, false, telemetry);
+        if (model == null || !model.isValid()) {
             return;
         }
-        if (!Strings.isNullOrEmpty(registryAndImage.getSecond())) {
-            function.setImage(registryAndImage.getSecond());
+        if (!Strings.isNullOrEmpty(model.getImage())) {
+            function.setImage(model.getImage());
         }
 
         IFuncActionPipeline deployPipeline = new FuncActionPipelineBuilder()
                 .createDeployPipeline(project, function)
                 .withBuildTask((task) -> doBuild(knCli, task))
                 .withTask("deployFunc", (task) -> doDeploy(node.getName(), knCli, task,
-                        registryAndImage.getFirst(), registryAndImage.getSecond(), telemetry))
+                        model, telemetry))
                 .build();
         knCli.getFuncActionPipelineManager().start(deployPipeline);
     }
 
-    private void doBuild(Kn knCli, FuncActionTask funcActionTask) {
+    protected void doBuild(Kn knCli, FuncActionTask funcActionTask) {
         ExecHelper.submit(() -> BuildAction.execute(
                 funcActionTask.getProject(),
                 funcActionTask.getFunction(),
@@ -79,11 +80,11 @@ public class DeployAction extends BuildAction {
         );
     }
 
-    protected void doDeploy(String name, Kn knCli, FuncActionTask funcActionTask, String registry, String image, TelemetryMessageBuilder.ActionMessage telemetry) {
+    protected void doDeploy(String name, Kn knCli, FuncActionTask funcActionTask, ImageRegistryModel model, TelemetryMessageBuilder.ActionMessage telemetry) {
         ExecHelper.submit(() -> {
             String namespace = knCli.getNamespace();
             try {
-                knCli.deployFunc(namespace, funcActionTask.getFunction().getLocalPath(), registry, image,
+                knCli.deployFunc(namespace, funcActionTask.getFunction().getLocalPath(), model,
                         funcActionTask.getTerminalExecutionConsole(), funcActionTask.getProcessListener());
                 telemetry
                         .result(anonymizeResource(name, knCli.getNamespace(), getSuccessMessage(namespace, name)))
@@ -118,7 +119,7 @@ public class DeployAction extends BuildAction {
         return TelemetryService.instance().action(NAME_PREFIX_BUILD_DEPLOY + "deploy func");
     }
 
-    private String getSuccessMessage(String namespace, String name) {
+    protected String getSuccessMessage(String namespace, String name) {
         return "Function " + name + " in namespace " + namespace + " has been successfully deployed";
     }
 

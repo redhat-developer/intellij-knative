@@ -18,6 +18,7 @@ import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.ExecProcessHandler;
 import com.redhat.devtools.intellij.knative.BaseTest;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
+import com.redhat.devtools.intellij.knative.utils.model.ImageRegistryModel;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
 import io.fabric8.kubernetes.api.model.RootPaths;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -418,8 +419,9 @@ public class KnCliTest extends BaseTest {
         TerminalExecutionConsole terminalExecutionConsole = mock(TerminalExecutionConsole.class);
         ProcessListener processListener = mock(ProcessListener.class);
         java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> processHandlerFunction = mock(java.util.function.Function.class);
+        ImageRegistryModel model = new ImageRegistryModel("", "registry");
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            kn.buildFunc("path", "registry", "", terminalExecutionConsole, processHandlerFunction, processListener);
+            kn.buildFunc("path", model, terminalExecutionConsole, processHandlerFunction, processListener);
             execHelperMockedStatic.verify(() ->
                     ExecHelper.executeWithTerminal(eq(null), anyString(), anyMap(),
                             any(TerminalExecutionConsole.class), any(java.util.function.Function.class), any(ProcessListener.class), anyString(),
@@ -433,8 +435,9 @@ public class KnCliTest extends BaseTest {
         TerminalExecutionConsole terminalExecutionConsole = mock(TerminalExecutionConsole.class);
         ProcessListener processListener = mock(ProcessListener.class);
         java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> processHandlerFunction = mock(java.util.function.Function.class);
+        ImageRegistryModel model = new ImageRegistryModel("image", "registry");
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            kn.buildFunc("path", "registry", "image", terminalExecutionConsole, processHandlerFunction, processListener);
+            kn.buildFunc("path", model, terminalExecutionConsole, processHandlerFunction, processListener);
             execHelperMockedStatic.verify(() ->
                     ExecHelper.executeWithTerminal(eq(null), anyString(), anyMap(),
                             any(TerminalExecutionConsole.class), any(java.util.function.Function.class), any(ProcessListener.class), anyString(),
@@ -447,7 +450,7 @@ public class KnCliTest extends BaseTest {
     public void BuildFunc_ClientFails_Throws() {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             execHelperMockedStatic.when(() -> ExecHelper.executeWithTerminal(any(), anyString())).thenThrow(new IOException("error"));
-            kn.buildFunc("", "", "", null, null, null);
+            kn.buildFunc("", new ImageRegistryModel(), null, null, null);
         } catch (IOException e) {
             assertEquals("error", e.getLocalizedMessage());
         }
@@ -457,8 +460,9 @@ public class KnCliTest extends BaseTest {
     public void DeployFunc_RegistryIsInsertedButNoImage_DeployIsCalled() throws IOException {
         TerminalExecutionConsole terminalExecutionConsole = mock(TerminalExecutionConsole.class);
         ProcessListener processListener = mock(ProcessListener.class);
+        ImageRegistryModel model = new ImageRegistryModel("", "registry");
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            kn.deployFunc("namespace", "path", "registry", "", terminalExecutionConsole, processListener);
+            kn.deployFunc("namespace", "path", model, terminalExecutionConsole, processListener);
             execHelperMockedStatic.verify(() ->
                     ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), eq(terminalExecutionConsole), eq(processListener), anyString(), eq("deploy"), eq("-r"), eq("registry"), eq("-n"), eq("namespace"), eq("-p"), eq("path"), eq("-v"), eq("-b"), eq("disabled")));
         }
@@ -468,8 +472,9 @@ public class KnCliTest extends BaseTest {
     public void DeployFunc_ImageIsInserted_DeployIsCalled() throws IOException {
         TerminalExecutionConsole terminalExecutionConsole = mock(TerminalExecutionConsole.class);
         ProcessListener processListener = mock(ProcessListener.class);
+        ImageRegistryModel model = new ImageRegistryModel("image", "registry");
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            kn.deployFunc("namespace", "path", "registry", "image", terminalExecutionConsole, processListener);
+            kn.deployFunc("namespace", "path", model, terminalExecutionConsole, processListener);
             execHelperMockedStatic.verify(() ->
                     ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), eq(terminalExecutionConsole), eq(processListener), anyString(), eq("deploy"), eq("-i"), eq("image"), eq("-n"), eq("namespace"), eq("-p"), eq("path"), eq("-v"), eq("-b"), eq("disabled")));
         }
@@ -479,7 +484,7 @@ public class KnCliTest extends BaseTest {
     public void DeployFunc_ClientFails_Throws() {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             execHelperMockedStatic.when(() -> ExecHelper.executeWithTerminal(any(), anyString())).thenThrow(new IOException("error"));
-            kn.deployFunc("", "", "", "", null, null);
+            kn.deployFunc("", "", new ImageRegistryModel(), null, null);
         } catch (IOException e) {
             assertEquals("error", e.getLocalizedMessage());
         }
