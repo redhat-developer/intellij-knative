@@ -45,7 +45,7 @@ public class OnClusterBuildAction extends DeployAction {
         ParentableNode node = getElement(selected);
         Function function = ((KnFunctionNode) node).getFunction();
         TelemetryMessageBuilder.ActionMessage telemetry = createTelemetry();
-        Project project = getEventProject(anActionEvent);
+        Project project = anActionEvent.getProject();
 
         String gitRepo = getRepoUrl(project);
         if (gitRepo == null) {

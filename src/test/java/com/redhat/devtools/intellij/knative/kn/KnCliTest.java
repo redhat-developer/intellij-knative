@@ -491,6 +491,47 @@ public class KnCliTest extends BaseTest {
     }
 
     @Test
+    public void OnClusterBuildFunc_ImageIsPassed_DeployIsCalled() throws IOException {
+        TerminalExecutionConsole terminalExecutionConsole = mock(TerminalExecutionConsole.class);
+        ProcessListener processListener = mock(ProcessListener.class);
+        ImageRegistryModel model = new ImageRegistryModel("image", "");
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            kn.onClusterBuildFunc("namespace", "path", "repo", model, terminalExecutionConsole, processListener);
+            execHelperMockedStatic.verify(() ->
+                    ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), eq(terminalExecutionConsole),
+                            eq(processListener), anyString(), eq("deploy"), eq("-i"), eq("image"),
+                            eq("-n"), eq("namespace"), eq("-p"), eq("path"),  eq("--remote"),
+                            eq("--git-url"), eq("repo"), eq("-v")));
+        }
+    }
+
+    @Test
+    public void OnClusterBuildFunc_AutoDiscoveryIsUsed_DeployIsCalled() throws IOException {
+        TerminalExecutionConsole terminalExecutionConsole = mock(TerminalExecutionConsole.class);
+        ProcessListener processListener = mock(ProcessListener.class);
+        ImageRegistryModel model = new ImageRegistryModel();
+        model.setAutoDiscovery();
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            kn.onClusterBuildFunc("namespace", "path", "repo", model, terminalExecutionConsole, processListener);
+            execHelperMockedStatic.verify(() ->
+                    ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), eq(terminalExecutionConsole),
+                            eq(processListener), anyString(), eq("deploy"), eq("-n"), eq("namespace"),
+                            eq("-p"), eq("path"),  eq("--remote"),
+                            eq("--git-url"), eq("repo"), eq("-v")));
+        }
+    }
+
+    @Test
+    public void OnClusterBuildFunc_ClientFails_Throws() {
+        try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
+            execHelperMockedStatic.when(() -> ExecHelper.executeWithTerminal(any(), anyString())).thenThrow(new IOException("error"));
+            kn.onClusterBuildFunc("", "", "", new ImageRegistryModel(), null, null);
+        } catch (IOException e) {
+            assertEquals("error", e.getLocalizedMessage());
+        }
+    }
+
+    @Test
     public void InvokeFunc_ResultIsNull_Throw() {
         InvokeModel model = new InvokeModel();
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {

@@ -174,7 +174,7 @@ public class KnCli implements Kn {
     @Override
     public List<Function> getFunctions() throws IOException {
         String json = ExecHelper.execute(funcCommand, envVars, "list", "-n", getNamespace(), "-o", "json");
-        if (json.startsWith("No functions found")) {
+        if (json.toLowerCase().startsWith("no functions found")) {
             return Collections.emptyList();
         }
         return getCustomCollection(json, Function.class);
