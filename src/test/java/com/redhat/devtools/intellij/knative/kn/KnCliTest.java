@@ -464,7 +464,7 @@ public class KnCliTest extends BaseTest {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.deployFunc("namespace", "path", model, terminalExecutionConsole, processListener);
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), eq(terminalExecutionConsole), eq(processListener), anyString(), eq("deploy"), eq("-r"), eq("registry"), eq("-n"), eq("namespace"), eq("-p"), eq("path"), eq("-v"), eq("-b"), eq("disabled")));
+                    ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), eq(terminalExecutionConsole), eq(processListener), anyString(), eq("deploy"), eq("-r"), eq("registry"), eq("-n"), eq("namespace"), eq("-p"), eq("path"), eq("-v"), eq("--build"), eq("false")));
         }
     }
 
@@ -476,7 +476,7 @@ public class KnCliTest extends BaseTest {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             kn.deployFunc("namespace", "path", model, terminalExecutionConsole, processListener);
             execHelperMockedStatic.verify(() ->
-                    ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), eq(terminalExecutionConsole), eq(processListener), anyString(), eq("deploy"), eq("-i"), eq("image"), eq("-n"), eq("namespace"), eq("-p"), eq("path"), eq("-v"), eq("-b"), eq("disabled")));
+                    ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), eq(terminalExecutionConsole), eq(processListener), anyString(), eq("deploy"), eq("-i"), eq("image"), eq("-n"), eq("namespace"), eq("-p"), eq("path"), eq("-v"), eq("--build"), eq("false")));
         }
     }
 

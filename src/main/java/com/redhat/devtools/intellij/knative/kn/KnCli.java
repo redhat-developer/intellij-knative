@@ -324,7 +324,7 @@ public class KnCli implements Kn {
     public void deployFunc(String namespace, String path, ImageRegistryModel model, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException {
         String[] args = getBuildDeployArgs("deploy", namespace, path, model, "", true);
         List<String> argsList = new ArrayList<>(Arrays.asList(args));
-        argsList.addAll(Arrays.asList("-b", "disabled"));
+        argsList.addAll(Arrays.asList("--build", "false"));
         ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, processListener, argsList.toArray(new String[0]));
     }
 
