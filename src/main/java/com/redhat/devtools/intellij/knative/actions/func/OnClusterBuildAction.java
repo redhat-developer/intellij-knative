@@ -62,7 +62,7 @@ public class OnClusterBuildAction extends DeployAction {
 
         IFuncActionPipeline deployPipeline = new FuncActionPipelineBuilder()
                 .createDeployPipeline(project, function)
-                .withTask("deployFunc", (task) -> doDeploy(node.getName(), knCli, task, gitRepo,
+                .withTask("onClusterBuildFunc", (task) -> doDeploy(node.getName(), knCli, task, gitRepo,
                         model, telemetry))
                 .build();
         knCli.getFuncActionPipelineManager().start(deployPipeline);

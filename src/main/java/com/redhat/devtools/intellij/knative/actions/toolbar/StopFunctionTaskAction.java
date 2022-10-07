@@ -13,6 +13,8 @@ package com.redhat.devtools.intellij.knative.actions.toolbar;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAwareAction;
+import com.redhat.devtools.intellij.knative.func.DeployFuncActionPipeline;
+import com.redhat.devtools.intellij.knative.func.FuncActionTask;
 import com.redhat.devtools.intellij.knative.ui.buildRunDeployWindow.BuildRunDeployFuncPanel;
 import com.redhat.devtools.intellij.knative.func.IFuncAction;
 import org.jetbrains.annotations.NotNull;
@@ -40,6 +42,24 @@ public class StopFunctionTaskAction extends DumbAwareAction {
     @Override
     public void update(@NotNull AnActionEvent e) {
         IFuncAction funcAction = panel.getSelectedFuncActionNode();
-        e.getPresentation().setEnabled(funcAction != null && !funcAction.isFinished());
+        e.getPresentation().setEnabled(shouldBeEnabled(funcAction));
+    }
+
+    private boolean shouldBeEnabled(IFuncAction funcAction) {
+        if (funcAction == null || funcAction.isFinished()) {
+            return false;
+        }
+
+        if (funcAction instanceof FuncActionTask) {
+            return !((FuncActionTask) funcAction).getActionName()
+                    .equalsIgnoreCase("onClusterBuildFunc");
+        }
+
+        if (funcAction instanceof DeployFuncActionPipeline) {
+            return !((DeployFuncActionPipeline) funcAction).getRunningStep().getActionName()
+                    .equalsIgnoreCase("onClusterBuildFunc");
+        }
+
+        return true;
     }
 }
