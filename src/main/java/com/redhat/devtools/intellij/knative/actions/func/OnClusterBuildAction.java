@@ -69,7 +69,7 @@ public class OnClusterBuildAction extends DeployAction {
     }
 
     private String getRepoUrl(Project project) {
-        String message = "Repo url to push the code to be built";
+        String message = "Git repo url to pull the code from to be built";
 
         return showInputDialog(project,
                 message,
