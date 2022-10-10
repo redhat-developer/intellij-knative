@@ -21,6 +21,7 @@ import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
+import com.redhat.devtools.intellij.knative.utils.FuncUtils;
 import com.redhat.devtools.intellij.knative.utils.model.ImageRegistryModel;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import org.slf4j.Logger;
@@ -93,6 +94,16 @@ public class OnClusterBuildAction extends DeployAction {
                         .send();
             }
         });
+    }
+
+    @Override
+    public boolean isVisible(Object selected) {
+        boolean visible = super.isVisible(selected);
+        if (visible) {
+            Kn kn = ((KnFunctionNode) selected).getRootNode().getKn();
+            return FuncUtils.isTektonReady(kn);
+        }
+        return false;
     }
 
 }

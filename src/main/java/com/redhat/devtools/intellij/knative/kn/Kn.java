@@ -34,9 +34,18 @@ import java.util.Map;
 public interface Kn {
 
     /**
+     * Check if the cluster is Tekton serving aware.
+     *
+     * @return true if Tekton is installed on cluster false otherwise
+     * @throws IOException if communication encountered an error
+     */
+    boolean isTektonAware() throws IOException;
+
+    /**
      * Check if the cluster is Knative serving aware.
      *
      * @return true if Knative Serving is installed on cluster false otherwise
+     * @throws IOException if communication encountered an error
      */
     boolean isKnativeServingAware() throws IOException;
 
@@ -44,6 +53,7 @@ public interface Kn {
      * Check if the cluster is Knative eventing aware.
      *
      * @return true if Knative Eventing is installed on cluster false otherwise
+     * @throws IOException if communication encountered an error
      */
     boolean isKnativeEventingAware() throws IOException;
 

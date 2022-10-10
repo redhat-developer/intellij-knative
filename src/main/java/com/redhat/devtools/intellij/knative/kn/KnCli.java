@@ -63,7 +63,6 @@ import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.KU
 import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.OPENSHIFT_VERSION;
 import static com.redhat.devtools.intellij.knative.ui.repository.RepositoryUtils.NATIVE_NAME;
 
-
 public class KnCli implements Kn {
     private static final Logger LOGGER = LoggerFactory.getLogger(KnCli.class);
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper(new JsonFactory());
@@ -71,7 +70,7 @@ public class KnCli implements Kn {
     private KubernetesClient client;
     private final String knCommand, funcCommand;
     private Map<String, String> envVars;
-    private boolean hasKnativeServing, hasKnativeEventing;
+    private boolean hasTekton, hasKnativeServing, hasKnativeEventing;
     private FuncActionPipelineManager funcActionPipelineManager;
 
     public KnCli(Project project, String knCommand, String funcCommand) {
@@ -85,6 +84,7 @@ public class KnCli implements Kn {
         } catch (URISyntaxException e) {
             this.envVars = Collections.emptyMap();
         }
+        this.hasTekton = false;
         this.hasKnativeServing = false;
         this.hasKnativeEventing = false;
         reportTelemetry();
@@ -111,6 +111,19 @@ public class KnCli implements Kn {
                 LOGGER.warn(ex.getLocalizedMessage(), ex);
             }
         }
+    }
+
+    @Override
+    public boolean isTektonAware() throws IOException {
+        // to speed up a bit the process we only call the cluster if we didn't find knative serving in last call
+        if (!hasTekton) {
+            try {
+                hasTekton = client.rootPaths().getPaths().stream().anyMatch(path -> path.endsWith("tekton.dev"));
+            } catch (KubernetesClientException e) {
+                throw new IOException(e);
+            }
+        }
+        return hasTekton;
     }
 
     @Override
