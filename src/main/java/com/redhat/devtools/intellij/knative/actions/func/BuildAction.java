@@ -189,9 +189,9 @@ public class BuildAction extends KnAction {
     protected ImageRegistryModel getImageFromUser(String name) {
         String defaultUsername = System.getProperty("user.name");
         String defaultImage = "quay.io/" + defaultUsername + "/" + name + ":latest";
-        InputDialogWithCheckbox dialog = new InputDialogWithCheckbox("Provide full image name in the form [registry]/[namespace]/[name]:[tag] (e.g quay.io/boson/image:latest)",
+        InputDialogWithCheckbox dialog = new InputDialogWithCheckbox("Provide full image name in the form registry/namespace/name:[tag] (e.g quay.io/boson/image:latest)",
                 "Build Function " + name,
-                "Autodiscovery an internal registry and use it to deploy",
+                "Auto discover an internal registry and use it to deploy",
                 false,
                 true,
                 null,
