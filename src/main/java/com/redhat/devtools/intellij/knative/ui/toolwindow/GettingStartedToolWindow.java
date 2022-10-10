@@ -99,10 +99,11 @@ public class GettingStartedToolWindow implements ToolWindowFactory {
         URL gifBuildFuncLesson = getLessonGif("build-func-lesson.gif");
         GettingStartedLesson buildFuncLesson = new GettingStartedLesson(
                 "Build function",
-                "<html><p>Building a function allows to create an image from the source code and being able to run and/or deploy it.</p>" +
+                "<html><p>Building a function allows to create an image from the source code and be able to run and/or deploy it. " +
+                        "The result will be a container image that is pushed to a registry.</p>" +
                         "<p>Only a function which has the source code opened in the IDE can be built. Right click on the function you want to build" +
                         "(look for the right node in the Functions tree), " +
-                        "open the context menu (right-click on the node) and click on \"Build\". " +
+                        "Open the context menu (right-click on the node) and click on \"Build\". " +
                         "The Build tool window will show up where you can see the logs or stop the build execution</p></html>",
                 Collections.emptyList(),
                 gifBuildFuncLesson
@@ -111,10 +112,8 @@ public class GettingStartedToolWindow implements ToolWindowFactory {
         URL gifRunFuncLesson = getLessonGif("run-func-lesson.gif");
         GettingStartedLesson runFuncLesson = new GettingStartedLesson(
                 "Run function",
-                "<html><p>Run your function to see how it works locally before to push it on your cluster.</p>" +
-                        "<p>Only a function which has the source code opened in the IDE can be run. " +
-                        "Right click on the function you want to run (look for its node in the Functions tree), open the context menu (right-click on the node) " +
-                        "and click on \"Run\". " +
+                "<html><p>Run the function locally on the current directory opened in the IDE.</p>" +
+                        "<p>Open the context menu (right-click on the node) and click on \"Run\". " +
                         "The Run tool window will show up where you can see the logs or stop the run execution</p></html>",
                 Collections.emptyList(),
                 gifRunFuncLesson
@@ -123,7 +122,7 @@ public class GettingStartedToolWindow implements ToolWindowFactory {
         URL gifDeployFuncLesson = getLessonGif("deploy-func-lesson.gif");
         GettingStartedLesson deployFuncLesson = new GettingStartedLesson(
                 "Deploy function",
-                "<html><p>Deploy your function to your cluster directly from your preferred IDE.</p>" +
+                "<html><p>Deploys a function to the currently configured Knative-enabled cluster.</p>" +
                         "<p>Only a function which has the source code opened in the IDE can be pushed. " +
                         "Right click on the function you want to deploy (look for its node in the Functions tree), open the context menu (right-click on the node) " +
                         "and click on \"Deploy\"." +
