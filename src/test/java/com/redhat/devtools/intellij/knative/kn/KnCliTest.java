@@ -18,6 +18,7 @@ import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.ExecProcessHandler;
 import com.redhat.devtools.intellij.knative.BaseTest;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
+import com.redhat.devtools.intellij.knative.utils.model.GitRepoModel;
 import com.redhat.devtools.intellij.knative.utils.model.ImageRegistryModel;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
 import io.fabric8.kubernetes.api.model.RootPaths;
@@ -495,8 +496,9 @@ public class KnCliTest extends BaseTest {
         TerminalExecutionConsole terminalExecutionConsole = mock(TerminalExecutionConsole.class);
         ProcessListener processListener = mock(ProcessListener.class);
         ImageRegistryModel model = new ImageRegistryModel("image", "");
+        GitRepoModel repoModel = new GitRepoModel("repo");
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            kn.onClusterBuildFunc("namespace", "path", "repo", model, terminalExecutionConsole, processListener);
+            kn.onClusterBuildFunc("namespace", "path", repoModel, model, terminalExecutionConsole, processListener);
             execHelperMockedStatic.verify(() ->
                     ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), eq(terminalExecutionConsole),
                             eq(processListener), anyString(), eq("deploy"), eq("-i"), eq("image"),
@@ -511,8 +513,9 @@ public class KnCliTest extends BaseTest {
         ProcessListener processListener = mock(ProcessListener.class);
         ImageRegistryModel model = new ImageRegistryModel();
         model.setAutoDiscovery();
+        GitRepoModel repoModel = new GitRepoModel("repo");
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
-            kn.onClusterBuildFunc("namespace", "path", "repo", model, terminalExecutionConsole, processListener);
+            kn.onClusterBuildFunc("namespace", "path", repoModel, model, terminalExecutionConsole, processListener);
             execHelperMockedStatic.verify(() ->
                     ExecHelper.executeWithTerminal(any(), anyString(), anyMap(), eq(terminalExecutionConsole),
                             eq(processListener), anyString(), eq("deploy"), eq("-n"), eq("namespace"),
@@ -525,7 +528,7 @@ public class KnCliTest extends BaseTest {
     public void OnClusterBuildFunc_ClientFails_Throws() {
         try (MockedStatic<ExecHelper> execHelperMockedStatic = mockStatic(ExecHelper.class)) {
             execHelperMockedStatic.when(() -> ExecHelper.executeWithTerminal(any(), anyString())).thenThrow(new IOException("error"));
-            kn.onClusterBuildFunc("", "", "", new ImageRegistryModel(), null, null);
+            kn.onClusterBuildFunc("", "", null, new ImageRegistryModel(), null, null);
         } catch (IOException e) {
             assertEquals("error", e.getLocalizedMessage());
         }

@@ -27,6 +27,7 @@ import com.redhat.devtools.intellij.common.utils.NetworkUtils;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.func.FuncActionPipelineManager;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
+import com.redhat.devtools.intellij.knative.utils.model.GitRepoModel;
 import com.redhat.devtools.intellij.knative.utils.model.ImageRegistryModel;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
 import com.redhat.devtools.intellij.knative.ui.repository.Repository;
@@ -330,24 +331,24 @@ public class KnCli implements Kn {
                           java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> processHandlerFunction,
                           ProcessListener processListener) throws IOException {
         ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole,
-                processHandlerFunction, processListener, getBuildDeployArgs("build", "", path, model, "", true));
+                processHandlerFunction, processListener, getBuildDeployArgs("build", "", path, model, null, true));
     }
 
     @Override
     public void deployFunc(String namespace, String path, ImageRegistryModel model, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException {
-        String[] args = getBuildDeployArgs("deploy", namespace, path, model, "", true);
+        String[] args = getBuildDeployArgs("deploy", namespace, path, model, null, true);
         List<String> argsList = new ArrayList<>(Arrays.asList(args));
         argsList.addAll(Arrays.asList("--build", "false"));
         ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, processListener, argsList.toArray(new String[0]));
     }
 
     @Override
-    public void onClusterBuildFunc(String namespace, String path, String repo, ImageRegistryModel model, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException {
-        String[] args = getBuildDeployArgs("deploy", namespace, path, model, repo, true);
+    public void onClusterBuildFunc(String namespace, String path, GitRepoModel repoModel, ImageRegistryModel model, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException {
+        String[] args = getBuildDeployArgs("deploy", namespace, path, model, repoModel, true);
         ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, processListener, args);
     }
 
-    private String[] getBuildDeployArgs(String command, String namespace, String path, ImageRegistryModel model, String remoteRepo, boolean verbose) {
+    private String[] getBuildDeployArgs(String command, String namespace, String path, ImageRegistryModel model, GitRepoModel repoModel, boolean verbose) {
         List<String> args = new ArrayList<>(Arrays.asList(funcCommand, command));
         if (!model.isAutoDiscovery()) {
             if (model.getImage().isEmpty()) {
@@ -364,8 +365,11 @@ public class KnCli implements Kn {
         }
         args.addAll(Arrays.asList("-p", path));
 
-        if (!remoteRepo.isEmpty()) {
-            args.addAll(Arrays.asList("--remote", "--git-url", remoteRepo));
+        if (repoModel != null) {
+            args.addAll(Arrays.asList("--remote", "--git-url", repoModel.getRepository()));
+            if (!repoModel.getBranch().isEmpty()) {
+                args.addAll(Arrays.asList("--git-branch", repoModel.getBranch()));
+            }
         }
         if (verbose) {
             args.addAll(Collections.singletonList("-v"));

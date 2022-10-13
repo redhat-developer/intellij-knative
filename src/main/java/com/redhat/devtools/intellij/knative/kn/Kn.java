@@ -17,6 +17,7 @@ import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
 import com.redhat.devtools.intellij.common.utils.ExecProcessHandler;
 import com.redhat.devtools.intellij.knative.func.FuncActionPipelineManager;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
+import com.redhat.devtools.intellij.knative.utils.model.GitRepoModel;
 import com.redhat.devtools.intellij.knative.utils.model.ImageRegistryModel;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
 import com.redhat.devtools.intellij.knative.ui.repository.Repository;
@@ -256,7 +257,7 @@ public interface Kn {
      * @param processListener
      * @throws IOException if communication errored
      */
-    void onClusterBuildFunc(String namespace, String path, String repo, ImageRegistryModel model, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException;
+    void onClusterBuildFunc(String namespace, String path, GitRepoModel repoModel, ImageRegistryModel model, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException;
 
     /**
      * Invokes the Function by sending a test request to the currently running

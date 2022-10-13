@@ -11,15 +11,14 @@
 package com.redhat.devtools.intellij.knative.ui.invokeFunc;
 
 import com.google.common.io.Files;
-import com.intellij.ide.ui.laf.darcula.ui.DarculaTextBorder;
 import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
-import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.TextFieldWithAutoCompletion;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import com.redhat.devtools.intellij.knative.kn.Function;
+import com.redhat.devtools.intellij.knative.ui.BaseDialog;
 import com.redhat.devtools.intellij.knative.utils.MimeTypes;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
 import org.jetbrains.annotations.Nullable;
@@ -40,7 +39,6 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileSystemView;
@@ -48,13 +46,14 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Insets;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class InvokeDialog extends DialogWrapper {
+import static com.redhat.devtools.intellij.knative.ui.UIConstants.ROW_DIMENSION;
+
+public class InvokeDialog extends BaseDialog {
     private final Logger logger = LoggerFactory.getLogger(InvokeDialog.class);
     private JPanel wrapperPanel, contentPanel, panelPath, panelNamespace, panelURL;
     private JBScrollPane scrollPane;
@@ -75,7 +74,7 @@ public class InvokeDialog extends DialogWrapper {
 
     private TitledBorder titledBorderInvokeSection;
 
-    private static final Dimension ROW_DIMENSION = new Dimension(Integer.MAX_VALUE, 40);
+
     private static final String AUTOMATICALLY_GENERATED_TEXT = "Automatically generated";
     private static final String TEXT_OPTION = "Text";
     private static final String FILE_OPTION = "File";
@@ -374,16 +373,7 @@ public class InvokeDialog extends DialogWrapper {
         wrapperPanel.add(panel, BorderLayout.NORTH);
     }
 
-    private JLabel createLabel(String text, String tooltip, Border border) {
-        JLabel label = new JLabel(text);
-        if (!tooltip.isEmpty()) {
-            label.setToolTipText(tooltip);
-        }
-        if (border != null) {
-            label.setBorder(border);
-        }
-        return label;
-    }
+
 
     private JPanel addGroupedComponentsToContent(String title, JCheckBox chkEnableComponent, JComponent componentCenter) {
         JPanel panel = new JPanel();
@@ -405,35 +395,6 @@ public class InvokeDialog extends DialogWrapper {
         chkEnableComponent.addItemListener(e -> componentCenter.setEnabled(chkEnableComponent.isSelected()));
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
         contentPanel.add(panel);
-        return panel;
-    }
-
-    private JPanel addComponentToContent(JPanel parent, JComponent componentLeft, JComponent componentCenter, JComponent componentRight, int top) {
-        JPanel panel = createFilledPanel(componentLeft, componentCenter, componentRight);
-        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.setBorder(JBUI.Borders.empty(top, 0, 5, 0));
-        parent.add(panel);
-        return panel;
-    }
-
-    private JPanel createFilledPanel(JComponent componentLeft, JComponent componentCenter, JComponent componentRight) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-        if (componentLeft != null) {
-            componentLeft.setBorder(JBUI.Borders.emptyLeft(10));
-            componentLeft.setMinimumSize(new Dimension(120, 40));
-            componentLeft.setPreferredSize(new Dimension(120, 40));
-            componentLeft.setMaximumSize(new Dimension(120, 40));
-            panel.add(componentLeft);
-        }
-        if (componentCenter != null) {
-            componentCenter.setMaximumSize(ROW_DIMENSION);
-            panel.add(componentCenter);
-        }
-        if (componentRight != null) {
-            componentRight.setMaximumSize(new Dimension(150, 40));
-            panel.add(componentRight);
-        }
         return panel;
     }
 

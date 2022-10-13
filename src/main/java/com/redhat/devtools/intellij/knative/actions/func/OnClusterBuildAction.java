@@ -13,6 +13,7 @@ package com.redhat.devtools.intellij.knative.actions.func;
 import com.google.common.base.Strings;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Pair;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.func.FuncActionPipelineBuilder;
 import com.redhat.devtools.intellij.knative.func.FuncActionTask;
@@ -21,11 +22,22 @@ import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
+import com.redhat.devtools.intellij.knative.ui.GitDialog;
 import com.redhat.devtools.intellij.knative.utils.FuncUtils;
+import com.redhat.devtools.intellij.knative.utils.model.GitRepoModel;
 import com.redhat.devtools.intellij.knative.utils.model.ImageRegistryModel;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
+import git4idea.GitLocalBranch;
+import git4idea.GitRemoteBranch;
+import git4idea.GitUtil;
+import git4idea.repo.GitRemote;
+import git4idea.repo.GitRepository;
+import org.jetbrains.plugins.github.api.data.GHRepository;
+import org.jetbrains.plugins.github.authentication.GithubAuthenticationManager;
+import org.jetbrains.plugins.github.authentication.accounts.GithubAccount;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 import javax.swing.tree.TreePath;
 import java.io.IOException;
@@ -48,7 +60,7 @@ public class OnClusterBuildAction extends DeployAction {
         TelemetryMessageBuilder.ActionMessage telemetry = createTelemetry();
         Project project = anActionEvent.getProject();
 
-        String gitRepo = getRepoUrl(project);
+        GitRepoModel gitRepo = getRepoInfo(project);
         if (gitRepo == null) {
             return;
         }
@@ -69,20 +81,20 @@ public class OnClusterBuildAction extends DeployAction {
         knCli.getFuncActionPipelineManager().start(deployPipeline);
     }
 
-    private String getRepoUrl(Project project) {
-        String message = "Git repo url to pull the code from to be built";
-
-        return showInputDialog(project,
-                message,
-                "On-Cluster Build",
-                null);
+    private GitRepoModel getRepoInfo(Project project) {
+        GitDialog gitDialog = new GitDialog(project, "On-Cluster Build", "Provide the Git repository/branch where to pull the code from");
+        gitDialog.show();
+        if (gitDialog.isOK()) {
+            return gitDialog.getGitInfo();
+        }
+        return null;
     }
 
-    private void doDeploy(String name, Kn knCli, FuncActionTask funcActionTask, String repo, ImageRegistryModel model, TelemetryMessageBuilder.ActionMessage telemetry) {
+    private void doDeploy(String name, Kn knCli, FuncActionTask funcActionTask, GitRepoModel gitRepo, ImageRegistryModel model, TelemetryMessageBuilder.ActionMessage telemetry) {
         ExecHelper.submit(() -> {
             String namespace = knCli.getNamespace();
             try {
-                knCli.onClusterBuildFunc(namespace, funcActionTask.getFunction().getLocalPath(), repo, model,
+                knCli.onClusterBuildFunc(namespace, funcActionTask.getFunction().getLocalPath(), gitRepo, model,
                         funcActionTask.getTerminalExecutionConsole(), funcActionTask.getProcessListener());
                 telemetry
                         .result(anonymizeResource(name, knCli.getNamespace(), getSuccessMessage(namespace, name)))
