@@ -14,19 +14,21 @@ import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.util.Pair;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.TextFieldWithAutoCompletion;
 import com.intellij.ui.TextFieldWithAutoCompletionListProvider;
 import com.intellij.ui.components.JBScrollPane;
-import com.intellij.util.Consumer;
 import com.intellij.util.ui.JBUI;
+import com.intellij.vcs.log.Hash;
 import com.redhat.devtools.intellij.knative.utils.model.GitRepoModel;
 import git4idea.GitLocalBranch;
 import git4idea.GitUtil;
 import git4idea.branch.GitBranchesCollection;
+import git4idea.index.GitFileStatus;
 import git4idea.repo.GitRemote;
 import git4idea.repo.GitRepository;
 import org.jetbrains.annotations.NotNull;
@@ -39,6 +41,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import java.awt.BorderLayout;
@@ -48,6 +51,8 @@ import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -62,12 +67,12 @@ public class GitDialog extends BaseDialog {
     private JLabel lblGitRepoError;
     private Project project;
     private Border originalBorder;
-    private List<GitRepository> gitRepositories;
+    private GitRepository gitRepository;
 
-    public GitDialog(Project project, String title, String descriptionText) {
+    public GitDialog(Project project, String title, String descriptionText, GitRepository gitRepository) {
         super(project, true);
         this.project = project;
-        gitRepositories = GitUtil.getRepositoryManager(project).getRepositories();
+        this.gitRepository = gitRepository;
         setTitle(title);
         buildStructure(descriptionText);
         init();
@@ -89,13 +94,54 @@ public class GitDialog extends BaseDialog {
     }
 
     private void fillContentPanel(String descriptionText) {
+        Pair<String, String> currentRemoteAndBranch = getCurrentRemoteAndBranch();
+        addTopWarningMessage(currentRemoteAndBranch.getFirst());
         addTopDescription(descriptionText);
-        addRepoField();
+
+
+        addRepoField(currentRemoteAndBranch.getFirst());
         addErrorRepo();
-        addBranchField();
+        addBranchField(currentRemoteAndBranch.getSecond());
 
         JPanel panel = new JPanel(new BorderLayout());
         contentPanel.add(panel);
+    }
+
+    private void addTopWarningMessage(String remote) {
+        String message = "";
+        if (gitRepository == null) {
+            message = "Your project is not a git repository. Please initialize it before to proceed building it on cluster.";
+        } else {
+            List<GitFileStatus> gitFileStatuses = gitRepository.getStagingAreaHolder().getAllRecords();
+            if (remote.isEmpty()) {
+                message = "Your local branch is not present remotely. Push it before to proceed building it on cluster";
+            } else if (!gitFileStatuses.isEmpty()) {
+                message = "Your local branch contains some uncommitted changes. Push them before to proceed building it on cluster";
+            }
+        }
+        if (!message.isEmpty()) {
+            JLabel topDescription = new JLabel(message, AllIcons.General.BalloonWarning, SwingConstants.LEFT);
+            topDescription.setBorder(JBUI.Borders.empty(10, 0, 0, 10));
+            addComponentToContent(contentPanel, null, topDescription, null, 5);
+        }
+    }
+
+    private Pair<String, String> getCurrentRemoteAndBranch() {
+        if (gitRepository == null) {
+            return Pair.create("", "");
+        }
+        GitLocalBranch localBranch = gitRepository.getCurrentBranch();
+        if (localBranch == null) {
+            List<GitRemote> gitRemotes = new ArrayList<>((gitRepository.getRemotes()));
+            String currentRemoteUrl = !gitRemotes.isEmpty() ? gitRemotes.get(0).getFirstUrl() : "";
+            return Pair.create(currentRemoteUrl, "");
+        }
+        Hash localBranchHash = gitRepository.getBranches().getHash(localBranch);
+        Optional<String> remoteUrl = gitRepository.getBranches().getRemoteBranches().stream()
+                .filter(gitRemoteBranch -> gitRemoteBranch.getNameForRemoteOperations().equalsIgnoreCase(localBranch.getName())
+                            && Objects.equals(gitRepository.getBranches().getHash(gitRemoteBranch), localBranchHash))
+                .map(gitRemoteBranch -> gitRemoteBranch.getRemote().getFirstUrl()).findFirst();
+        return remoteUrl.map(s -> Pair.create(s, localBranch.getName())).orElse(Pair.create("", ""));
     }
 
     private void addTopDescription(String descriptionText) {
@@ -104,17 +150,17 @@ public class GitDialog extends BaseDialog {
         addComponentToContent(contentPanel, null, topDescription, null, 5);
     }
 
-    private void addRepoField() {
+    private void addRepoField(String remote) {
         JLabel lblIDParam = createLabel("Repo:",
                 "The repository to use for building and deploying.",
                 null);
 
-        List<GitRemote> gitRemotes = !gitRepositories.isEmpty()
-                ? new ArrayList<>((gitRepositories.get(0).getRemotes()))
+        List<GitRemote> gitRemotes = gitRepository != null
+                ? new ArrayList<>((gitRepository.getRemotes()))
                 : Collections.emptyList();
         txtRemotesWithAutoCompletion = createTextFieldAutoCompletion(
                 gitRemotes,
-                !gitRemotes.isEmpty() ? gitRemotes.get(0).getFirstUrl() : "",
+                remote,
                 (item) -> {
                     if (panelGitRepoError.isVisible()) {
                         panelGitRepoError.setVisible(false);
@@ -142,15 +188,14 @@ public class GitDialog extends BaseDialog {
         contentPanel.add(panelGitRepoError);
     }
 
-    private void addBranchField() {
+    private void addBranchField(String branch) {
         JLabel lblBranchParam = createLabel("Branch:",
                 "The branch to use for building and deploying. If left empty, the main branch is used.",
                 null);
 
-        GitLocalBranch gitLocalBranch = gitRepositories.get(0).getCurrentBranch();
         txtBranchesWithAutoCompletion = createTextFieldAutoCompletion(
                 new ArrayList(),
-                gitLocalBranch != null ? gitLocalBranch.getName() : "",
+                branch,
                 (item) -> (String) item,
                 () -> getBranchesAutoCompletion()
         );
@@ -189,14 +234,14 @@ public class GitDialog extends BaseDialog {
 
     private List<LookupElement> getBranchesAutoCompletion() {
         String currentRemoteUrl = txtRemotesWithAutoCompletion.getText();
-        GitBranchesCollection gitBranchesCollection = gitRepositories.get(0).getBranches();
+        GitBranchesCollection gitBranchesCollection = gitRepository.getBranches();
         return gitBranchesCollection.getRemoteBranches().stream()
-                .filter(branch -> branch.getRemote().getFirstUrl().equalsIgnoreCase(currentRemoteUrl))
+                .filter(branch -> Objects.requireNonNull(branch.getRemote().getFirstUrl()).equalsIgnoreCase(currentRemoteUrl))
                 .map(branch -> LookupElementBuilder.create(branch, branch.getNameForRemoteOperations())).collect(Collectors.toList());
     }
 
     public static void main(String[] args) {
-        GitDialog dialog = new GitDialog(null, "", "");
+        GitDialog dialog = new GitDialog(null, "", "", null);
         dialog.pack();
         dialog.show();
         System.exit(0);

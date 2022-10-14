@@ -13,7 +13,6 @@ package com.redhat.devtools.intellij.knative.actions.func;
 import com.google.common.base.Strings;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Pair;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.func.FuncActionPipelineBuilder;
 import com.redhat.devtools.intellij.knative.func.FuncActionTask;
@@ -27,22 +26,14 @@ import com.redhat.devtools.intellij.knative.utils.FuncUtils;
 import com.redhat.devtools.intellij.knative.utils.model.GitRepoModel;
 import com.redhat.devtools.intellij.knative.utils.model.ImageRegistryModel;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
-import git4idea.GitLocalBranch;
-import git4idea.GitRemoteBranch;
 import git4idea.GitUtil;
-import git4idea.repo.GitRemote;
 import git4idea.repo.GitRepository;
-import org.jetbrains.plugins.github.api.data.GHRepository;
-import org.jetbrains.plugins.github.authentication.GithubAuthenticationManager;
-import org.jetbrains.plugins.github.authentication.accounts.GithubAccount;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 
-import static com.intellij.openapi.ui.Messages.showInputDialog;
 import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymizeResource;
 
 public class OnClusterBuildAction extends DeployAction {
@@ -60,7 +51,7 @@ public class OnClusterBuildAction extends DeployAction {
         TelemetryMessageBuilder.ActionMessage telemetry = createTelemetry();
         Project project = anActionEvent.getProject();
 
-        GitRepoModel gitRepo = getRepoInfo(project);
+        GitRepoModel gitRepo = getRepoInfo(project, function);
         if (gitRepo == null) {
             return;
         }
@@ -81,11 +72,21 @@ public class OnClusterBuildAction extends DeployAction {
         knCli.getFuncActionPipelineManager().start(deployPipeline);
     }
 
-    private GitRepoModel getRepoInfo(Project project) {
-        GitDialog gitDialog = new GitDialog(project, "On-Cluster Build", "Provide the Git repository/branch where to pull the code from");
+    private GitRepoModel getRepoInfo(Project project, Function function) {
+        GitRepository gitRepository = getFunctionRepo(project, function);
+        GitDialog gitDialog = new GitDialog(project, "On-Cluster Build", "Provide the Git repository/branch where to pull the code from", gitRepository);
         gitDialog.show();
         if (gitDialog.isOK()) {
             return gitDialog.getGitInfo();
+        }
+        return null;
+    }
+
+    private GitRepository getFunctionRepo(Project project, Function function) {
+        for (GitRepository gitRepository: GitUtil.getRepositoryManager(project).getRepositories()) {
+            if (gitRepository.getRoot().getPath().equalsIgnoreCase(function.getLocalPath())) {
+                return gitRepository;
+            }
         }
         return null;
     }
