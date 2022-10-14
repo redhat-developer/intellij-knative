@@ -1,7 +1,7 @@
 {
   "tools": {
     "kn": {
-      "version": "20220823-local-6d86bf75",
+      "version": "1.7.0",
       "versionCmd": "version",
       "versionExtractRegExp": "Version:\\s*v(\\w+-\\w+-\\w+)",
       "versionMatchRegExpr": "20220823-local-6d86bf75",
