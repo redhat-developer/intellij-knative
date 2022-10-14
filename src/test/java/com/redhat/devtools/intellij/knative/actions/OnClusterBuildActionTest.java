@@ -16,16 +16,20 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.redhat.devtools.intellij.common.ui.InputDialogWithCheckbox;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.Constants;
-import com.redhat.devtools.intellij.knative.actions.func.DeployAction;
 import com.redhat.devtools.intellij.knative.actions.func.OnClusterBuildAction;
 import com.redhat.devtools.intellij.knative.func.DeployFuncActionPipeline;
 import com.redhat.devtools.intellij.knative.func.FuncActionTask;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
+import com.redhat.devtools.intellij.knative.ui.GitDialog;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
+import com.redhat.devtools.intellij.knative.utils.model.GitRepoModel;
+import git4idea.repo.GitRepository;
+import git4idea.repo.GitRepositoryManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedConstruction;
@@ -38,6 +42,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -54,6 +59,10 @@ public class OnClusterBuildActionTest extends ActionTest {
     private Function function;
     private Path pathFuncFile;
     private JsonNode jsonNode;
+    private GitRepositoryManager gitRepositoryManager;
+    private GitRepository gitRepository;
+    private VirtualFile virtualFile;
+    private GitRepoModel gitRepoModel;
 
     @Before
     public void setUp() throws Exception {
@@ -61,6 +70,42 @@ public class OnClusterBuildActionTest extends ActionTest {
         function = mock(Function.class);
         pathFuncFile = mock(Path.class);
         jsonNode = mock(JsonNode.class);
+        gitRepositoryManager = mock(GitRepositoryManager.class);
+        when(function.getLocalPath()).thenReturn("path");
+        gitRepository = mock(GitRepository.class);
+        virtualFile = mock(VirtualFile.class);
+        when(virtualFile.getPath()).thenReturn("path");
+        when(gitRepository.getRoot()).thenReturn(virtualFile);
+        when(gitRepositoryManager.getRepositories()).thenReturn(Collections.singletonList(gitRepository));
+        gitRepoModel = mock(GitRepoModel.class);
+    }
+
+    @Test
+    public void ActionPerformed_NoGitRemoteAndBranchIsSelected_DoNothing() throws IOException, InterruptedException {
+        AnAction action = new OnClusterBuildAction();
+        AnActionEvent anActionEvent = createOnClusterBuildActionEvent();
+        when(function.getLocalPath()).thenReturn("");
+        try (MockedStatic<TelemetryService> telemetryServiceMockedStatic = mockStatic((TelemetryService.class))) {
+            try(MockedStatic<GitRepositoryManager> gitRepositoryManagerMockedStatic = mockStatic(GitRepositoryManager.class)) {
+                try (MockedConstruction<GitDialog> gitDialogMockedConstruction = mockConstruction(GitDialog.class,
+                        (mock, context) -> {
+                            when(mock.isOK()).thenReturn(false);
+                            when(mock.getGitInfo()).thenReturn(gitRepoModel);
+                        })) {
+                    try (MockedConstruction<DeployFuncActionPipeline> deployFuncActionPipelineMockedConstruction = mockConstruction(DeployFuncActionPipeline.class,
+                            (mock, context) -> {
+                                doNothing().when(mock).start();
+                            })) {
+                        gitRepositoryManagerMockedStatic.when(() -> GitRepositoryManager.getInstance(any(Project.class))).thenReturn(gitRepositoryManager);
+                        mockTelemetry(telemetryServiceMockedStatic);
+                        action.actionPerformed(anActionEvent);
+                        Thread.sleep(1000);
+
+                        assertEquals(0, deployFuncActionPipelineMockedConstruction.constructed().size());
+                    }
+                }
+            }
+        }
     }
 
     @Test
@@ -73,18 +118,27 @@ public class OnClusterBuildActionTest extends ActionTest {
             try (MockedStatic<TelemetryService> telemetryServiceMockedStatic = mockStatic((TelemetryService.class))) {
                 try(MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
                     try(MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
-                        try (MockedConstruction<DeployFuncActionPipeline> deployFuncActionPipelineMockedConstruction = mockConstruction(DeployFuncActionPipeline.class,
-                                (mock, context) -> {
-                                    doNothing().when(mock).start();
-                                })) {
-                            when(kn.getNamespace()).thenReturn("namespace");
-                            treeHelperMockedStatic.when(() -> TreeHelper.getKn(any(Project.class))).thenReturn(kn);
-                            messagesMockedStatic.when(() -> Messages.showInputDialog(any(Project.class), anyString(), anyString(), any())).thenReturn("repo");
-                            mockTelemetry(telemetryServiceMockedStatic);
-                            action.actionPerformed(anActionEvent);
-                            Thread.sleep(1000);
+                        try(MockedStatic<GitRepositoryManager> gitRepositoryManagerMockedStatic = mockStatic(GitRepositoryManager.class)) {
+                            try (MockedConstruction<GitDialog> gitDialogMockedConstruction = mockConstruction(GitDialog.class,
+                                    (mock, context) -> {
+                                        when(mock.isOK()).thenReturn(true);
+                                        when(mock.getGitInfo()).thenReturn(gitRepoModel);
+                                    })) {
+                                try (MockedConstruction<DeployFuncActionPipeline> deployFuncActionPipelineMockedConstruction = mockConstruction(DeployFuncActionPipeline.class,
+                                        (mock, context) -> {
+                                            doNothing().when(mock).start();
+                                        })) {
+                                    when(kn.getNamespace()).thenReturn("namespace");
+                                    treeHelperMockedStatic.when(() -> TreeHelper.getKn(any(Project.class))).thenReturn(kn);
+                                    messagesMockedStatic.when(() -> Messages.showInputDialog(any(Project.class), anyString(), anyString(), any())).thenReturn("repo");
+                                    gitRepositoryManagerMockedStatic.when(() -> GitRepositoryManager.getInstance(any(Project.class))).thenReturn(gitRepositoryManager);
+                                    mockTelemetry(telemetryServiceMockedStatic);
+                                    action.actionPerformed(anActionEvent);
+                                    Thread.sleep(1000);
 
-                            assertEquals(0, deployFuncActionPipelineMockedConstruction.constructed().size());
+                                    assertEquals(0, deployFuncActionPipelineMockedConstruction.constructed().size());
+                                }
+                            }
                         }
                     }
                 }
@@ -106,22 +160,31 @@ public class OnClusterBuildActionTest extends ActionTest {
                                     when(mock.getInputString()).thenReturn("test");
                                     when(mock.isChecked()).thenReturn(false);
                                 })) {
-                            try (MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
-                                try (MockedConstruction<DeployFuncActionPipeline> deployFuncActionPipelineMockedConstruction = mockConstruction(DeployFuncActionPipeline.class,
+                            try (MockedStatic<GitRepositoryManager> gitRepositoryManagerMockedStatic = mockStatic(GitRepositoryManager.class)) {
+                                try (MockedConstruction<GitDialog> gitDialogMockedConstruction = mockConstruction(GitDialog.class,
                                         (mock, context) -> {
-                                            doNothing().when(mock).start();
+                                            when(mock.isOK()).thenReturn(true);
+                                            when(mock.getGitInfo()).thenReturn(gitRepoModel);
                                         })) {
-                                    treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
-                                    when(kn.getFuncFileURL(any())).thenReturn(mock(URL.class));
-                                    pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
-                                    yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
-                                    yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("image: test");
-                                    yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("test");
-                                    messagesMockedStatic.when(() -> Messages.showOkCancelDialog(any(Project.class), anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
-                                    messagesMockedStatic.when(() -> Messages.showInputDialog(any(Project.class), anyString(), anyString(), any())).thenReturn("repo");
-                                    action.actionPerformed(anActionEvent);
-                                    Thread.sleep(1000);
-                                    verify(manager, times(1)).start(deployFuncActionPipelineMockedConstruction.constructed().get(0));
+                                    try (MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
+                                        try (MockedConstruction<DeployFuncActionPipeline> deployFuncActionPipelineMockedConstruction = mockConstruction(DeployFuncActionPipeline.class,
+                                                (mock, context) -> {
+                                                    doNothing().when(mock).start();
+                                                })) {
+                                            treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+                                            when(kn.getFuncFileURL(any())).thenReturn(mock(URL.class));
+                                            pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
+                                            yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
+                                            yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("image: test");
+                                            yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("test");
+                                            messagesMockedStatic.when(() -> Messages.showOkCancelDialog(any(Project.class), anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
+                                            messagesMockedStatic.when(() -> Messages.showInputDialog(any(Project.class), anyString(), anyString(), any())).thenReturn("repo");
+                                            gitRepositoryManagerMockedStatic.when(() -> GitRepositoryManager.getInstance(any(Project.class))).thenReturn(gitRepositoryManager);
+                                            action.actionPerformed(anActionEvent);
+                                            Thread.sleep(1000);
+                                            verify(manager, times(1)).start(deployFuncActionPipelineMockedConstruction.constructed().get(0));
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -146,22 +209,31 @@ public class OnClusterBuildActionTest extends ActionTest {
                                     when(mock.getInputString()).thenReturn("");
                                     when(mock.isChecked()).thenReturn(true);
                                 })) {
-                            try (MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
-                                try (MockedConstruction<DeployFuncActionPipeline> deployFuncActionPipelineMockedConstruction = mockConstruction(DeployFuncActionPipeline.class,
+                            try (MockedStatic<GitRepositoryManager> gitRepositoryManagerMockedStatic = mockStatic(GitRepositoryManager.class)) {
+                                try (MockedConstruction<GitDialog> gitDialogMockedConstruction = mockConstruction(GitDialog.class,
                                         (mock, context) -> {
-                                            doNothing().when(mock).start();
+                                            when(mock.isOK()).thenReturn(true);
+                                            when(mock.getGitInfo()).thenReturn(gitRepoModel);
                                         })) {
-                                    treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
-                                    pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
-                                    when(kn.getFuncFileURL(any())).thenReturn(mock(URL.class));
-                                    yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
-                                    yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("registry: test");
-                                    yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("test").thenReturn("");
-                                    messagesMockedStatic.when(() -> Messages.showOkCancelDialog(any(Project.class), anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
-                                    messagesMockedStatic.when(() -> Messages.showInputDialog(any(Project.class), anyString(), anyString(), any())).thenReturn("repo");
-                                    action.actionPerformed(anActionEvent);
-                                    Thread.sleep(1000);
-                                    verify(manager, times(1)).start(deployFuncActionPipelineMockedConstruction.constructed().get(0));
+                                    try (MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
+                                        try (MockedConstruction<DeployFuncActionPipeline> deployFuncActionPipelineMockedConstruction = mockConstruction(DeployFuncActionPipeline.class,
+                                                (mock, context) -> {
+                                                    doNothing().when(mock).start();
+                                                })) {
+                                            treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+                                            pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
+                                            when(kn.getFuncFileURL(any())).thenReturn(mock(URL.class));
+                                            yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
+                                            yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("registry: test");
+                                            yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("test").thenReturn("");
+                                            messagesMockedStatic.when(() -> Messages.showOkCancelDialog(any(Project.class), anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
+                                            messagesMockedStatic.when(() -> Messages.showInputDialog(any(Project.class), anyString(), anyString(), any())).thenReturn("repo");
+                                            gitRepositoryManagerMockedStatic.when(() -> GitRepositoryManager.getInstance(any(Project.class))).thenReturn(gitRepositoryManager);
+                                            action.actionPerformed(anActionEvent);
+                                            Thread.sleep(1000);
+                                            verify(manager, times(1)).start(deployFuncActionPipelineMockedConstruction.constructed().get(0));
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -185,23 +257,32 @@ public class OnClusterBuildActionTest extends ActionTest {
                                 when(mock.getInputString()).thenReturn("image");
                                 when(mock.isChecked()).thenReturn(false);
                             })) {
-                        try(MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
-                            try(MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
-                                try (MockedConstruction<DeployFuncActionPipeline> deployFuncActionPipelineMockedConstruction = mockConstruction(DeployFuncActionPipeline.class,
-                                        (mock, context) -> {
-                                            doNothing().when(mock).start();
-                                        })) {
-                                    treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
-                                    pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
-                                    when(kn.getFuncFileURL(any())).thenReturn(mock(URL.class));
-                                    yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
-                                    yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("");
-                                    yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("");
-                                    messagesMockedStatic.when(() -> Messages.showOkCancelDialog(any(Project.class), anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
-                                    messagesMockedStatic.when(() -> Messages.showInputDialog(any(Project.class), anyString(), anyString(), any())).thenReturn("repo");
-                                    action.actionPerformed(anActionEvent);
-                                    Thread.sleep(1000);
-                                    verify(manager, times(1)).start(deployFuncActionPipelineMockedConstruction.constructed().get(0));
+                        try (MockedStatic<GitRepositoryManager> gitRepositoryManagerMockedStatic = mockStatic(GitRepositoryManager.class)) {
+                            try (MockedConstruction<GitDialog> gitDialogMockedConstruction = mockConstruction(GitDialog.class,
+                                    (mock, context) -> {
+                                        when(mock.isOK()).thenReturn(true);
+                                        when(mock.getGitInfo()).thenReturn(gitRepoModel);
+                                    })) {
+                                try (MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
+                                    try (MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
+                                        try (MockedConstruction<DeployFuncActionPipeline> deployFuncActionPipelineMockedConstruction = mockConstruction(DeployFuncActionPipeline.class,
+                                                (mock, context) -> {
+                                                    doNothing().when(mock).start();
+                                                })) {
+                                            treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+                                            pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
+                                            when(kn.getFuncFileURL(any())).thenReturn(mock(URL.class));
+                                            yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
+                                            yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("");
+                                            yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("");
+                                            messagesMockedStatic.when(() -> Messages.showOkCancelDialog(any(Project.class), anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
+                                            messagesMockedStatic.when(() -> Messages.showInputDialog(any(Project.class), anyString(), anyString(), any())).thenReturn("repo");
+                                            gitRepositoryManagerMockedStatic.when(() -> GitRepositoryManager.getInstance(any(Project.class))).thenReturn(gitRepositoryManager);
+                                            action.actionPerformed(anActionEvent);
+                                            Thread.sleep(1000);
+                                            verify(manager, times(1)).start(deployFuncActionPipelineMockedConstruction.constructed().get(0));
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -224,20 +305,29 @@ public class OnClusterBuildActionTest extends ActionTest {
                             when(mock.getInputString()).thenReturn("image");
                             when(mock.isChecked()).thenReturn(false);
                         })) {
-                    try(MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
-                        try(MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
-                            try (MockedConstruction<DeployFuncActionPipeline> deployFuncActionPipelineMockedConstruction = mockConstruction(DeployFuncActionPipeline.class,
-                                    (mock, context) -> {
-                                        doNothing().when(mock).start();
-                                    })) {
-                                treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
-                                pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
-                                messagesMockedStatic.when(() -> Messages.showOkCancelDialog(any(Project.class), anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
-                                messagesMockedStatic.when(() -> Messages.showInputDialog(any(Project.class), anyString(), anyString(), any())).thenReturn("repo");
-                                action.actionPerformed(anActionEvent);
-                                Thread.sleep(1000);
-                                assertEquals(1, inputDialogMockedConstruction.constructed().size());
-                                verify(manager, times(1)).start(deployFuncActionPipelineMockedConstruction.constructed().get(0));
+                    try (MockedStatic<GitRepositoryManager> gitRepositoryManagerMockedStatic = mockStatic(GitRepositoryManager.class)) {
+                        try (MockedConstruction<GitDialog> gitDialogMockedConstruction = mockConstruction(GitDialog.class,
+                                (mock, context) -> {
+                                    when(mock.isOK()).thenReturn(true);
+                                    when(mock.getGitInfo()).thenReturn(gitRepoModel);
+                                })) {
+                            try (MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
+                                try (MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
+                                    try (MockedConstruction<DeployFuncActionPipeline> deployFuncActionPipelineMockedConstruction = mockConstruction(DeployFuncActionPipeline.class,
+                                            (mock, context) -> {
+                                                doNothing().when(mock).start();
+                                            })) {
+                                        treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+                                        pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
+                                        messagesMockedStatic.when(() -> Messages.showOkCancelDialog(any(Project.class), anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
+                                        messagesMockedStatic.when(() -> Messages.showInputDialog(any(Project.class), anyString(), anyString(), any())).thenReturn("repo");
+                                        gitRepositoryManagerMockedStatic.when(() -> GitRepositoryManager.getInstance(any(Project.class))).thenReturn(gitRepositoryManager);
+                                        action.actionPerformed(anActionEvent);
+                                        Thread.sleep(1000);
+                                        assertEquals(1, inputDialogMockedConstruction.constructed().size());
+                                        verify(manager, times(1)).start(deployFuncActionPipelineMockedConstruction.constructed().get(0));
+                                    }
+                                }
                             }
                         }
                     }
@@ -261,21 +351,30 @@ public class OnClusterBuildActionTest extends ActionTest {
                                 when(mock.getInputString()).thenReturn("image");
                                 when(mock.isChecked()).thenReturn(false);
                             })) {
-                        try(MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
-                            try(MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
-                                try (MockedConstruction<DeployFuncActionPipeline> deployFuncActionPipelineMockedConstruction = mockConstruction(DeployFuncActionPipeline.class,
-                                        (mock, context) -> {
-                                            doNothing().when(mock).start();
-                                        })) {
-                                    treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
-                                    pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
-                                    yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenThrow(new IOException("error"));
-                                    messagesMockedStatic.when(() -> Messages.showOkCancelDialog(any(Project.class), anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
-                                    messagesMockedStatic.when(() -> Messages.showInputDialog(any(Project.class), anyString(), anyString(), any())).thenReturn("repo");
-                                    action.actionPerformed(anActionEvent);
-                                    Thread.sleep(1000);
-                                    assertEquals(1, inputDialogMockedConstruction.constructed().size());
-                                    verify(manager, times(1)).start(deployFuncActionPipelineMockedConstruction.constructed().get(0));
+                        try(MockedStatic<GitRepositoryManager> gitRepositoryManagerMockedStatic = mockStatic(GitRepositoryManager.class)) {
+                            try (MockedConstruction<GitDialog> gitDialogMockedConstruction = mockConstruction(GitDialog.class,
+                                    (mock, context) -> {
+                                        when(mock.isOK()).thenReturn(true);
+                                        when(mock.getGitInfo()).thenReturn(gitRepoModel);
+                                    })) {
+                                try (MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
+                                    try (MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
+                                        try (MockedConstruction<DeployFuncActionPipeline> deployFuncActionPipelineMockedConstruction = mockConstruction(DeployFuncActionPipeline.class,
+                                                (mock, context) -> {
+                                                    doNothing().when(mock).start();
+                                                })) {
+                                            treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+                                            pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
+                                            yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenThrow(new IOException("error"));
+                                            messagesMockedStatic.when(() -> Messages.showOkCancelDialog(any(Project.class), anyString(), anyString(), anyString(), anyString(), any())).thenReturn(Messages.OK);
+                                            messagesMockedStatic.when(() -> Messages.showInputDialog(any(Project.class), anyString(), anyString(), any())).thenReturn("repo");
+                                            gitRepositoryManagerMockedStatic.when(() -> GitRepositoryManager.getInstance(any(Project.class))).thenReturn(gitRepositoryManager);
+                                            action.actionPerformed(anActionEvent);
+                                            Thread.sleep(1000);
+                                            assertEquals(1, inputDialogMockedConstruction.constructed().size());
+                                            verify(manager, times(1)).start(deployFuncActionPipelineMockedConstruction.constructed().get(0));
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -299,23 +398,32 @@ public class OnClusterBuildActionTest extends ActionTest {
                                 when(mock.getInputString()).thenReturn("");
                                 when(mock.isChecked()).thenReturn(false);
                             })) {
-                        try(MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
-                            try (MockedStatic<TelemetryService> telemetryServiceMockedStatic = mockStatic((TelemetryService.class))) {
-                                try (MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
-                                    try (MockedConstruction<DeployFuncActionPipeline> deployFuncActionPipelineMockedConstruction = mockConstruction(DeployFuncActionPipeline.class,
-                                            (mock, context) -> {
-                                                doNothing().when(mock).start();
-                                            })) {
-                                        treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
-                                        pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
-                                        yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
-                                        yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("");
-                                        yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("");
-                                        messagesMockedStatic.when(() -> Messages.showInputDialog(any(Project.class), anyString(), anyString(), any())).thenReturn("repo");
-                                        mockTelemetry(telemetryServiceMockedStatic);
-                                        action.actionPerformed(anActionEvent);
-                                        Thread.sleep(1000);
-                                        assertEquals(0, deployFuncActionPipelineMockedConstruction.constructed().size());
+                        try(MockedStatic<GitRepositoryManager> gitRepositoryManagerMockedStatic = mockStatic(GitRepositoryManager.class)) {
+                            try (MockedConstruction<GitDialog> gitDialogMockedConstruction = mockConstruction(GitDialog.class,
+                                    (mock, context) -> {
+                                        when(mock.isOK()).thenReturn(true);
+                                        when(mock.getGitInfo()).thenReturn(gitRepoModel);
+                                    })) {
+                                try (MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
+                                    try (MockedStatic<TelemetryService> telemetryServiceMockedStatic = mockStatic((TelemetryService.class))) {
+                                        try (MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
+                                            try (MockedConstruction<DeployFuncActionPipeline> deployFuncActionPipelineMockedConstruction = mockConstruction(DeployFuncActionPipeline.class,
+                                                    (mock, context) -> {
+                                                        doNothing().when(mock).start();
+                                                    })) {
+                                                treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+                                                pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
+                                                yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
+                                                yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("");
+                                                yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("");
+                                                messagesMockedStatic.when(() -> Messages.showInputDialog(any(Project.class), anyString(), anyString(), any())).thenReturn("repo");
+                                                gitRepositoryManagerMockedStatic.when(() -> GitRepositoryManager.getInstance(any(Project.class))).thenReturn(gitRepositoryManager);
+                                                mockTelemetry(telemetryServiceMockedStatic);
+                                                action.actionPerformed(anActionEvent);
+                                                Thread.sleep(1000);
+                                                assertEquals(0, deployFuncActionPipelineMockedConstruction.constructed().size());
+                                            }
+                                        }
                                     }
                                 }
                             }
