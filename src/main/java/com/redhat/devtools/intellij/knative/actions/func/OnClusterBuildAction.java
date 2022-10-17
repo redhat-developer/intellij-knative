@@ -11,7 +11,9 @@
 package com.redhat.devtools.intellij.knative.actions.func;
 
 import com.google.common.base.Strings;
+import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.func.FuncActionPipelineBuilder;
@@ -34,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 
+import static com.redhat.devtools.intellij.knative.Constants.GIT_PLUGIN_ID;
 import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymizeResource;
 
 public class OnClusterBuildAction extends DeployAction {
@@ -114,7 +117,8 @@ public class OnClusterBuildAction extends DeployAction {
         boolean visible = super.isVisible(selected);
         if (visible) {
             Kn kn = ((KnFunctionNode) selected).getRootNode().getKn();
-            return FuncUtils.isTektonReady(kn);
+            PluginId gitPluginId = PluginId.findId(GIT_PLUGIN_ID);
+            return gitPluginId != null && !PluginManagerCore.isDisabled(gitPluginId) && FuncUtils.isTektonReady(kn);
         }
         return false;
     }

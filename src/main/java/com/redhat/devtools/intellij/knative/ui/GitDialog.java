@@ -110,13 +110,13 @@ public class GitDialog extends BaseDialog {
     private void addTopWarningMessage(String remote) {
         String message = "";
         if (gitRepository == null) {
-            message = "Your project is not a git repository. Please initialize it before to proceed building it on cluster.";
+            message = "This project is not a git repository. Please git initialise it and then proceed to build it on the cluster.";
         } else {
             List<GitFileStatus> gitFileStatuses = gitRepository.getStagingAreaHolder().getAllRecords();
             if (remote.isEmpty()) {
-                message = "Your local branch is not present remotely. Push it before to proceed building it on cluster";
+                message = "The local branch is not present remotely. Push it to remote and then proceed to build it on cluster";
             } else if (!gitFileStatuses.isEmpty()) {
-                message = "Your local branch contains some uncommitted changes. Push them before to proceed building it on cluster";
+                message = "The local branch contains some uncommitted changes. Push those changes and then proceed to build it on cluster";
             }
         }
         if (!message.isEmpty()) {
@@ -152,7 +152,7 @@ public class GitDialog extends BaseDialog {
 
     private void addRepoField(String remote) {
         JLabel lblIDParam = createLabel("Repo:",
-                "The repository to use for building and deploying.",
+                "Provide git repository with the function source code",
                 null);
 
         List<GitRemote> gitRemotes = gitRepository != null
@@ -190,7 +190,7 @@ public class GitDialog extends BaseDialog {
 
     private void addBranchField(String branch) {
         JLabel lblBranchParam = createLabel("Branch:",
-                "The branch to use for building and deploying. If left empty, the main branch is used.",
+                "Git revision to be used (branch, tag, commit). If left empty, the main branch is used.",
                 null);
 
         txtBranchesWithAutoCompletion = createTextFieldAutoCompletion(
