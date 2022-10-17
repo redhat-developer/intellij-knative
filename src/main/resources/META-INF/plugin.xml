@@ -59,7 +59,7 @@
     <depends>org.jetbrains.plugins.terminal</depends>
     <depends>com.intellij.modules.lang</depends>
     <depends>org.jetbrains.plugins.yaml</depends>
-    <depends optional="true">org.jetbrains.plugins.github</depends>
+    <depends optional="true" config-file="">org.jetbrains.plugins.github</depends>
     <depends>com.redhat.devtools.intellij.telemetry</depends>
     <depends>com.redhat.devtools.intellij.kubernetes</depends>
     <depends optional="true" config-file="plugin-json.xml">com.intellij.modules.json</depends>
