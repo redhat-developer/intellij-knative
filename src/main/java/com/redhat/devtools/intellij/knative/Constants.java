@@ -64,4 +64,6 @@ public class Constants {
 
     public static final Color borderSearchFieldColor = JBColor.namedColor("Plugins.SearchField.borderColor", new JBColor(0xC5C5C5, 0x515151));
 
+    public static final String GIT_PLUGIN_ID = "org.jetbrains.plugins.github";
+
 }

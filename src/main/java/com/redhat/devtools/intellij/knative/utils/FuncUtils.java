@@ -25,6 +25,26 @@ import java.util.concurrent.TimeoutException;
 
 public class FuncUtils {
 
+    public static boolean isTektonReady(Kn kn) {
+        try {
+            return isTektonAwareAsync(kn).get(500, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            return false;
+        }
+    }
+
+    private static CompletableFuture<Boolean> isTektonAwareAsync(Kn kn) {
+        CompletableFuture<Boolean> result = new CompletableFuture<>();
+        ExecHelper.submit(() -> {
+            try {
+                result.complete(kn.isTektonAware());
+            } catch (IOException e) {
+                result.complete(false);
+            }
+        });
+        return result;
+    }
+
     public static boolean isKnativeReady(Kn kn) {
         try {
             return isKnServingAndEventingAwareAsync(kn).get(500, TimeUnit.MILLISECONDS);

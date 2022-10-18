@@ -21,7 +21,7 @@ def versionsMap = ['IU-2021.1':'211.6693.108', 'IU-2021.2':'212.4746.57', 'IU-20
 intellij {
     version = ideaVersion
     pluginName = 'Knative by Red Hat'
-    plugins = ['terminal', 'yaml', 'com.intellij.kubernetes:' + versionsMap[ideaVersion], 'com.redhat.devtools.intellij.telemetry:0.0.3.33', 'com.redhat.devtools.intellij.kubernetes:0.3.0.83']
+    plugins = ['terminal', 'yaml', 'github', 'com.intellij.kubernetes:' + versionsMap[ideaVersion], 'com.redhat.devtools.intellij.telemetry:0.0.3.33', 'com.redhat.devtools.intellij.kubernetes:0.3.0.83']
     updateSinceUntilBuild = false
 }
 

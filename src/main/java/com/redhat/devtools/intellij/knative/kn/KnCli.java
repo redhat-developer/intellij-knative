@@ -27,6 +27,8 @@ import com.redhat.devtools.intellij.common.utils.NetworkUtils;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.func.FuncActionPipelineManager;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
+import com.redhat.devtools.intellij.knative.utils.model.GitRepoModel;
+import com.redhat.devtools.intellij.knative.utils.model.ImageRegistryModel;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
 import com.redhat.devtools.intellij.knative.ui.repository.Repository;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
@@ -62,7 +64,6 @@ import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.KU
 import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.OPENSHIFT_VERSION;
 import static com.redhat.devtools.intellij.knative.ui.repository.RepositoryUtils.NATIVE_NAME;
 
-
 public class KnCli implements Kn {
     private static final Logger LOGGER = LoggerFactory.getLogger(KnCli.class);
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper(new JsonFactory());
@@ -70,7 +71,7 @@ public class KnCli implements Kn {
     private KubernetesClient client;
     private final String knCommand, funcCommand;
     private Map<String, String> envVars;
-    private boolean hasKnativeServing, hasKnativeEventing;
+    private boolean hasTekton, hasKnativeServing, hasKnativeEventing;
     private FuncActionPipelineManager funcActionPipelineManager;
 
     public KnCli(Project project, String knCommand, String funcCommand) {
@@ -84,6 +85,7 @@ public class KnCli implements Kn {
         } catch (URISyntaxException e) {
             this.envVars = Collections.emptyMap();
         }
+        this.hasTekton = false;
         this.hasKnativeServing = false;
         this.hasKnativeEventing = false;
         reportTelemetry();
@@ -110,6 +112,19 @@ public class KnCli implements Kn {
                 LOGGER.warn(ex.getLocalizedMessage(), ex);
             }
         }
+    }
+
+    @Override
+    public boolean isTektonAware() throws IOException {
+        // to speed up a bit the process we only call the cluster if we didn't find knative serving in last call
+        if (!hasTekton) {
+            try {
+                hasTekton = client.rootPaths().getPaths().stream().anyMatch(path -> path.endsWith("tekton.dev"));
+            } catch (KubernetesClientException e) {
+                throw new IOException(e);
+            }
+        }
+        return hasTekton;
     }
 
     @Override
@@ -173,7 +188,7 @@ public class KnCli implements Kn {
     @Override
     public List<Function> getFunctions() throws IOException {
         String json = ExecHelper.execute(funcCommand, envVars, "list", "-n", getNamespace(), "-o", "json");
-        if (json.startsWith("No functions found")) {
+        if (json.toLowerCase().startsWith("no functions found")) {
             return Collections.emptyList();
         }
         return getCustomCollection(json, Function.class);
@@ -312,38 +327,54 @@ public class KnCli implements Kn {
     }
 
     @Override
-    public void buildFunc(String path, String registry, String image, ConsoleView terminalExecutionConsole,
+    public void buildFunc(String path, ImageRegistryModel model, ConsoleView terminalExecutionConsole,
                           java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> processHandlerFunction,
                           ProcessListener processListener) throws IOException {
         ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole,
-                processHandlerFunction, processListener, getBuildDeployArgs("build", "", path, registry, image, true));
+                processHandlerFunction, processListener, getBuildDeployArgs("build", "", path, model, null, true));
     }
 
     @Override
-    public void deployFunc(String namespace, String path, String registry, String image, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException {
-        String[] args = getBuildDeployArgs("deploy", namespace, path, registry, image, true);
+    public void deployFunc(String namespace, String path, ImageRegistryModel model, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException {
+        String[] args = getBuildDeployArgs("deploy", namespace, path, model, null, true);
         List<String> argsList = new ArrayList<>(Arrays.asList(args));
-        argsList.addAll(Arrays.asList("-b", "disabled"));
+        argsList.addAll(Arrays.asList("--build", "false"));
         ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, processListener, argsList.toArray(new String[0]));
     }
 
-    private String[] getBuildDeployArgs(String command, String namespace, String path, String registry, String image, boolean verbose) {
+    @Override
+    public void onClusterBuildFunc(String namespace, String path, GitRepoModel repoModel, ImageRegistryModel model, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException {
+        String[] args = getBuildDeployArgs("deploy", namespace, path, model, repoModel, true);
+        ExecHelper.executeWithTerminal(project, KNATIVE_TOOL_WINDOW_ID, envVars, terminalExecutionConsole, processListener, args);
+    }
+
+    private String[] getBuildDeployArgs(String command, String namespace, String path, ImageRegistryModel model, GitRepoModel repoModel, boolean verbose) {
         List<String> args = new ArrayList<>(Arrays.asList(funcCommand, command));
-        if (image.isEmpty()) {
-            args.addAll(Arrays.asList("-r", registry));
-        } else {
-            args.addAll(Arrays.asList("-i", image));
-            if (client.isAdaptable(OpenShiftClient.class)) {
-                args.addAll(Arrays.asList("-r", ""));
+        if (!model.isAutoDiscovery()) {
+            if (model.getImage().isEmpty()) {
+                args.addAll(Arrays.asList("-r", model.getRegistry()));
+            } else {
+                args.addAll(Arrays.asList("-i", model.getImage()));
+                if (client.isAdaptable(OpenShiftClient.class)) {
+                    args.addAll(Arrays.asList("-r", ""));
+                }
             }
         }
         if (!namespace.isEmpty()) {
             args.addAll(Arrays.asList("-n", namespace));
         }
         args.addAll(Arrays.asList("-p", path));
+
+        if (repoModel != null) {
+            args.addAll(Arrays.asList("--remote", "--git-url", repoModel.getRepository()));
+            if (!repoModel.getBranch().isEmpty()) {
+                args.addAll(Arrays.asList("--git-branch", repoModel.getBranch()));
+            }
+        }
         if (verbose) {
             args.addAll(Collections.singletonList("-v"));
         }
+
         return args.toArray(new String[0]);
     }
 

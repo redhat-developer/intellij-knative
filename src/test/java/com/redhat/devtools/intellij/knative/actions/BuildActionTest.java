@@ -18,6 +18,7 @@ import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.wm.ToolWindowManager;
+import com.redhat.devtools.intellij.common.ui.InputDialogWithCheckbox;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.Constants;
@@ -84,7 +85,7 @@ public class BuildActionTest extends ActionTest {
                         mockToolWindow(toolWindowManagerMockedStatic);
                         mockTelemetry(telemetryServiceMockedStatic);
                         action.actionPerformed(anActionEvent);
-                        verify(kn, times(0)).buildFunc(anyString(), anyString(), anyString(), any(), any(), any());
+                        verify(kn, times(0)).buildFunc(anyString(), any(), any(), any(), any());
                     }
                 }
             }
@@ -160,10 +161,11 @@ public class BuildActionTest extends ActionTest {
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
             try (MockedStatic<Paths> pathsMockedStatic = mockStatic(Paths.class)) {
                 try (MockedStatic<YAMLHelper> yamlHelperMockedStatic = mockStatic(YAMLHelper.class)) {
-                    try(MockedConstruction<Messages.InputDialog> inputDialogMockedConstruction = mockConstruction(Messages.InputDialog.class,
+                    try(MockedConstruction<InputDialogWithCheckbox> inputDialogMockedConstruction = mockConstruction(InputDialogWithCheckbox.class,
                             (mock, context) -> {
                                 when(mock.isOK()).thenReturn(true);
                                 when(mock.getInputString()).thenReturn("image");
+                                when(mock.isChecked()).thenReturn(false);
                             })) {
                         try(MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
                             try (MockedConstruction<BuildFuncActionPipeline> buildFuncActionPipelineMockedConstruction = mockConstruction(BuildFuncActionPipeline.class,
@@ -205,10 +207,11 @@ public class BuildActionTest extends ActionTest {
                                 ((Runnable) invocation.getArguments()[0]).run();
                                 return 0;
                             });
-                            try (MockedConstruction<Messages.InputDialog> inputDialogMockedConstruction = mockConstruction(Messages.InputDialog.class,
+                            try (MockedConstruction<InputDialogWithCheckbox> inputDialogMockedConstruction = mockConstruction(InputDialogWithCheckbox.class,
                                     (mock, context) -> {
                                         when(mock.isOK()).thenReturn(true);
                                         when(mock.getInputString()).thenReturn("image");
+                                        when(mock.isChecked()).thenReturn(false);
                                     })) {
                                 try(MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
                                     try (MockedConstruction<BuildFuncActionPipeline> buildFuncActionPipelineMockedConstruction = mockConstruction(BuildFuncActionPipeline.class,
@@ -243,10 +246,11 @@ public class BuildActionTest extends ActionTest {
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
             try (MockedStatic<Paths> pathsMockedStatic = mockStatic(Paths.class)) {
                 try (MockedStatic<YAMLHelper> yamlHelperMockedStatic = mockStatic(YAMLHelper.class)) {
-                    try (MockedConstruction<Messages.InputDialog> inputDialogMockedConstruction = mockConstruction(Messages.InputDialog.class,
+                    try (MockedConstruction<InputDialogWithCheckbox> inputDialogMockedConstruction = mockConstruction(InputDialogWithCheckbox.class,
                         (mock, context) -> {
                             when(mock.isOK()).thenReturn(true);
                             when(mock.getInputString()).thenReturn("image");
+                            when(mock.isChecked()).thenReturn(false);
                         })) {
                         try(MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
                             try(MockedConstruction<BuildFuncActionPipeline> buildFuncActionPipelineMockedConstruction = mockConstruction(BuildFuncActionPipeline.class,
@@ -285,10 +289,11 @@ public class BuildActionTest extends ActionTest {
                                     ((Runnable) invocation.getArguments()[0]).run();
                                     return 0;
                                 });
-                                try (MockedConstruction<Messages.InputDialog> inputDialogMockedConstruction = mockConstruction(Messages.InputDialog.class,
+                                try (MockedConstruction<InputDialogWithCheckbox> inputDialogMockedConstruction = mockConstruction(InputDialogWithCheckbox.class,
                                         (mock, context) -> {
                                             when(mock.isOK()).thenReturn(true);
                                             when(mock.getInputString()).thenReturn("");
+                                            when(mock.isChecked()).thenReturn(false);
                                         })) {
 
                                     treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
@@ -300,7 +305,7 @@ public class BuildActionTest extends ActionTest {
                                     mockTelemetry(telemetryServiceMockedStatic);
                                     action.actionPerformed(anActionEvent);
                                     Thread.sleep(1000);
-                                    verify(kn, times(0)).buildFunc(eq("path"), eq(""), eq("image"), eq(null), eq(null), eq(null));
+                                    verify(kn, times(0)).buildFunc(eq("path"), eq(null), eq(null), eq(null), eq(null));
                                 }
                             }
                         }

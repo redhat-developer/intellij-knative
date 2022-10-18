@@ -23,20 +23,22 @@ import com.intellij.openapi.ui.InputValidator;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Pair;
 import com.redhat.devtools.intellij.common.model.ProcessHandlerInput;
+import com.redhat.devtools.intellij.common.ui.InputDialogWithCheckbox;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.ExecProcessHandler;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.actions.KnAction;
+import com.redhat.devtools.intellij.knative.func.FuncActionPipelineBuilder;
+import com.redhat.devtools.intellij.knative.func.FuncActionTask;
+import com.redhat.devtools.intellij.knative.func.IFuncActionPipeline;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
-import com.redhat.devtools.intellij.knative.func.FuncActionTask;
-import com.redhat.devtools.intellij.knative.func.FuncActionPipelineBuilder;
-import com.redhat.devtools.intellij.knative.func.IFuncActionPipeline;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
+import com.redhat.devtools.intellij.knative.utils.model.ImageRegistryModel;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,8 +49,6 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static com.intellij.openapi.ui.Messages.CANCEL_BUTTON;
-import static com.intellij.openapi.ui.Messages.OK_BUTTON;
 import static com.redhat.devtools.intellij.knative.Constants.NOTIFICATION_ID;
 import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_BUILD_DEPLOY;
 import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.PROP_CALLER_ACTION;
@@ -73,17 +73,11 @@ public class BuildAction extends KnAction {
         TelemetryMessageBuilder.ActionMessage telemetry = createTelemetryBuild();
         telemetry.property(PROP_CALLER_ACTION, buildStepHandler.getPipeline().getActionName());
         BuildAction buildAction = (BuildAction) ActionManager.getInstance().getAction(ID);
-        String image = function.getImage(), registry = "";
-        if (Strings.isNullOrEmpty(image)) {
-            Pair<String, String> registryAndImage = UIHelper.executeInUI(() -> buildAction.confirmAndGetRegistryImage(project, function, knCli, telemetry));
-            if (registryAndImage == null) {
-                return;
-            }
-            registry = registryAndImage.getFirst();
-            image = registryAndImage.getSecond();
+        ImageRegistryModel model = new ImageRegistryModel(function.getImage(), "");
+        if (Strings.isNullOrEmpty(model.getImage())) {
+            model = UIHelper.executeInUI(() -> buildAction.confirmAndGetRegistryImage(project, function, knCli, false, telemetry));
         }
-        buildAction.doExecuteAction(project, function, registry,
-                image, knCli, buildStepHandler, telemetry);
+        buildAction.doExecuteAction(project, function, model, knCli, buildStepHandler, telemetry);
     }
 
     @Override
@@ -93,36 +87,33 @@ public class BuildAction extends KnAction {
         TelemetryMessageBuilder.ActionMessage telemetry = createTelemetry();
         Project project = getEventProject(anActionEvent);
 
-        Pair<String, String> registryAndImage = confirmAndGetRegistryImage(project, function, knCli, telemetry);
-        if (registryAndImage == null) {
+        ImageRegistryModel model = confirmAndGetRegistryImage(project, function, knCli, false, telemetry);
+        if (model == null || !model.isValid()) {
             return;
         }
-
         IFuncActionPipeline buildPipeline = new FuncActionPipelineBuilder()
                 .createBuildPipeline(project, function)
                 .withBuildTask((task) ->
-                        ExecHelper.submit(() -> doExecuteAction(project, function, registryAndImage.getFirst(),
-                                registryAndImage.getSecond(), knCli, task, telemetry))
+                        ExecHelper.submit(() -> doExecuteAction(project, function, model, knCli, task, telemetry))
                 )
                 .build();
         knCli.getFuncActionPipelineManager().start(buildPipeline);
     }
 
-    protected Pair<String, String> confirmAndGetRegistryImage(Project project, Function function, Kn knCli, TelemetryMessageBuilder.ActionMessage telemetry) {
+    protected ImageRegistryModel confirmAndGetRegistryImage(Project project, Function function, Kn knCli, boolean forceAskImageToUser, TelemetryMessageBuilder.ActionMessage telemetry) {
         String namespace = knCli.getNamespace();
         if (!isLocalFunction(function, namespace, telemetry)) {
             return null;
         }
 
-        Pair<String, String> registryAndImage = getRegistryAndImage(function, knCli, telemetry);
-        if (registryAndImage == null) {
+        ImageRegistryModel model = getRegistryAndImage(function, knCli, forceAskImageToUser, telemetry);
+        if (model == null || !model.isValid()) {
             return null;
         }
-
         if (!isExecutionConfirmed(project, function, namespace, telemetry)) {
             return null;
         }
-        return registryAndImage;
+        return model;
     }
 
     private boolean isLocalFunction(Function function, String namespace, TelemetryMessageBuilder.ActionMessage telemetry) {
@@ -137,20 +128,13 @@ public class BuildAction extends KnAction {
         return true;
     }
 
-    private Pair<String, String> getRegistryAndImage(Function function, Kn knCli, TelemetryMessageBuilder.ActionMessage telemetry) {
-        Pair<String, String> dataToDeploy = getDataToDeploy(Paths.get(function.getLocalPath()), knCli);
-        String registry = dataToDeploy.getFirst();
-        String image = dataToDeploy.getSecond();
-        if (Strings.isNullOrEmpty(image) && Strings.isNullOrEmpty(registry)) {
+    protected ImageRegistryModel getRegistryAndImage(Function function, Kn knCli, boolean forceAskImageToUser, TelemetryMessageBuilder.ActionMessage telemetry) {
+        ImageRegistryModel dataToDeploy = getDataToDeploy(Paths.get(function.getLocalPath()), knCli);
+        String registry = dataToDeploy.getRegistry();
+        String image = dataToDeploy.getImage();
+        if (forceAskImageToUser || (Strings.isNullOrEmpty(image) && Strings.isNullOrEmpty(registry))) {
             // ask input to user
-            image = getImageFromUser(function.getName());
-            if (image.isEmpty()) {
-                telemetry
-                        .result(anonymizeResource(function.getName(), knCli.getNamespace(), "No image name or registry has been added."))
-                        .send();
-                return null;
-            }
-            return Pair.create(registry, image);
+            return getImageFromUser(function.getName());
         }
         return dataToDeploy;
     }
@@ -165,7 +149,7 @@ public class BuildAction extends KnAction {
         return true;
     }
 
-    protected void doExecuteAction(Project project, Function function, String registry, String image,
+    protected void doExecuteAction(Project project, Function function, ImageRegistryModel model,
                                    Kn knCli, FuncActionTask task,
                                    TelemetryMessageBuilder.ActionMessage telemetry) {
         String name = function.getName();
@@ -173,7 +157,7 @@ public class BuildAction extends KnAction {
         String localPathFunc = function.getLocalPath();
         try {
             function.setBuilding(true);
-            doExecute(task, knCli, namespace, localPathFunc, registry, image);
+            doExecute(task, knCli, namespace, localPathFunc, model);
             telemetry
                     .result(anonymizeResource(name, namespace, getSuccessMessage(namespace, name)))
                     .send();
@@ -191,22 +175,27 @@ public class BuildAction extends KnAction {
         }
     }
 
-    protected void doExecute(FuncActionTask task, Kn knCli, String namespace, String localPathFunc, String registry, String image) throws IOException {
+    protected void doExecute(FuncActionTask task, Kn knCli, String namespace, String localPathFunc, ImageRegistryModel model) throws IOException {
         ConsoleView terminalExecutionConsole = task != null ? task.getTerminalExecutionConsole() : null;
         java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> processHandlerFunction = task != null ? task.getProcessHandlerFunction() : null;
         ProcessListener processListener = task != null ? task.getProcessListener() : null;
-        knCli.buildFunc(localPathFunc, registry, image, terminalExecutionConsole, processHandlerFunction, processListener);
+        knCli.buildFunc(localPathFunc, model, terminalExecutionConsole, processHandlerFunction, processListener);
     }
 
     protected boolean isActionConfirmed(Project project, String name, String funcNamespace, String activeNamespace) {
         return true;
     }
 
-    protected String getImageFromUser(String name) {
+    protected ImageRegistryModel getImageFromUser(String name) {
         String defaultUsername = System.getProperty("user.name");
         String defaultImage = "quay.io/" + defaultUsername + "/" + name + ":latest";
-        Messages.InputDialog dialog = new Messages.InputDialog(null, "Provide full image name in the form [registry]/[namespace]/[name]:[tag] (e.g quay.io/boson/image:latest)",
-                "Build Function " + name, null, defaultImage,
+        InputDialogWithCheckbox dialog = new InputDialogWithCheckbox("Provide full image name in the form registry/namespace/name:[tag] (e.g quay.io/boson/image:latest)",
+                "Build Function " + name,
+                "Auto discover an internal registry and use it to deploy",
+                false,
+                true,
+                null,
+                defaultImage,
                 new InputValidator() {
                     @Override
                     public boolean checkInput(String inputString) {
@@ -217,27 +206,31 @@ public class BuildAction extends KnAction {
                     public boolean canClose(String inputString) {
                         return true;
                     }
-                },
-                new String[]{OK_BUTTON, CANCEL_BUTTON},
-                0, null);
+                });
+        dialog.setDisableTextPanelWithCheckbox();
         dialog.show();
         if (!dialog.isOK()) {
-            return "";
+            return null;
         }
-        return dialog.getInputString();
+        if (dialog.isChecked()) {
+            ImageRegistryModel model = new ImageRegistryModel();
+            model.setAutoDiscovery();
+            return model;
+        }
+        return new ImageRegistryModel(dialog.getInputString(), "");
     }
 
-    protected Pair<String, String> getDataToDeploy(Path root, Kn kncli) {
+    protected ImageRegistryModel getDataToDeploy(Path root, Kn kncli) {
         try {
             URL funcFileURL = kncli.getFuncFileURL(root);
             String content = YAMLHelper.JSONToYAML(YAMLHelper.URLToJSON(funcFileURL));
             String registry = YAMLHelper.getStringValueFromYAML(content, new String[]{"registry"});
             String image = YAMLHelper.getStringValueFromYAML(content, new String[]{"image"});
-            return Pair.create(registry, image);
+            return new ImageRegistryModel(image, registry);
         } catch(IOException e) {
             logger.warn(e.getLocalizedMessage(), e);
         }
-        return Pair.empty();
+        return new ImageRegistryModel();
     }
 
     protected TelemetryMessageBuilder.ActionMessage createTelemetry() {

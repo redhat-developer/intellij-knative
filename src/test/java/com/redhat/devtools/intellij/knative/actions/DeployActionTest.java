@@ -16,6 +16,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.redhat.devtools.intellij.common.ui.InputDialogWithCheckbox;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
 import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.actions.func.DeployAction;
@@ -158,10 +159,11 @@ public class DeployActionTest extends ActionTest {
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
             try (MockedStatic<Paths> pathsMockedStatic = mockStatic(Paths.class)) {
                 try (MockedStatic<YAMLHelper> yamlHelperMockedStatic = mockStatic(YAMLHelper.class)) {
-                    try(MockedConstruction<Messages.InputDialog> inputDialogMockedConstruction = mockConstruction(Messages.InputDialog.class,
+                    try(MockedConstruction<InputDialogWithCheckbox> inputDialogMockedConstruction = mockConstruction(InputDialogWithCheckbox.class,
                             (mock, context) -> {
                                 when(mock.isOK()).thenReturn(true);
                                 when(mock.getInputString()).thenReturn("image");
+                                when(mock.isChecked()).thenReturn(false);
                             })) {
                         try(MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
                             try(MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
@@ -195,10 +197,11 @@ public class DeployActionTest extends ActionTest {
 
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
             try (MockedStatic<Paths> pathsMockedStatic = mockStatic(Paths.class)) {
-                try(MockedConstruction<Messages.InputDialog> inputDialogMockedConstruction = mockConstruction(Messages.InputDialog.class,
+                try(MockedConstruction<InputDialogWithCheckbox> inputDialogMockedConstruction = mockConstruction(InputDialogWithCheckbox.class,
                         (mock, context) -> {
                             when(mock.isOK()).thenReturn(true);
                             when(mock.getInputString()).thenReturn("image");
+                            when(mock.isChecked()).thenReturn(false);
                         })) {
                     try(MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
                         try(MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
@@ -230,10 +233,11 @@ public class DeployActionTest extends ActionTest {
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
             try (MockedStatic<Paths> pathsMockedStatic = mockStatic(Paths.class)) {
                 try (MockedStatic<YAMLHelper> yamlHelperMockedStatic = mockStatic(YAMLHelper.class)) {
-                    try(MockedConstruction<Messages.InputDialog> inputDialogMockedConstruction = mockConstruction(Messages.InputDialog.class,
+                    try(MockedConstruction<InputDialogWithCheckbox> inputDialogMockedConstruction = mockConstruction(InputDialogWithCheckbox.class,
                             (mock, context) -> {
                                 when(mock.isOK()).thenReturn(true);
                                 when(mock.getInputString()).thenReturn("image");
+                                when(mock.isChecked()).thenReturn(false);
                             })) {
                         try(MockedStatic<Messages> messagesMockedStatic = mockStatic(Messages.class)) {
                             try(MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
@@ -266,29 +270,31 @@ public class DeployActionTest extends ActionTest {
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
             try (MockedStatic<Paths> pathsMockedStatic = mockStatic(Paths.class)) {
                 try (MockedStatic<YAMLHelper> yamlHelperMockedStatic = mockStatic(YAMLHelper.class)) {
-                    try(MockedConstruction<Messages.InputDialog> inputDialogMockedConstruction = mockConstruction(Messages.InputDialog.class,
+                    try(MockedConstruction<InputDialogWithCheckbox> inputDialogMockedConstruction = mockConstruction(InputDialogWithCheckbox.class,
                             (mock, context) -> {
                                 when(mock.isOK()).thenReturn(true);
                                 when(mock.getInputString()).thenReturn("");
+                                when(mock.isChecked()).thenReturn(false);
                             })) {
-                        try (MockedStatic<TelemetryService> telemetryServiceMockedStatic = mockStatic((TelemetryService.class))) {
-                            try(MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
-                                try (MockedConstruction<DeployFuncActionPipeline> deployFuncActionPipelineMockedConstruction = mockConstruction(DeployFuncActionPipeline.class,
-                                        (mock, context) -> {
-                                            doNothing().when(mock).start();
-                                        })) {
-                                    treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
-                                    pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
-                                    yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
-                                    yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("");
-                                    yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("");
-                                    mockTelemetry(telemetryServiceMockedStatic);
-                                    action.actionPerformed(anActionEvent);
-                                    Thread.sleep(1000);
-                                    assertEquals(0, deployFuncActionPipelineMockedConstruction.constructed().size());
+                            try (MockedStatic<TelemetryService> telemetryServiceMockedStatic = mockStatic((TelemetryService.class))) {
+                                try (MockedConstruction<FuncActionTask> ignored = mockConstruction(FuncActionTask.class)) {
+                                    try (MockedConstruction<DeployFuncActionPipeline> deployFuncActionPipelineMockedConstruction = mockConstruction(DeployFuncActionPipeline.class,
+                                            (mock, context) -> {
+                                                doNothing().when(mock).start();
+                                            })) {
+                                        treeHelperMockedStatic.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
+                                        pathsMockedStatic.when(() -> Paths.get(anyString(), anyString())).thenReturn(pathFuncFile);
+                                        yamlHelperMockedStatic.when(() -> YAMLHelper.URLToJSON(any())).thenReturn(jsonNode);
+                                        yamlHelperMockedStatic.when(() -> YAMLHelper.JSONToYAML(any())).thenReturn("");
+                                        yamlHelperMockedStatic.when(() -> YAMLHelper.getStringValueFromYAML(anyString(), any(String[].class))).thenReturn("").thenReturn("");
+                                        mockTelemetry(telemetryServiceMockedStatic);
+                                        action.actionPerformed(anActionEvent);
+                                        Thread.sleep(1000);
+                                        assertEquals(0, deployFuncActionPipelineMockedConstruction.constructed().size());
+                                    }
                                 }
                             }
-                        }
+
                     }
                 }
             }

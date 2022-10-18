@@ -17,6 +17,8 @@ import com.redhat.devtools.intellij.common.utils.CommonTerminalExecutionConsole;
 import com.redhat.devtools.intellij.common.utils.ExecProcessHandler;
 import com.redhat.devtools.intellij.knative.func.FuncActionPipelineManager;
 import com.redhat.devtools.intellij.knative.ui.createFunc.CreateFuncModel;
+import com.redhat.devtools.intellij.knative.utils.model.GitRepoModel;
+import com.redhat.devtools.intellij.knative.utils.model.ImageRegistryModel;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
 import com.redhat.devtools.intellij.knative.ui.repository.Repository;
 import io.fabric8.kubernetes.client.Watch;
@@ -33,9 +35,18 @@ import java.util.Map;
 public interface Kn {
 
     /**
+     * Check if the cluster is Tekton serving aware.
+     *
+     * @return true if Tekton is installed on cluster false otherwise
+     * @throws IOException if communication encountered an error
+     */
+    boolean isTektonAware() throws IOException;
+
+    /**
      * Check if the cluster is Knative serving aware.
      *
      * @return true if Knative Serving is installed on cluster false otherwise
+     * @throws IOException if communication encountered an error
      */
     boolean isKnativeServingAware() throws IOException;
 
@@ -43,6 +54,7 @@ public interface Kn {
      * Check if the cluster is Knative eventing aware.
      *
      * @return true if Knative Eventing is installed on cluster false otherwise
+     * @throws IOException if communication encountered an error
      */
     boolean isKnativeEventingAware() throws IOException;
 
@@ -208,12 +220,13 @@ public interface Kn {
      * Build a function from path
      *
      * @param path     path where the source code is stored
-     * @param registry registry to use
-     * @param image    image name. This option takes precedence over registry which can be omitted
+     * @param model     image and registry model representing which registry or image to use.
+     *                  The image option takes precedence over registry which can be omitted.
+     *                  If the autoDiscovery is set to true no image or registry will be used and the cli will try to auto-detect it
      * @param terminalExecutionConsole terminal tab to be used to run the command. If null a new tab will be created
      * @throws IOException if communication errored
      */
-    void buildFunc(String path, String registry, String image, ConsoleView terminalExecutionConsole,
+    void buildFunc(String path, ImageRegistryModel model, ConsoleView terminalExecutionConsole,
                    java.util.function.Function<ProcessHandlerInput, ExecProcessHandler> processHandlerFunction,
                    ProcessListener processListener) throws IOException;
 
@@ -222,13 +235,29 @@ public interface Kn {
      *
      * @param namespace namespace where to deploy
      * @param path      path where the source code is stored
-     * @param registry  registry to use
-     * @param image     image name. This option takes precedence over registry which can be omitted
+     * @param model     image and registry model representing which registry or image to use.
+     *                  The image option takes precedence over registry which can be omitted.
+     *                  If the autoDiscovery is set to true no image or registry will be used and the cli will try to auto-detect it
      * @param terminalExecutionConsole
      * @param processListener
      * @throws IOException if communication errored
      */
-    void deployFunc(String namespace, String path, String registry, String image, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException;
+    void deployFunc(String namespace, String path, ImageRegistryModel model, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException;
+
+    /**
+     * Start an on-cluster build
+     *
+     * @param namespace namespace where to deploy
+     * @param path      path where the source code is stored
+     * @param repo Repo url to push the code to be built
+     * @param terminalExecutionConsole
+     * @param model     image and registry model representing which registry or image to use.
+     *                  The image option takes precedence over registry which can be omitted.
+     *                  If the autoDiscovery is set to true no image or registry will be used and the cli will try to auto-detect it
+     * @param processListener
+     * @throws IOException if communication errored
+     */
+    void onClusterBuildFunc(String namespace, String path, GitRepoModel repoModel, ImageRegistryModel model, ConsoleView terminalExecutionConsole, ProcessListener processListener) throws IOException;
 
     /**
      * Invokes the Function by sending a test request to the currently running

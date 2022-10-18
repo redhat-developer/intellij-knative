@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Red Hat, Inc.
+ * Copyright (c) 2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -11,39 +11,39 @@
 package com.redhat.devtools.intellij.knative.actions.func;
 
 import com.google.common.base.Strings;
+import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.util.Pair;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
-import com.redhat.devtools.intellij.knative.kn.Function;
-import com.redhat.devtools.intellij.knative.kn.Kn;
-import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
-import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
-import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import com.redhat.devtools.intellij.knative.func.FuncActionPipelineBuilder;
 import com.redhat.devtools.intellij.knative.func.FuncActionTask;
 import com.redhat.devtools.intellij.knative.func.IFuncActionPipeline;
+import com.redhat.devtools.intellij.knative.kn.Function;
+import com.redhat.devtools.intellij.knative.kn.Kn;
+import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
+import com.redhat.devtools.intellij.knative.tree.ParentableNode;
+import com.redhat.devtools.intellij.knative.ui.GitDialog;
 import com.redhat.devtools.intellij.knative.utils.FuncUtils;
+import com.redhat.devtools.intellij.knative.utils.model.GitRepoModel;
 import com.redhat.devtools.intellij.knative.utils.model.ImageRegistryModel;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
+import git4idea.GitUtil;
+import git4idea.repo.GitRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 
-import static com.intellij.openapi.ui.Messages.getCancelButton;
-import static com.intellij.openapi.ui.Messages.getOkButton;
-import static com.intellij.openapi.ui.Messages.showOkCancelDialog;
-import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_BUILD_DEPLOY;
+import static com.redhat.devtools.intellij.knative.Constants.GIT_PLUGIN_ID;
 import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymizeResource;
 
-public class DeployAction extends BuildAction {
+public class OnClusterBuildAction extends DeployAction {
 
-    private static final Logger logger = LoggerFactory.getLogger(DeployAction.class);
+    private static final Logger logger = LoggerFactory.getLogger(OnClusterBuildAction.class);
 
-    public DeployAction() {
+    public OnClusterBuildAction() {
         super();
     }
 
@@ -52,9 +52,14 @@ public class DeployAction extends BuildAction {
         ParentableNode node = getElement(selected);
         Function function = ((KnFunctionNode) node).getFunction();
         TelemetryMessageBuilder.ActionMessage telemetry = createTelemetry();
-        Project project = getEventProject(anActionEvent);
+        Project project = anActionEvent.getProject();
 
-        ImageRegistryModel model = confirmAndGetRegistryImage(project, function, knCli, false, telemetry);
+        GitRepoModel gitRepo = getRepoInfo(project, function);
+        if (gitRepo == null) {
+            return;
+        }
+
+        ImageRegistryModel model = confirmAndGetRegistryImage(project, function, knCli, true, telemetry);
         if (model == null || !model.isValid()) {
             return;
         }
@@ -64,27 +69,36 @@ public class DeployAction extends BuildAction {
 
         IFuncActionPipeline deployPipeline = new FuncActionPipelineBuilder()
                 .createDeployPipeline(project, function)
-                .withBuildTask((task) -> doBuild(knCli, task))
-                .withTask("deployFunc", (task) -> doDeploy(node.getName(), knCli, task,
+                .withTask("onClusterBuildFunc", (task) -> doDeploy(node.getName(), knCli, task, gitRepo,
                         model, telemetry))
                 .build();
         knCli.getFuncActionPipelineManager().start(deployPipeline);
     }
 
-    protected void doBuild(Kn knCli, FuncActionTask funcActionTask) {
-        ExecHelper.submit(() -> BuildAction.execute(
-                funcActionTask.getProject(),
-                funcActionTask.getFunction(),
-                knCli,
-                funcActionTask)
-        );
+    private GitRepoModel getRepoInfo(Project project, Function function) {
+        GitRepository gitRepository = getFunctionRepo(project, function);
+        GitDialog gitDialog = new GitDialog(project, "On-Cluster Build", "Provide the Git repository/branch where to pull the code from", gitRepository);
+        gitDialog.show();
+        if (gitDialog.isOK()) {
+            return gitDialog.getGitInfo();
+        }
+        return null;
     }
 
-    protected void doDeploy(String name, Kn knCli, FuncActionTask funcActionTask, ImageRegistryModel model, TelemetryMessageBuilder.ActionMessage telemetry) {
+    private GitRepository getFunctionRepo(Project project, Function function) {
+        for (GitRepository gitRepository: GitUtil.getRepositoryManager(project).getRepositories()) {
+            if (gitRepository.getRoot().getPath().equalsIgnoreCase(function.getLocalPath())) {
+                return gitRepository;
+            }
+        }
+        return null;
+    }
+
+    private void doDeploy(String name, Kn knCli, FuncActionTask funcActionTask, GitRepoModel gitRepo, ImageRegistryModel model, TelemetryMessageBuilder.ActionMessage telemetry) {
         ExecHelper.submit(() -> {
             String namespace = knCli.getNamespace();
             try {
-                knCli.deployFunc(namespace, funcActionTask.getFunction().getLocalPath(), model,
+                knCli.onClusterBuildFunc(namespace, funcActionTask.getFunction().getLocalPath(), gitRepo, model,
                         funcActionTask.getTerminalExecutionConsole(), funcActionTask.getProcessListener());
                 telemetry
                         .result(anonymizeResource(name, knCli.getNamespace(), getSuccessMessage(namespace, name)))
@@ -99,39 +113,14 @@ public class DeployAction extends BuildAction {
     }
 
     @Override
-    protected boolean isActionConfirmed(Project project, String name, String funcNamespace, String activeNamespace) {
-        String message = "";
-        if (!Strings.isNullOrEmpty(funcNamespace)) {
-            if (!funcNamespace.equalsIgnoreCase(activeNamespace)) {
-                message = "Function namespace (declared in func.yaml) is different from the current active namespace. \n";
-            }
-        }
-        message += "Deploy function " + name + " to namespace " + activeNamespace + "?";
-
-        int result = showOkCancelDialog(project,
-                message,
-                "Deploy Function " + name,
-                getOkButton(), getCancelButton(), null);
-        return result == Messages.OK;
-    }
-
-    protected TelemetryMessageBuilder.ActionMessage createTelemetry() {
-        return TelemetryService.instance().action(NAME_PREFIX_BUILD_DEPLOY + "deploy func");
-    }
-
-    protected String getSuccessMessage(String namespace, String name) {
-        return "Function " + name + " in namespace " + namespace + " has been successfully deployed";
-    }
-
-    @Override
     public boolean isVisible(Object selected) {
         boolean visible = super.isVisible(selected);
         if (visible) {
             Kn kn = ((KnFunctionNode) selected).getRootNode().getKn();
-            return FuncUtils.isKnativeReady(kn);
+            PluginId gitPluginId = PluginId.findId(GIT_PLUGIN_ID);
+            return gitPluginId != null && !PluginManagerCore.isDisabled(gitPluginId) && FuncUtils.isTektonReady(kn);
         }
         return false;
     }
-
 
 }

@@ -59,6 +59,7 @@
     <depends>org.jetbrains.plugins.terminal</depends>
     <depends>com.intellij.modules.lang</depends>
     <depends>org.jetbrains.plugins.yaml</depends>
+    <depends optional="true" config-file="">org.jetbrains.plugins.github</depends>
     <depends>com.redhat.devtools.intellij.telemetry</depends>
     <depends>com.redhat.devtools.intellij.kubernetes</depends>
     <depends optional="true" config-file="plugin-json.xml">com.intellij.modules.json</depends>
@@ -105,6 +106,9 @@
             <action id="com.redhat.devtools.intellij.knative.actions.func.DeployAction"
                     class="com.redhat.devtools.intellij.knative.actions.func.DeployAction"
                     text="Deploy"/>
+            <action id="com.redhat.devtools.intellij.knative.actions.func.OnClusterBuildAction"
+                    class="com.redhat.devtools.intellij.knative.actions.func.OnClusterBuildAction"
+                    text="On Cluster Build" />
             <action id="com.redhat.devtools.intellij.knative.actions.func.InvokeAction"
                     class="com.redhat.devtools.intellij.knative.actions.func.InvokeAction"
                     text="Invoke"/>
