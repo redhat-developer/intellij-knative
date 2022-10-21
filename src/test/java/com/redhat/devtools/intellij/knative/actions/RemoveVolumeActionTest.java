@@ -32,7 +32,8 @@ public class RemoveVolumeActionTest extends ActionTest {
     public void GetSection_ReturnsEnv() throws IOException {
         RemoveVolumeAction action = new RemoveVolumeAction();
         String[] section = action.getSection();
-        assertEquals(1, section.length);
-        assertEquals("volumes", section[0]);
+        assertEquals(2, section.length);
+        assertEquals("run", section[0]);
+        assertEquals("volumes", section[1]);
     }
 }

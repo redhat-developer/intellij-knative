@@ -192,7 +192,7 @@ public class KnFunctionsTreeStructure extends KnTreeStructure {
         URL funcFileURL = kn.getFuncFileURL(Paths.get(path));
         String content = YAMLHelper.JSONToYAML(YAMLHelper.URLToJSON(funcFileURL));
         String name = YAMLHelper.getStringValueFromYAML(content, new String[] { "name" });
-        String namespace = YAMLHelper.getStringValueFromYAML(content, new String[] { "namespace" });
+        String namespace = YAMLHelper.getStringValueFromYAML(content, new String[] { "deploy", "namespace" });
         String runtime = YAMLHelper.getStringValueFromYAML(content, new String[] { "runtime" });
         String image = YAMLHelper.getStringValueFromYAML(content, new String[] { "image" });
         if (Strings.isNullOrEmpty(name) || Strings.isNullOrEmpty(runtime)) {

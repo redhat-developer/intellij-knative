@@ -37,6 +37,6 @@ public class RemoveVolumeAction extends RemoveConfigAction {
 
     @Override
     public String[] getSection() {
-        return new String[] { "volumes" };
+        return new String[] { "run", "volumes" };
     }
 }

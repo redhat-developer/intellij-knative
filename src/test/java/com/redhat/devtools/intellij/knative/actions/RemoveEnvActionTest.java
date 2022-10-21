@@ -32,7 +32,8 @@ public class RemoveEnvActionTest extends ActionTest {
     public void GetSection_ReturnsEnv() throws IOException {
         RemoveEnvAction action = new RemoveEnvAction();
         String[] section = action.getSection();
-        assertEquals(1, section.length);
-        assertEquals("envs", section[0]);
+        assertEquals(2, section.length);
+        assertEquals("run", section[0]);
+        assertEquals("envs", section[1]);
     }
 }
