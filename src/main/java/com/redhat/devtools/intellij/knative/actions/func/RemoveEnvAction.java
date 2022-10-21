@@ -36,6 +36,6 @@ public class RemoveEnvAction extends RemoveConfigAction {
 
     @Override
     public String[] getSection() {
-        return new String[] { "envs" };
+        return new String[] { "run", "envs" };
     }
 }
