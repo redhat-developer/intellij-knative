@@ -38,7 +38,7 @@ public class KnFunctionDescriptor extends PresentableNodeDescriptor<IKnFunctionN
         presentation.setIcon(SERVICE_ICON);
         if (!function.getLocalPath().isEmpty()) {
             presentation.setTooltip("Name: " + function.getName() + "\n" +
-                    (function.getNamespace().isEmpty() ? "" : "Namespace: " + function.getNamespace() + "\n") +
+                    (Strings.isNullOrEmpty(function.getNamespace()) ? "" : "Namespace: " + function.getNamespace() + "\n") +
                     "Runtime: " + function.getRuntime() + "\n" +
                     "Context: " + function.getLocalPath()
             );

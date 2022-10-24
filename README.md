@@ -14,7 +14,32 @@ A JetBrains IntelliJ plugin for interacting with Knative & Serverless Functions.
 ## New and Noteworthy
 
 The minimum JetBrains IDEs version supported by the plugin has been increased to 2021.1
-The plugin works by using `kn` CLI 1.5.0 and `func` CLI 0.25.0
+The plugin works by using `kn` CLI 1.7.0 and `func` CLI 1.8.0
+
+### On-Cluster Build
+
+On-Cluster Build allows building (and deploying) the source code stored in a git repository within the cluster by leveraging Tekton.
+Now it is possible to start an on-cluster build from the IDE. The action is enabled if and only if Knative and Tekton are 
+both installed on the cluster. The plugin interacts with the JetBrains git plugin to guide the user through the entire process.
+
+![](images/1.3.0/knative1.gif)
+
+### Manage Function repos
+
+The plugin provides a custom dialog to add and remove new Function repositories. They can be used to create a new function
+using a template stored in them.
+
+![](images/1.3.0/knative3.gif)
+
+### Getting Started Page
+
+A getting started page has been added to explain the different features the plugin offers and shows how to use them
+
+![](images/1.3.0/knative2.gif)
+
+## Previous releases
+
+### 1.2.0
 
 ### New ToolWindow for build/deploy/run actions
 
@@ -38,8 +63,6 @@ The plugin skips building a function if it has not been updated since last build
 ### Inform user if the function is not running when invoking it
 
 The user is prompted to run the function first before invoking it, if the function is not running. This improves the overall experience during invoke calls.
-
-## Previous releases
 
 ### 1.1.0
 
