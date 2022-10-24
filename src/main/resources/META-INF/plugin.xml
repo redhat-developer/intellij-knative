@@ -14,6 +14,7 @@
       <p><b>1.3.0</b></p>
       <ul>
         <li>Provide support for on-cluster build</li>
+        <li>The user can add and remove a Function repository and use it to select a template when creating a new function</li>
         <li>Add a Getting Started page to explain and show how to use the plugin</li>
       </ul>
       <p><b>1.2.1</b></p>
