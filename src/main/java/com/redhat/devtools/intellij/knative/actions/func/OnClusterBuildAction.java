@@ -19,6 +19,7 @@ import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.knative.func.FuncActionPipelineBuilder;
 import com.redhat.devtools.intellij.knative.func.FuncActionTask;
 import com.redhat.devtools.intellij.knative.func.IFuncActionPipeline;
+import com.redhat.devtools.intellij.knative.git.GitHandler;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionNode;
@@ -28,8 +29,6 @@ import com.redhat.devtools.intellij.knative.utils.FuncUtils;
 import com.redhat.devtools.intellij.knative.utils.model.GitRepoModel;
 import com.redhat.devtools.intellij.knative.utils.model.ImageRegistryModel;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
-import git4idea.GitUtil;
-import git4idea.repo.GitRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,20 +75,13 @@ public class OnClusterBuildAction extends DeployAction {
     }
 
     private GitRepoModel getRepoInfo(Project project, Function function) {
-        GitRepository gitRepository = getFunctionRepo(project, function);
-        GitDialog gitDialog = new GitDialog(project, "On-Cluster Build", "Provide the Git repository/branch where to pull the code from", gitRepository);
+        GitDialog gitDialog = new GitDialog(project,
+                "On-Cluster Build",
+                "Provide the Git repository/branch where to pull the code from",
+                GitHandler.getFunctionRepo(project, function));
         gitDialog.show();
         if (gitDialog.isOK()) {
             return gitDialog.getGitInfo();
-        }
-        return null;
-    }
-
-    private GitRepository getFunctionRepo(Project project, Function function) {
-        for (GitRepository gitRepository: GitUtil.getRepositoryManager(project).getRepositories()) {
-            if (gitRepository.getRoot().getPath().equalsIgnoreCase(function.getLocalPath())) {
-                return gitRepository;
-            }
         }
         return null;
     }

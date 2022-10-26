@@ -26,7 +26,6 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.vcs.log.Hash;
 import com.redhat.devtools.intellij.knative.utils.model.GitRepoModel;
 import git4idea.GitLocalBranch;
-import git4idea.GitUtil;
 import git4idea.branch.GitBranchesCollection;
 import git4idea.index.GitFileStatus;
 import git4idea.repo.GitRemote;
