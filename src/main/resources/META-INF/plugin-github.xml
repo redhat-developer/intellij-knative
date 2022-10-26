@@ -1,6 +1,2 @@
 <idea-plugin>
-    <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="com.redhat.devtools.intellij.knative.git.GitHandler"/>
-        <applicationService serviceImplementation="com.redhat.devtools.intellij.knative.ui.GitDialog"/>
-    </extensions>
 </idea-plugin>
