@@ -11,8 +11,10 @@
 package com.redhat.devtools.intellij.knative.ui.toolwindow;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
+import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.knative.listener.KnTreeDoubleClickListener;
 import com.redhat.devtools.intellij.knative.tree.KnFunctionsTreeStructure;
@@ -26,11 +28,12 @@ public class FunctionsWindowToolFactory extends KnBaseWindowTool<KnTreeStructure
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         setTitleAndIcon(toolWindow, "Functions");
+        SimpleToolWindowPanel panel = new SimpleToolWindowPanel(true, true);
+        Content content = createContent(toolWindow, panel, FUNCTIONS_TOOLBAR_ACTION_GROUP_ID);
 
         KnFunctionsTreeStructure structure = new KnFunctionsTreeStructure(project);
-        Tree tree = createTree(project, structure, true);
+        Tree tree = createTree(content, structure, true, panel);
         new KnTreeDoubleClickListener(tree);
-        createContent(toolWindow, tree, FUNCTIONS_ACTION_GROUP_ID, FUNCTIONS_TOOLBAR_ACTION_GROUP_ID);
     }
 
 
