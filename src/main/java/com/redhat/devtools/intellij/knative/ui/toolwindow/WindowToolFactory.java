@@ -11,13 +11,16 @@
 package com.redhat.devtools.intellij.knative.ui.toolwindow;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
+import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.knative.listener.KnTreeDoubleClickListener;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
 import org.jetbrains.annotations.NotNull;
 
+import static com.redhat.devtools.intellij.knative.Constants.FUNCTIONS_ACTION_GROUP_ID;
 import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_ACTION_GROUP_ID;
 import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_TOOLBAR_ACTION_GROUP_ID;
 
@@ -25,10 +28,7 @@ public class WindowToolFactory extends KnBaseWindowTool<KnTreeStructure> impleme
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         setTitleAndIcon(toolWindow, "Knative");
-
         KnTreeStructure structure = new KnTreeStructure(project);
-        Tree tree = createTree(project, structure, true);
-        new KnTreeDoubleClickListener(tree);
-        createContent(toolWindow, tree, KNATIVE_ACTION_GROUP_ID, KNATIVE_TOOLBAR_ACTION_GROUP_ID);
+        createToolWindowContent(toolWindow, structure, KNATIVE_ACTION_GROUP_ID, KNATIVE_TOOLBAR_ACTION_GROUP_ID);
     }
 }
