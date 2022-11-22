@@ -20,6 +20,7 @@ import com.redhat.devtools.intellij.knative.listener.KnTreeDoubleClickListener;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
 import org.jetbrains.annotations.NotNull;
 
+import static com.redhat.devtools.intellij.knative.Constants.FUNCTIONS_ACTION_GROUP_ID;
 import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_ACTION_GROUP_ID;
 import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_TOOLBAR_ACTION_GROUP_ID;
 
@@ -27,11 +28,7 @@ public class WindowToolFactory extends KnBaseWindowTool<KnTreeStructure> impleme
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         setTitleAndIcon(toolWindow, "Knative");
-        SimpleToolWindowPanel panel = new SimpleToolWindowPanel(true, true);
-        Content content = createContent(toolWindow, panel, KNATIVE_TOOLBAR_ACTION_GROUP_ID);
-
         KnTreeStructure structure = new KnTreeStructure(project);
-        Tree tree = createTree(content, structure, true, panel);
-        new KnTreeDoubleClickListener(tree);
+        createToolWindowContent(toolWindow, structure, KNATIVE_ACTION_GROUP_ID, KNATIVE_TOOLBAR_ACTION_GROUP_ID);
     }
 }

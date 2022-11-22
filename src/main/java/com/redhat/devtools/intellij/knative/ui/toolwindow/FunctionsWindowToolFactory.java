@@ -28,13 +28,7 @@ public class FunctionsWindowToolFactory extends KnBaseWindowTool<KnTreeStructure
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         setTitleAndIcon(toolWindow, "Functions");
-        SimpleToolWindowPanel panel = new SimpleToolWindowPanel(true, true);
-        Content content = createContent(toolWindow, panel, FUNCTIONS_TOOLBAR_ACTION_GROUP_ID);
-
         KnFunctionsTreeStructure structure = new KnFunctionsTreeStructure(project);
-        Tree tree = createTree(content, structure, true, panel);
-        new KnTreeDoubleClickListener(tree);
+        createToolWindowContent(toolWindow, structure, FUNCTIONS_ACTION_GROUP_ID, FUNCTIONS_TOOLBAR_ACTION_GROUP_ID);
     }
-
-
 }

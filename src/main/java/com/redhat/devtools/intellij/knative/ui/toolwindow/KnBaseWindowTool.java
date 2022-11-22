@@ -29,12 +29,15 @@ import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.common.listener.TreePopupMenuListener;
 import com.redhat.devtools.intellij.common.tree.MutableModelSynchronizer;
 import com.redhat.devtools.intellij.knative.Constants;
+import com.redhat.devtools.intellij.knative.listener.KnTreeDoubleClickListener;
 import com.redhat.devtools.intellij.knative.tree.AbstractKnTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.KnNodeComparator;
+import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
 
 import javax.swing.Icon;
 
 import static com.redhat.devtools.intellij.knative.Constants.FUNCTIONS_ACTION_GROUP_ID;
+import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_TOOLBAR_ACTION_GROUP_ID;
 
 public abstract class KnBaseWindowTool<T extends AbstractKnTreeStructure> {
 
@@ -47,7 +50,7 @@ public abstract class KnBaseWindowTool<T extends AbstractKnTreeStructure> {
         toolWindow.setTitle(title);
     }
 
-    protected Tree createTree(Disposable disposable, T structure, boolean isRootVisible, SimpleToolWindowPanel panel) {
+    protected Tree createTree(Disposable disposable, T structure, boolean isRootVisible) {
         StructureTreeModel<T> model = new StructureTreeModel<T>(structure, disposable);
         model.setComparator(new KnNodeComparator<>());
         new MutableModelSynchronizer<>(model, structure, structure);
@@ -55,8 +58,6 @@ public abstract class KnBaseWindowTool<T extends AbstractKnTreeStructure> {
         tree.putClientProperty(Constants.STRUCTURE_PROPERTY, structure);
         tree.setRootVisible(isRootVisible);
         tree.setCellRenderer(new NodeRenderer());
-        addMenuToTree(tree, FUNCTIONS_ACTION_GROUP_ID);
-        panel.setContent(new JBScrollPane(tree));
         return tree;
     }
 
@@ -72,6 +73,16 @@ public abstract class KnBaseWindowTool<T extends AbstractKnTreeStructure> {
             ActionToolbar actionToolbar = actionManager.createActionToolbar(Constants.TOOLBAR_PLACE, (ActionGroup) actionManager.getAction(toolbarActionGroupId), true);
             panel.setToolbar(actionToolbar.getComponent());
         }
+    }
+
+    protected void createToolWindowContent(ToolWindow toolWindow, T structure, String actionGroup, String toolbarActionGroup) {
+        SimpleToolWindowPanel panel = new SimpleToolWindowPanel(true, true);
+        Content content = createContent(toolWindow, panel, toolbarActionGroup);
+
+        Tree tree = createTree(content, structure, true);
+        addMenuToTree(tree, actionGroup);
+        panel.setContent(new JBScrollPane(tree));
+        new KnTreeDoubleClickListener(tree);
     }
 
     protected Content createContent(ToolWindow toolWindow, SimpleToolWindowPanel panel, String toolbarActionGroup) {
