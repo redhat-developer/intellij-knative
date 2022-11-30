@@ -16,7 +16,7 @@ The plugin works by using `kn` CLI 1.7.0 and `func` CLI 1.8.0
 ### On-Cluster Build
 
 On-Cluster Build allows building (and deploying) the source code stored in a git repository within the cluster by leveraging Tekton.
-Now it is possible to start an on-cluster build from the IDE. The action is enabled if and only if Knative and Tekton are
+Now it is possible to start an on-cluster build from the IDE. The action is enabled when Knative and Tekton are
 both installed on the cluster. The plugin interacts with the JetBrains git plugin to guide the user through the entire process.
 
 ![](images/1.3.0/knative1.gif)
@@ -30,7 +30,7 @@ using a template stored in them.
 
 ### Getting Started Page
 
-A getting started page has been added to explain the different features the plugin offers and shows how to use them
+A getting started page has been added to explain the different features the plugin offers and shows how to use them.
 
 ![](images/1.3.0/knative2.gif)
 
