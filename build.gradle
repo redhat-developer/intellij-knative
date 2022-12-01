@@ -21,7 +21,7 @@ def versionsMap = ['IU-2021.1':'211.6693.108', 'IU-2021.2':'212.4746.57', 'IU-20
 intellij {
     version = ideaVersion
     pluginName = 'Knative by Red Hat'
-    plugins = ['terminal', 'yaml', 'github', 'com.intellij.kubernetes:' + versionsMap[ideaVersion], 'com.redhat.devtools.intellij.telemetry:0.0.3.33', 'com.redhat.devtools.intellij.kubernetes:0.3.0.83']
+    plugins = ['terminal', 'yaml', 'github', 'com.intellij.kubernetes:' + versionsMap[ideaVersion], 'com.redhat.devtools.intellij.telemetry:0.0.3.33', 'com.redhat.devtools.intellij.kubernetes:0.6.2.179']
     updateSinceUntilBuild = false
 }
 
@@ -35,7 +35,7 @@ runIdeForUiTests {
 
 dependencies {
     compile 'io.fabric8:knative-client:5.12.4'
-    compile 'com.redhat.devtools.intellij:intellij-common:1.8.0-SNAPSHOT'
+    compile 'com.redhat.devtools.intellij:intellij-common:1.8.0'
     testCompile 'org.mockito:mockito-inline:3.8.0'
     compile 'com.squareup.okio:okio:1.15.0'
     // telemetry contributes annotations 13.0.0, so we need to declare newer version
