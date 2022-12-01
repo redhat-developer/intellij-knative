@@ -1,17 +1,14 @@
+[![JetBrains Marketplace](https://img.shields.io/jetbrains/plugin/v/16476-knative-by-red-hat?label=Jet%20Brains%20Marketplace&style=for-the-badge)](https://plugins.jetbrains.com/plugin/16476-knative-by-red-hat)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/16476-knative-by-red-hat?logo=jetbrains&style=for-the-badge)](https://plugins.jetbrains.com/plugin/16476-knative-by-red-hat)
+[![Java CI with Gradle](https://img.shields.io/github/workflow/status/redhat-developer/intellij-knative/Java%20CI%20with%20Gradle?label=Java%20CI%20with%20Gradle&style=for-the-badge)](https://github.com/redhat-developer/intellij-knative/actions/workflows/ci.yml?query=workflow%3ACI)
+[![Validate against IJ versions](https://img.shields.io/github/workflow/status/redhat-developer/intellij-knative/Validate%20against%20IJ%20versions?label=IJ%20Versions&style=for-the-badge)](https://github.com/redhat-developer/intellij-knative/actions/workflows/IJ.yml?query=workflow%3ACI)
+[![License](https://img.shields.io/github/license/redhat-developer/intellij-knative?style=for-the-badge)](https://github.com/redhat-developer/intellij-knative/blob/main/LICENSE)
+
 # IntelliJ plugin for Knative & Serverless Functions
-[plugin-repo]: https://plugins.jetbrains.com/plugin/16476-knative-by-red-hat
-[plugin-version-svg]: https://img.shields.io/jetbrains/plugin/v/16476-knative-by-red-hat.svg
-[plugin-downloads-svg]: https://img.shields.io/jetbrains/plugin/d/16476-knative-by-red-hat.svg
-![Build status](https://github.com/redhat-developer/intellij-knative/actions/workflows/ci.yml/badge.svg?branch=main)
-![Validate against IJ versions](https://github.com/redhat-developer/intellij-knative/actions/workflows/IJ.yml/badge.svg)
-[![JetBrains plugins][plugin-version-svg]][plugin-repo]
-[![JetBrains plugins][plugin-downloads-svg]][plugin-repo]
 
-## Overview
+[Knative](https://knative.dev/docs/) is an Open-Source Enterprise-level solution to build Serverless and Event Driven Applications. Thus running Serverless Containers in Kubernetes environments.
 
-A JetBrains IntelliJ plugin for interacting with Knative & Serverless Functions. This plugin is currently in Preview Mode.
-
-## New and Noteworthy
+This JetBrains IntelliJ plugin provides the app developer the tools and experience needed when working with `Knative & Serverless Functions` on a Kubernetes cluster. Using this extension, developers can develop and deploy functions in a serverless way through guided IDE workflow.
 
 The minimum JetBrains IDEs version supported by the plugin has been increased to 2021.1
 The plugin works by using `kn` CLI 1.7.0 and `func` CLI 1.8.0
@@ -19,7 +16,7 @@ The plugin works by using `kn` CLI 1.7.0 and `func` CLI 1.8.0
 ### On-Cluster Build
 
 On-Cluster Build allows building (and deploying) the source code stored in a git repository within the cluster by leveraging Tekton.
-Now it is possible to start an on-cluster build from the IDE. The action is enabled if and only if Knative and Tekton are 
+Now it is possible to start an on-cluster build from the IDE. The action is enabled when Knative and Tekton are
 both installed on the cluster. The plugin interacts with the JetBrains git plugin to guide the user through the entire process.
 
 ![](images/1.3.0/knative1.gif)
@@ -33,13 +30,9 @@ using a template stored in them.
 
 ### Getting Started Page
 
-A getting started page has been added to explain the different features the plugin offers and shows how to use them
+A getting started page has been added to explain the different features the plugin offers and shows how to use them.
 
 ![](images/1.3.0/knative2.gif)
-
-## Previous releases
-
-### 1.2.0
 
 ### New ToolWindow for build/deploy/run actions
 
@@ -64,30 +57,11 @@ The plugin skips building a function if it has not been updated since last build
 
 The user is prompted to run the function first before invoking it, if the function is not running. This improves the overall experience during invoke calls.
 
-### 1.1.0
-
 ### Invoke fuction
 
 It is possible to invoke a local/remote function directly from the IDE
 
 ![](images/1.1.0/knative1.gif)
-
-### Create new function enabled in all JetBrains IDE
-
-The `New Function` action have been extended to all JetBrains IDEs
-
-### Discovering existing CLIs and downloading missing ones have been improved
-
-The CLIs needed for the plugin to work are now downloaded on background without freezing the IDE.
-It has also been enhanced the way already-installed CLIs are discovered.
-
-### Known issues discovered by using `func` CLI 0.23.1
-
-To overcome a visualization issue during the execution of the deploy command, this is run with the `-v` verbose flag [#974](https://github.com/knative-sandbox/kn-plugin-func/issues/974)
-
-### 1.0.0
-
-The new release supports Knative Functions, enabling the development and deployment of Functions directly from IntelliJ.
 
 ### Create new function
 
@@ -119,18 +93,6 @@ A function can be updated manually by changing the `func.yaml` file through the 
 
 ![](images/1.0.0/knative6.gif)
 
-### Open in browser
-
-Deployed Function can be opened in browser from the IDE.
-
-### Undeploy Function
-
-A deployed function can be undeployed.
-
-### 0.1.0
-
-This first release only support knative serving.
-
 ### Create new service
 
 The plugin supports two ways to create a new service. A simplified view with textboxes/inputs to be filled in and an editor view for advanced settings.
@@ -148,15 +110,6 @@ Services can be opened in the editor and edit it from there. It offers code assi
 It is possible to delete several different elements, even if they are of different nature (ie services and revisions).
 
 ![](images/0.1.0/knative3.gif)
-
-### Read only editor
-
-Revisions are opened as read only in the editor.
-
-### Shortcuts
-
-Basic commands such as delete and refresh inherit and make use of shortcuts from IJ IDE.
-
 ### Open in browser
 
 Services can be opened in browser from the IDE.
@@ -165,12 +118,14 @@ Services can be opened in browser from the IDE.
 
 ### Running Kubernetes and OpenShift Clusters to use with plugin
 
-To use the plugin, developers can deploy Knative into a Red Hat CodeReady Containers or Minikube instance.
+To use the plugin, developers can deploy Knative into a OpenShift or Kubernetes cluster. OpenShift clusters can be provisioned using the following ways:
 
-* OpenShift 4.x - [CodeReadyContainers](https://cloud.redhat.com/openshift/install/crc/installer-provisioned)
-* Kubernetes - [Minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/).
-
-The plugin also supports OpenShift running on Azure, AWS.
+* [OpenShift Local](https://developers.redhat.com/products/openshift-local/overview)
+* [Developer Sandbox for Red Hat OpenShift](https://developers.redhat.com/developer-sandbox)
+* [Red Hat OpenShift Cluster Manager](https://console.redhat.com/openshift/create/datacenter) - This 60-day, self-supported trial lets you install and run Red Hat OpenShift Container Platform on infrastructure you manage.
+* [Red Hat OpenShift Dedicated](https://console.redhat.com/openshift/create/osdtrial) - Red Hat OpenShift Dedicated is a fully managed service of Red Hat OpenShift on Amazon Web Services (AWS) and Google Cloud.
+* [Azure Red Hat OpenShift](http://red.ht/3oeVPjM) - Azure Red Hat OpenShift is a fully-managed service of Red Hat OpenShift on Azure, jointly engineered, managed and supported by Microsoft and Red Hat.
+* [Red Hat OpenShift Service on AWS (ROSA)](https://console.redhat.com/openshift/create/rosa/wizard) - Build, deploy, and manage Kubernetes applications with Red Hat OpenShift running natively on AWS.
 
 ## Knative Tutorial
 
@@ -180,7 +135,7 @@ To get started with Knative and learn how to easily deploy containers and manage
 
 ## Commands and features
 
-Development of the Knative Plugin is largely following development of the [kn CLI](https://github.com/knative/client) and 
+Development of the Knative Plugin is largely following development of the [kn CLI](https://github.com/knative/client) and
 [func CLI](https://github.com/knative-sandbox/kn-plugin-func) as well as
 Knative serving and Knative eventing which are both under active development and potentially subject to drastic changes.
 
@@ -222,11 +177,9 @@ This plugin uses two CLI tools to interact with Knative:
 
 > The plugin will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see an notification for the missing tool.
 
-**NOTE:** This plugin is in Preview mode. The plugin support for Knative is strictly experimental - assumptions may break, commands and behavior may change!
-
 ## Release notes
 
-See the change log.
+See the [release notes](https://github.com/redhat-developer/intellij-knative/releases).
 
 Contributing
 ============
@@ -234,11 +187,14 @@ This is an open source project open to anyone. This project welcomes contributio
 
 For information on getting started, refer to the [CONTRIBUTING instructions](CONTRIBUTING.md).
 
-
 Feedback & Questions
 ====================
+
 If you discover an issue please file a bug and we will fix it as soon as possible.
 * File a bug in [GitHub Issues](https://github.com/redhat-developer/intellij-knative/issues).
+* Open a [Discussion on GitHub](https://github.com/redhat-developer/intellij-knative/discussions).
+
+The func Task Force meets @ 10:30 PST every Tuesday, we'd love to have you! For more information, see the invitation on the [Knative Team Calendar](https://calendar.google.com/calendar/u/0/embed?src=knative.team_9q83bg07qs5b9rrslp5jor4l6s@group.calendar.google.com).
 
 License
 =======
