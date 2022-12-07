@@ -33,6 +33,12 @@ runIdeForUiTests {
     systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'debug'
 }
 
+buildSearchableOptions {
+    if (System.getProperty("idea.platform.prefix") == null) {
+        systemProperties["idea.platform.prefix"] = ''
+    }
+}
+
 dependencies {
     implementation 'io.fabric8:knative-client:5.12.4'
     implementation 'com.redhat.devtools.intellij:intellij-common:1.8.0'
