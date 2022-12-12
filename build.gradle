@@ -1,7 +1,7 @@
 plugins {
     id 'idea'
     id 'java'
-    id 'org.jetbrains.intellij' version '1.10.0'
+    id 'org.jetbrains.intellij' version '1.10.1'
 }
 
 group 'com.redhat.devtools.intellij'
@@ -21,7 +21,7 @@ def versionsMap = ['IU-2021.1':'211.6693.108', 'IU-2021.2':'212.4746.57', 'IU-20
 intellij {
     version = ideaVersion
     pluginName = 'Knative by Red Hat'
-    plugins = ['terminal', 'yaml', 'org.jetbrains.plugins.github', 'com.intellij.kubernetes:' + versionsMap[ideaVersion], 'com.redhat.devtools.intellij.telemetry:0.0.3.33', 'com.redhat.devtools.intellij.kubernetes:0.6.2.179']
+    plugins = ['terminal', 'yaml', 'github', 'com.intellij.kubernetes:' + versionsMap[ideaVersion], 'com.redhat.devtools.intellij.telemetry:0.0.3.33', 'com.redhat.devtools.intellij.kubernetes:0.6.2.179']
     updateSinceUntilBuild = false
 }
 
@@ -58,6 +58,14 @@ configurations {
 }
 
 sourceSets {
+    main {
+        java.srcDir file('src/main/java')
+        resources.srcDir file('src/main/resources')
+    }
+    test {
+        java.srcDir file('src/test/java')
+        resources.srcDir file('src/test/resources')
+    }
     integrationTest {
         java.srcDir file('src/it/java')
         resources.srcDir file('src/it/resources')
