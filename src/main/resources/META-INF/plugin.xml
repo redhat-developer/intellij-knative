@@ -11,6 +11,8 @@
     ]]></description>
 
     <change-notes><![CDATA[
+      <p><b>1.3.3</b></p>
+      <p>Make IJ Knative compatible with 2022.3</p>
       <p><b>1.3.2</b></p>
       <ul>
         <li>Add plugin icon to marketplace</li>
