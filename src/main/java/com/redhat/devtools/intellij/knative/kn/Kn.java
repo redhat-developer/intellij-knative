@@ -21,6 +21,7 @@ import com.redhat.devtools.intellij.knative.utils.model.GitRepoModel;
 import com.redhat.devtools.intellij.knative.utils.model.ImageRegistryModel;
 import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
 import com.redhat.devtools.intellij.knative.ui.repository.Repository;
+import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
@@ -151,7 +152,7 @@ public interface Kn {
      * @return Object as HashMap, null if no resource was found
      * @throws IOException if communication errored
      */
-    Map<String, Object> getCustomResource(String name, CustomResourceDefinitionContext crdContext);
+    GenericKubernetesResource getCustomResource(String name, CustomResourceDefinitionContext crdContext);
 
     /**
      * Edit a custom resource object which is a namespaced object
@@ -166,11 +167,20 @@ public interface Kn {
     /**
      * Create a custom resource which is a namespaced object.
      *
-     * @param crdContext     the custom resource definition context of the resource kind
-     * @param objectAsString new object as a JSON string
-     * @throws IOException if communication errored
+     * @param crdContext    the custom resource definition context of the resource kind
+     * @param resource      new object to create on the cluster
+     * @throws IOException  if communication errored
      */
-    void createCustomResource(CustomResourceDefinitionContext crdContext, String objectAsString) throws IOException;
+    void createCustomResource(CustomResourceDefinitionContext crdContext, GenericKubernetesResource resource) throws IOException;
+
+    /**
+     * Create a custom resource which is a namespaced object.
+     *
+     * @param crdContext    the custom resource definition context of the resource kind
+     * @param @param objectAsString new object as a JSON string
+     * @throws IOException  if communication errored
+     */
+    void createCustomResource(CustomResourceDefinitionContext crdContext, String resource) throws IOException;
 
     /**
      * Return the list of all Knative Event Sources
@@ -249,7 +259,7 @@ public interface Kn {
      *
      * @param namespace namespace where to deploy
      * @param path      path where the source code is stored
-     * @param repo Repo url to push the code to be built
+     * @param repoModel Repo url to push the code to be built
      * @param terminalExecutionConsole
      * @param model     image and registry model representing which registry or image to use.
      *                  The image option takes precedence over registry which can be omitted.

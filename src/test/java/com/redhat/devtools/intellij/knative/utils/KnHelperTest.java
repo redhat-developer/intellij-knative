@@ -17,15 +17,15 @@ import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.knative.FixtureBaseTest;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
+import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Supplier;
+import io.fabric8.kubernetes.client.utils.Serialization;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 
+import java.io.IOException;
+import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -137,7 +137,7 @@ public class KnHelperTest extends FixtureBaseTest {
             theMock.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
             try {
                 boolean result = KnHelper.saveOnCluster(project, yaml, true);
-                verify(kn, times(1)).createCustomResource(any(), anyString());
+                verify(kn, times(1)).createCustomResource(any(), any(GenericKubernetesResource.class));
                 assertTrue(result);
             } catch (IOException e) {
             }
@@ -155,7 +155,7 @@ public class KnHelperTest extends FixtureBaseTest {
                 theMock.when(() -> TreeHelper.getKn(any())).thenReturn(kn);
                 try {
                     KnHelper.saveOnCluster(project, yaml, false);
-                    verify(kn, times(1)).createCustomResource(any(), anyString());
+                    verify(kn, times(1)).createCustomResource(any(), any(GenericKubernetesResource.class));
                 } catch (IOException e) {
                 }
             }
@@ -167,9 +167,8 @@ public class KnHelperTest extends FixtureBaseTest {
         ObjectMapper YAML_MAPPER = new ObjectMapper(new com.fasterxml.jackson.dataformat.yaml.YAMLFactory());
         String yaml = load(RESOURCE_PATH + "service.yaml");
         doAnswer((a) -> true).when(kn).createCustomResource(any(CustomResourceDefinitionContext.class), anyString());
-        Map<String, Object> resourceAsMap = new HashMap<>();
-        resourceAsMap.put("metadata", YAML_MAPPER.createObjectNode());
-        when(kn.getCustomResource(anyString(), any())).thenReturn(resourceAsMap);
+        GenericKubernetesResource resource = Serialization.unmarshal(yaml, GenericKubernetesResource.class);
+        when(kn.getCustomResource(anyString(), any())).thenReturn(resource);
         try (MockedStatic<TreeHelper> theMock = mockStatic(TreeHelper.class)) {
             try(MockedStatic<UIHelper> uiHelperMockedStatic = mockStatic(UIHelper.class)) {
                 uiHelperMockedStatic.when(() -> UIHelper.executeInUI(any(Supplier.class))).thenReturn(Messages.OK);
