@@ -11,7 +11,7 @@
 This JetBrains IntelliJ plugin provides the app developer the tools and experience needed when working with `Knative & Serverless Functions` on a Kubernetes cluster. Using this extension, developers can develop and deploy functions in a serverless way through guided IDE workflow.
 
 The minimum JetBrains IDEs version supported by the plugin has been increased to 2021.1
-The plugin works by using `kn` CLI 1.7.0 and `func` CLI 1.8.0
+The plugin works by using `kn` CLI 1.8.1 and `func` CLI 1.8.2
 
 ### On-Cluster Build
 
