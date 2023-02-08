@@ -10,15 +10,12 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.knative.utils;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Strings;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.redhat.devtools.intellij.common.model.GenericResource;
-import com.redhat.devtools.intellij.common.utils.JSONHelper;
 import com.redhat.devtools.intellij.common.utils.StringHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.knative.kn.Kn;
@@ -27,8 +24,14 @@ import com.redhat.devtools.intellij.knative.tree.KnRevisionNode;
 import com.redhat.devtools.intellij.knative.tree.KnServiceNode;
 import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
+import io.fabric8.kubernetes.api.Pluralize;
+import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
+import io.fabric8.kubernetes.client.utils.Serialization;
+
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Map;
 
 import static com.redhat.devtools.intellij.knative.telemetry.TelemetryService.NAME_PREFIX_CRUD;
@@ -87,42 +90,42 @@ public class KnHelper {
     }
 
     private static void save(Kn knCli, String yaml) throws IOException {
-        GenericResource resourceWithUpdatedFields = generateResourceFromYAML(yaml);
+        GenericKubernetesResource resourceWithUpdatedFields = Serialization.unmarshal(yaml, GenericKubernetesResource.class);
         CustomResourceDefinitionContext crdContext = getCRDContext(resourceWithUpdatedFields.getApiVersion(), resourceWithUpdatedFields.getKind());
-
-        Map<String, Object> existingResource = knCli.getCustomResource(resourceWithUpdatedFields.getName(), crdContext);
+        GenericKubernetesResource existingResource = knCli.getCustomResource(resourceWithUpdatedFields.getMetadata().getName(), crdContext);
         if (existingResource == null) {
-            knCli.createCustomResource(crdContext, yaml);
+            knCli.createCustomResource(crdContext, resourceWithUpdatedFields);
         } else {
-            JsonNode resourceUpdated = updateExistingResource(existingResource, resourceWithUpdatedFields);
-            knCli.editCustomResource(resourceWithUpdatedFields.getName(), crdContext, resourceUpdated.toString());
+            GenericKubernetesResource resourceUpdated = updateExistingResource(existingResource, resourceWithUpdatedFields);
+            knCli.editCustomResource(resourceWithUpdatedFields.getMetadata().getName(), crdContext, resourceUpdated.toString());
         }
     }
 
-    private static JsonNode updateExistingResource(Map<String, Object> existingResourceAsMap, GenericResource resourceWithUpdatedFields) throws IOException {
-        JsonNode resource = JSONHelper.MapToJSON(existingResourceAsMap);
-        JsonNode labels = resourceWithUpdatedFields.getMetadata().get("labels");
-        ((ObjectNode) resource.get("metadata")).remove("labels");
-        if (labels != null) {
-            ((ObjectNode) resource.get("metadata")).set("labels", labels);
+    private static GenericKubernetesResource updateExistingResource(GenericKubernetesResource existing, GenericKubernetesResource updated) throws IOException {
+        Map<String, String> updatedLabels = updated.getMetadata().getLabels();
+        if (updatedLabels != null) {
+            existing.getMetadata().setLabels(updatedLabels);
         }
-        JsonNode annotations = resourceWithUpdatedFields.getMetadata().get("annotations");
-        ((ObjectNode) resource.get("metadata")).remove("annotations");
+        Map<String, String> annotations = updated.getMetadata().getAnnotations();
         if (annotations != null) {
-            ((ObjectNode) resource.get("metadata")).set("annotations", annotations);
+            existing.getMetadata().setAnnotations(annotations);
         }
-        ((ObjectNode) resource).set("spec", resourceWithUpdatedFields.getSpec());
-        return resource;
+        Object spec = updated.getAdditionalProperties().get("spec");
+        existing.getAdditionalProperties().put("spec", spec);
+        return updated;
     }
 
     public static void saveNew(Kn knCli, String yaml) throws IOException {
-        GenericResource resource = generateResourceFromYAML(yaml);
+        GenericKubernetesResource resource = Serialization.unmarshal(yaml, GenericKubernetesResource.class);
         CustomResourceDefinitionContext crdContext = getCRDContext(resource.getApiVersion(), resource.getKind());
-        knCli.createCustomResource(crdContext, yaml);
+        knCli.createCustomResource(crdContext, resource);
     }
 
     private static CustomResourceDefinitionContext getCRDContext(String apiVersion, String kind) throws IOException {
-        String plural = StringHelper.getPlural(kind);
+        if (kind == null) {
+            return null;
+        }
+        String plural = Pluralize.toPlural(kind.toLowerCase(Locale.ROOT));
         if (Strings.isNullOrEmpty(apiVersion) || Strings.isNullOrEmpty(plural)) return null;
         String[] groupVersion = apiVersion.split("/");
         if (groupVersion.length != 2) {
@@ -141,10 +144,5 @@ public class KnHelper {
 
     public static boolean isWritable(ParentableNode node) {
         return node instanceof KnServiceNode;
-    }
-
-    public static GenericResource generateResourceFromYAML(String yaml) throws IOException {
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        return mapper.readValue(yaml, GenericResource.class);
     }
 }

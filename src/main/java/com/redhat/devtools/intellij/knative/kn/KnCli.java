@@ -33,6 +33,7 @@ import com.redhat.devtools.intellij.knative.utils.model.InvokeModel;
 import com.redhat.devtools.intellij.knative.ui.repository.Repository;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
 import io.fabric8.knative.client.KnativeClient;
+import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -40,6 +41,8 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
+import io.fabric8.kubernetes.client.utils.Serialization;
+import io.fabric8.kubernetes.model.Scope;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +58,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_TOOL_WINDOW_ID;
@@ -236,13 +238,13 @@ public class KnCli implements Kn {
     }
 
     @Override
-    public Map<String, Object> getCustomResource(String name, CustomResourceDefinitionContext crdContext) {
+    public GenericKubernetesResource getCustomResource(String name, CustomResourceDefinitionContext crdContext) {
         try {
-            if (crdContext.getScope().equalsIgnoreCase("Namespaced")) {
-                return new TreeMap<>(client.customResource(crdContext).get(getNamespace(), name));
+            if (crdContext.getScope().equalsIgnoreCase(Scope.NAMESPACED.value())) {
+                return client.genericKubernetesResources(crdContext).inNamespace(getNamespace()).withName(name).get();
+            } else {
+                return client.genericKubernetesResources(crdContext).withName(name).get();
             }
-
-            return new TreeMap<>(client.customResource(crdContext).get(name));
         } catch(KubernetesClientException e) {
             // call failed bc resource doesn't exist - 404
             return null;
@@ -252,10 +254,10 @@ public class KnCli implements Kn {
     @Override
     public void editCustomResource(String name, CustomResourceDefinitionContext crdContext, String objectAsString) throws IOException {
         try {
-            if (crdContext.getScope().equalsIgnoreCase("Namespaced")) {
-                client.customResource(crdContext).edit(getNamespace(), name, objectAsString);
+            if (crdContext.getScope().equalsIgnoreCase(Scope.NAMESPACED.value())) {
+                client.genericKubernetesResources(crdContext).inNamespace(getNamespace()).withName(name).patch(objectAsString);
             } else {
-                client.customResource(crdContext).edit(name, objectAsString);
+                client.genericKubernetesResources(crdContext).withName(name).patch(objectAsString);
             }
         } catch(KubernetesClientException e) {
             throw new IOException(e.getLocalizedMessage());
@@ -263,12 +265,25 @@ public class KnCli implements Kn {
     }
 
     @Override
-    public void createCustomResource(CustomResourceDefinitionContext crdContext, String objectAsString) throws IOException {
+    public void createCustomResource(CustomResourceDefinitionContext crdContext, String json) throws IOException {
         try {
-            if (crdContext.getScope().equalsIgnoreCase("Namespaced")) {
-                client.customResource(crdContext).create(getNamespace(), objectAsString);
+            GenericKubernetesResource resource = Serialization.unmarshal(json);
+            createCustomResource(crdContext, resource);
+        } catch (ClassCastException e) {
+            // json was unmarhalled to KubenetesResource, not HasMetadata
+            throw new IOException("Resource configuration not valid. Resource kind/api version are missing or invalid.", e);
+        } catch (RuntimeException e) {
+            throw new IOException("Could not create resource " + crdContext.getName(), e);
+        }
+    }
+
+    @Override
+    public void createCustomResource(CustomResourceDefinitionContext crdContext, GenericKubernetesResource resource) throws IOException {
+        try {
+            if (crdContext.getScope().equalsIgnoreCase(Scope.NAMESPACED.value())) {
+                client.genericKubernetesResources(crdContext).inNamespace(getNamespace()).createOrReplace(resource);
             } else {
-                client.customResource(crdContext).create(objectAsString);
+                client.genericKubernetesResources(crdContext).createOrReplace(resource);
             }
         } catch (KubernetesClientException e) {
             throw new IOException(e.getLocalizedMessage());
