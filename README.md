@@ -1,7 +1,6 @@
 [![JetBrains Marketplace](https://img.shields.io/jetbrains/plugin/v/16476-knative-by-red-hat?label=Jet%20Brains%20Marketplace&style=for-the-badge)](https://plugins.jetbrains.com/plugin/16476-knative-by-red-hat)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/16476-knative-by-red-hat?logo=jetbrains&style=for-the-badge)](https://plugins.jetbrains.com/plugin/16476-knative-by-red-hat)
-[![Java CI with Gradle](https://img.shields.io/github/workflow/status/redhat-developer/intellij-knative/Java%20CI%20with%20Gradle?label=Java%20CI%20with%20Gradle&style=for-the-badge)](https://github.com/redhat-developer/intellij-knative/actions/workflows/ci.yml?query=workflow%3ACI)
-[![Validate against IJ versions](https://img.shields.io/github/workflow/status/redhat-developer/intellij-knative/Validate%20against%20IJ%20versions?label=IJ%20Versions&style=for-the-badge)](https://github.com/redhat-developer/intellij-knative/actions/workflows/IJ.yml?query=workflow%3ACI)
+[![Java CI with Gradle](https://img.shields.io/github/actions/workflow/status/redhat-developer/intellij-knative/ci.yml?style=for-the-badge)](https://github.com/redhat-developer/intellij-knative/actions/workflows/ci.yml?query=workflow%3ACI)
 [![License](https://img.shields.io/github/license/redhat-developer/intellij-knative?style=for-the-badge)](https://github.com/redhat-developer/intellij-knative/blob/main/LICENSE)
 
 # IntelliJ plugin for Knative & Serverless Functions
