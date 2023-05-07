@@ -12,6 +12,8 @@ package com.redhat.devtools.intellij.knative.tree;
 
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import com.redhat.devtools.intellij.knative.utils.WatchHandler;
+
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +26,7 @@ public class ClusterModelSynchronizer {
         this.treeStructure = treeStructure;
     }
 
-    public void updateElementOnChange(KnRootNode element, String kindToWatch) {
+    public void updateElementOnChange(KnRootNode element, String kindToWatch) throws IOException {
         String id = TreeHelper.getId(element);
         resourceToNodeMapping.put(id, element);
         WatchHandler.get(element.getKn()).watchResource(id, kindToWatch, getUpdateRunnable(id));

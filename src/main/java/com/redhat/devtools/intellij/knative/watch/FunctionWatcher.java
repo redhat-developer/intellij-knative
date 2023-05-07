@@ -33,13 +33,8 @@ public class FunctionWatcher extends AbstractWatcher {
         super(kn);
     }
 
-    public Watch doWatch(Runnable doExecute) {
-        try {
-            return kn.watchServiceWithLabel(FUNCTON_LABEL_KEY, "true", getWatcher(doExecute));
-        } catch (IOException e) {
-            logger.warn(e.getLocalizedMessage(), e);
-        }
-        return null;
+    public Watch doWatch(Runnable doExecute) throws IOException {
+        return kn.watchServiceWithLabel(FUNCTON_LABEL_KEY, "true", getWatcher(doExecute));
     }
 
     private Watcher<io.fabric8.knative.serving.v1.Service> getWatcher(Runnable doExecute) {
@@ -56,13 +51,8 @@ public class FunctionWatcher extends AbstractWatcher {
         };
     }
 
-    public Watch doWatch(BiConsumer<Watcher.Action, Service> doExecute) {
-        try {
-            return kn.watchServiceWithLabel(FUNCTON_LABEL_KEY, "true", getWatcher(doExecute));
-        } catch (IOException e) {
-            logger.warn(e.getLocalizedMessage(), e);
-        }
-        return null;
+    public Watch doWatch(BiConsumer<Watcher.Action, Service> doExecute) throws IOException {
+        return kn.watchServiceWithLabel(FUNCTON_LABEL_KEY, "true", getWatcher(doExecute));
     }
 
     private Watcher<io.fabric8.knative.serving.v1.Service> getWatcher(BiConsumer<Watcher.Action, Service> doExecute) {
