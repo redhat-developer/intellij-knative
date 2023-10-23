@@ -43,8 +43,7 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 public class OpenInBrowserActionTest extends ActionTest {
 
-    @Test
-    public void IsVisible_SelectedIsKnServiceNodeWithNoURL_False() {
+    public void testIsVisible_SelectedIsKnServiceNodeWithNoURL_False() {
         OpenInBrowserAction action = new OpenInBrowserAction();
         when(service.getStatus()).thenReturn(null);
         when(knServiceNode.getService(false)).thenReturn(service);
@@ -52,8 +51,7 @@ public class OpenInBrowserActionTest extends ActionTest {
         assertFalse(result);
     }
 
-    @Test
-    public void IsVisible_SelectedIsKnServiceNodeWithValidURL_True() {
+    public void testIsVisible_SelectedIsKnServiceNodeWithValidURL_True() {
         OpenInBrowserAction action = new OpenInBrowserAction();
         ServiceStatus serviceStatus = mock(ServiceStatus.class);
         when(serviceStatus.getUrl()).thenReturn("url");
@@ -63,8 +61,7 @@ public class OpenInBrowserActionTest extends ActionTest {
         assertTrue(result);
     }
 
-    @Test
-    public void IsVisible_SelectedIsRevisionOfNotRunningService_False() {
+    public void testIsVisible_SelectedIsRevisionOfNotRunningService_False() {
         OpenInBrowserAction action = new OpenInBrowserAction();
         when(service.getStatus()).thenReturn(null);
         when(knServiceNode.getService(false)).thenReturn(service);
@@ -73,8 +70,7 @@ public class OpenInBrowserActionTest extends ActionTest {
         assertFalse(result);
     }
 
-    @Test
-    public void IsVisible_SelectedIsRevisionOfRunningService_True() {
+    public void testIsVisible_SelectedIsRevisionOfRunningService_True() {
         OpenInBrowserAction action = new OpenInBrowserAction();
         ServiceStatus serviceStatus = mock(ServiceStatus.class);
         when(serviceStatus.getUrl()).thenReturn("url");
@@ -85,15 +81,13 @@ public class OpenInBrowserActionTest extends ActionTest {
         assertTrue(result);
     }
 
-    @Test
-    public void IsVisible_SelectedIsNotAKnServiceNodeOrKnRevisionNode_False() {
+    public void testIsVisible_SelectedIsNotAKnServiceNodeOrKnRevisionNode_False() {
         OpenInBrowserAction action = new OpenInBrowserAction();
         boolean result = action.isVisible(knEventingNode);
         assertFalse(result);
     }
 
-    @Test
-    public void ActionPerformed_SelectedIsKnServiceNodeWithoutUrl_BrowseNotCalled() {
+    public void testActionPerformed_SelectedIsKnServiceNodeWithoutUrl_BrowseNotCalled() {
         AnAction action = new OpenInBrowserAction();
         AnActionEvent anActionEvent = createOpenInBrowserActionEventForService();
         when(service.getStatus()).thenReturn(null);
@@ -113,8 +107,7 @@ public class OpenInBrowserActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedIsKnServiceNodeWithUrl_BrowseCalled() {
+    public void testActionPerformed_SelectedIsKnServiceNodeWithUrl_BrowseCalled() {
         AnAction action = new OpenInBrowserAction();
         AnActionEvent anActionEvent = createOpenInBrowserActionEventForService();
         when(service.getStatus()).thenReturn(serviceStatus);
@@ -135,8 +128,7 @@ public class OpenInBrowserActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedIsKnRevisionNodeWithoutUrl_InputDialogIsCalled() {
+    public void testActionPerformed_SelectedIsKnRevisionNodeWithoutUrl_InputDialogIsCalled() {
         AnAction action = new OpenInBrowserAction();
         AnActionEvent anActionEvent = createOpenInBrowserActionEventForRevision();
         when(serviceTraffic.getUrl()).thenReturn("");
@@ -162,8 +154,7 @@ public class OpenInBrowserActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedIsKnRevisionNodeWithoutTagAndUrlAndInputDialogReturnsTag_RevisionTaggedAndBrowseCalled() throws IOException {
+    public void testActionPerformed_SelectedIsKnRevisionNodeWithoutTagAndUrlAndInputDialogReturnsTag_RevisionTaggedAndBrowseCalled() throws IOException {
         AnAction action = new OpenInBrowserAction();
         AnActionEvent anActionEvent = createOpenInBrowserActionEventForRevision();
         when(serviceTraffic.getUrl()).thenReturn("").thenReturn("url");
@@ -189,8 +180,7 @@ public class OpenInBrowserActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedIsKnRevisionNodeWithTagAndUrl_DialogNotCalledAndBrowseCalled() {
+    public void testActionPerformed_SelectedIsKnRevisionNodeWithTagAndUrl_DialogNotCalledAndBrowseCalled() {
         AnAction action = new OpenInBrowserAction();
         AnActionEvent anActionEvent = createOpenInBrowserActionEventForRevision();
         when(serviceTraffic.getUrl()).thenReturn("url");

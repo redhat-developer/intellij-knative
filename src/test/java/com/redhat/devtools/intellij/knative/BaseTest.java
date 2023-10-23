@@ -11,6 +11,7 @@
 package com.redhat.devtools.intellij.knative;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.redhat.devtools.intellij.knative.kn.Function;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.kn.KnCli;
@@ -44,7 +45,7 @@ import java.nio.file.Paths;
 
 import static org.mockito.Mockito.mock;
 
-public class BaseTest {
+public abstract class BaseTest extends BasePlatformTestCase {
 
     protected Project project;
     protected Kn kn;
@@ -69,8 +70,8 @@ public class BaseTest {
     protected TelemetryMessageBuilder.ActionMessage actionMessage;
     protected Function function;
 
-    @Before
     public void setUp() throws Exception {
+        super.setUp();
         project = mock(Project.class);
         kn = mock(KnCli.class);
         parentableNode = mock(ParentableNode.class);

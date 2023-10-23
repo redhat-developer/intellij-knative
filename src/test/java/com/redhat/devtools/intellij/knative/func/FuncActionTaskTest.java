@@ -12,7 +12,7 @@ package com.redhat.devtools.intellij.knative.func;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.terminal.TerminalExecutionConsole;
-import com.redhat.devtools.intellij.knative.FixtureBaseTest;
+import com.redhat.devtools.intellij.knative.BaseTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedConstruction;
@@ -22,10 +22,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mockConstruction;
 
-public class FuncActionTaskTest extends FixtureBaseTest {
+public class FuncActionTaskTest extends BaseTest {
     private FuncActionPipeline pipeline;
 
-    @Before
     public void setUp() throws Exception {
         super.setUp();
         pipeline = new FuncActionPipeline("name", project, function) {
@@ -36,8 +35,7 @@ public class FuncActionTaskTest extends FixtureBaseTest {
         };
     }
 
-    @Test
-    public void Init_Pipeline_TaskIsSetWithTerminalAndProcessHandlers() {
+    public void testInit_Pipeline_TaskIsSetWithTerminalAndProcessHandlers() {
         FuncActionTask task = new FuncActionTask("test", (t) -> {});
         assertNull(task.getProcessListener());
         assertNull(task.getTerminalExecutionConsole());

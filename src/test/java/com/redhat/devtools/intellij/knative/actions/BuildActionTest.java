@@ -59,7 +59,6 @@ public class BuildActionTest extends ActionTest {
     private Path pathFuncFile;
     private JsonNode jsonNode;
 
-    @Before
     public void setUp() throws Exception {
         super.setUp();
         function = mock(Function.class);
@@ -67,8 +66,7 @@ public class BuildActionTest extends ActionTest {
         jsonNode = mock(JsonNode.class);
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasNotLocalPath_DoNothing() throws IOException {
+    public void testActionPerformed_SelectedHasNotLocalPath_DoNothing() throws IOException {
         AnAction action = new BuildAction();
         AnActionEvent anActionEvent = createBuildActionEvent();
         when(function.getLocalPath()).thenReturn("");
@@ -92,8 +90,7 @@ public class BuildActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasLocalPathAndImageSpecified_DoBuild() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasLocalPathAndImageSpecified_DoBuild() throws IOException, InterruptedException {
         AnAction action = new BuildAction();
         AnActionEvent anActionEvent = createBuildActionEvent();
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
@@ -122,8 +119,7 @@ public class BuildActionTest extends ActionTest {
 
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasLocalPathAndRegistrySpecified_DoBuild() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasLocalPathAndRegistrySpecified_DoBuild() throws IOException, InterruptedException {
         AnAction action = new BuildAction();
         AnActionEvent anActionEvent = createBuildActionEvent();
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
@@ -153,8 +149,7 @@ public class BuildActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasLocalPathAndHasFuncFileWithoutRegistryAndImageSpecified_UIAskForImage() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasLocalPathAndHasFuncFileWithoutRegistryAndImageSpecified_UIAskForImage() throws IOException, InterruptedException {
         AnAction action = new BuildAction();
         AnActionEvent anActionEvent = createBuildActionEvent();
 
@@ -193,8 +188,7 @@ public class BuildActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasLocalPathAndHasNoFuncFile_UIAskForImage() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasLocalPathAndHasNoFuncFile_UIAskForImage() throws IOException, InterruptedException {
         AnAction action = new BuildAction();
         AnActionEvent anActionEvent = createBuildActionEvent();
 
@@ -238,8 +232,7 @@ public class BuildActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasLocalPathAndFailOpeningFuncFile_UIAskForImage() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasLocalPathAndFailOpeningFuncFile_UIAskForImage() throws IOException, InterruptedException {
         AnAction action = new BuildAction();
         AnActionEvent anActionEvent = createBuildActionEvent();
 
@@ -274,8 +267,7 @@ public class BuildActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasLocalPathAndHasFuncFileWithoutRegistryAndImageSpecifiedAndImageInsertedByUserIsEmptyString_doNothing() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasLocalPathAndHasFuncFileWithoutRegistryAndImageSpecifiedAndImageInsertedByUserIsEmptyString_doNothing() throws IOException, InterruptedException {
         AnAction action = new BuildAction();
         AnActionEvent anActionEvent = createBuildActionEvent();
 
@@ -315,32 +307,28 @@ public class BuildActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void Execute_ProjectIsNull_Nothing() {
+    public void testExecute_ProjectIsNull_Nothing() {
         try(MockedStatic<ActionManager> actionManagerStatic = mockStatic(ActionManager.class)) {
             //BuildAction.execute(null, function, kn, null, "caller");
             actionManagerStatic.verify(ActionManager::getInstance, times(0));
         }
     }
 
-    @Test
-    public void Execute_FunctionIsNull_Nothing() {
+    public void testExecute_FunctionIsNull_Nothing() {
         try(MockedStatic<ActionManager> actionManagerStatic = mockStatic(ActionManager.class)) {
            // BuildAction.execute(project, null, kn, null, "caller");
             actionManagerStatic.verify(ActionManager::getInstance, times(0));
         }
     }
 
-    @Test
-    public void Execute_KnIsNull_Nothing() {
+    public void testExecute_KnIsNull_Nothing() {
         try(MockedStatic<ActionManager> actionManagerStatic = mockStatic(ActionManager.class)) {
             //BuildAction.execute(project, function, null, null, "caller");
             actionManagerStatic.verify(ActionManager::getInstance, times(0));
         }
     }
 
-    @Test
-    public void Execute_CallerIsEmpty_Nothing() {
+    public void testExecute_CallerIsEmpty_Nothing() {
         try(MockedStatic<ActionManager> actionManagerStatic = mockStatic(ActionManager.class)) {
             //BuildAction.execute(project, function, kn, null, "");
             actionManagerStatic.verify(ActionManager::getInstance, times(0));

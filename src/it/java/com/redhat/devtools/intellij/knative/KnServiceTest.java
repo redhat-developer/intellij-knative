@@ -23,8 +23,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class KnServiceTest extends BaseTest {
-    @Test
-    public void CreateServiceAndDelete() throws IOException {
+
+    public void testCreateServiceAndDelete() throws IOException {
         final String serviceName = "test1";
         String serviceAsYAML = load("service.yaml").replace("foo", serviceName);
 
@@ -44,8 +44,8 @@ public class KnServiceTest extends BaseTest {
         assertFalse(services.stream().anyMatch(service -> service.getName().equals(serviceName)));
     }
 
-    @Test
-    public void CreateServiceAndGetIt() throws IOException {
+
+    public void testCreateServiceAndGetIt() throws IOException {
         final String serviceName = "test2";
         String serviceAsYAML = load("service.yaml").replace("foo", serviceName);
 

@@ -18,8 +18,7 @@ import static org.junit.Assert.assertEquals;
 
 public class KnEventingNodeTest extends BaseTest {
 
-    @Test
-    public void Constructor_KnEventingNode() {
+    public void testConstructor_KnEventingNode() {
         KnEventingNode knEventingNode = new KnEventingNode(knRootNode, knRootNode);
         assertEquals("Eventing", knEventingNode.getName());
         assertEquals(knRootNode, knEventingNode.getRootNode());

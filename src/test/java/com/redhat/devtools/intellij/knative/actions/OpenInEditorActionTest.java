@@ -28,8 +28,7 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 public class OpenInEditorActionTest extends ActionTest {
 
-    @Test
-    public void ActionPerformed_OpenKnComponentInEditorIsCalled() {
+    public void testActionPerformed_OpenKnComponentInEditorIsCalled() {
         AnAction action = new OpenInEditorAction();
         AnActionEvent anActionEvent = mock(AnActionEvent.class);
         when(anActionEvent.getData(PlatformDataKeys.CONTEXT_COMPONENT)).thenReturn(tree);

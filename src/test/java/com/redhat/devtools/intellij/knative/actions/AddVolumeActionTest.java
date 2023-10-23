@@ -20,8 +20,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 public class AddVolumeActionTest extends ActionTest {
-    @Test
-    public void AddConfig_AddVolumeIsCalled() throws IOException {
+    public void testAddConfig_AddVolumeIsCalled() throws IOException {
         AddVolumeAction action = new AddVolumeAction();
         action.doAddConfig(kn, "path");
         verify(kn, times(1)).addVolume(anyString());

@@ -43,14 +43,12 @@ public class RunActionTest extends ActionTest {
 
     private Function function;
 
-    @Before
     public void setUp() throws Exception {
         super.setUp();
         function = mock(Function.class);
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasNotLocalPath_DoNothing() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasNotLocalPath_DoNothing() throws IOException, InterruptedException {
         AnAction action = new RunAction();
         AnActionEvent anActionEvent = createRunActionEvent();
         when(function.getLocalPath()).thenReturn("");
@@ -63,8 +61,7 @@ public class RunActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasLocalPath_DoRun() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasLocalPath_DoRun() throws IOException, InterruptedException {
         AnAction action = new RunAction();
         AnActionEvent anActionEvent = createRunActionEvent();
         when(function.getLocalPath()).thenReturn("path");

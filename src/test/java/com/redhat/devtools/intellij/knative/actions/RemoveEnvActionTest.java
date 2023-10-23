@@ -21,15 +21,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 public class RemoveEnvActionTest extends ActionTest {
-    @Test
-    public void DoRemoveConfig_RemoveEnvIsCalled() throws IOException {
+    public void testDoRemoveConfig_RemoveEnvIsCalled() throws IOException {
         RemoveEnvAction action = new RemoveEnvAction();
         action.doRemoveConfig(kn, "path");
         verify(kn, times(1)).removeEnv(anyString());
     }
 
-    @Test
-    public void GetSection_ReturnsEnv() throws IOException {
+    public void testGetSection_ReturnsEnv() throws IOException {
         RemoveEnvAction action = new RemoveEnvAction();
         String[] section = action.getSection();
         assertEquals(2, section.length);

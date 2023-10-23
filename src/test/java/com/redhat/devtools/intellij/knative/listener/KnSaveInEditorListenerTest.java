@@ -19,7 +19,7 @@ import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
-import com.redhat.devtools.intellij.knative.FixtureBaseTest;
+import com.redhat.devtools.intellij.knative.BaseTest;
 import com.redhat.devtools.intellij.knative.utils.KnHelper;
 import com.redhat.devtools.intellij.knative.utils.TreeHelper;
 import java.io.IOException;
@@ -43,19 +43,17 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class KnSaveInEditorListenerTest extends FixtureBaseTest {
+public class KnSaveInEditorListenerTest extends BaseTest {
 
     private KnSaveInEditorListener knSaveInEditorListener;
     private static final String RESOURCE_PATH = "listener/knSaveInEditorListener/";
 
-    @Before
     public void setUp() throws Exception {
         super.setUp();
         knSaveInEditorListener = new KnSaveInEditorListener();
     }
 
-    @Test
-    public void Notify_ValidDocument_SendNotification() throws IOException {
+    public void testNotify_ValidDocument_SendNotification() throws IOException {
         Document document = createDocument();
         Application application = mock(Application.class);
         when(application.isUnitTestMode()).thenReturn(true);
@@ -65,18 +63,15 @@ public class KnSaveInEditorListenerTest extends FixtureBaseTest {
         }
     }
 
-    @Test
-    public void Refresh_NodeIsNull_Nothing() {
+    public void testRefresh_NodeIsNull_Nothing() {
         executeRefresh(project, null, 0);
     }
 
-    @Test
-    public void Refresh_NodeIsUnknownType_Nothing() {
+    public void testRefresh_NodeIsUnknownType_Nothing() {
         executeRefresh(project, knRootNode, 0);
     }
 
-    @Test
-    public void Refresh_NodeIsParentableNode_Refresh() {
+    public void testRefresh_NodeIsParentableNode_Refresh() {
         executeRefresh(null, parentableNode, 1);
     }
 
@@ -87,8 +82,7 @@ public class KnSaveInEditorListenerTest extends FixtureBaseTest {
         }
     }
 
-    @Test
-    public void Save_SaveOnClusterIsFalse_False() throws IOException {
+    public void testSave_SaveOnClusterIsFalse_False() throws IOException {
         Document document = createDocument();
         try(MockedStatic<KnHelper> knHelperMockedStatic = mockStatic(KnHelper.class)) {
             knHelperMockedStatic.when(() -> KnHelper.saveOnCluster(any(), anyString(), anyBoolean())).thenReturn(false);
@@ -97,8 +91,7 @@ public class KnSaveInEditorListenerTest extends FixtureBaseTest {
         }
     }
 
-    @Test
-    public void Save_SaveOnClusterIsTrue_True() throws IOException {
+    public void testSave_SaveOnClusterIsTrue_True() throws IOException {
         Document document = createDocument();
         try(MockedStatic<KnHelper> knHelperMockedStatic = mockStatic(KnHelper.class)) {
             knHelperMockedStatic.when(() -> KnHelper.saveOnCluster(any(), anyString(), anyBoolean())).thenReturn(true);
@@ -107,8 +100,7 @@ public class KnSaveInEditorListenerTest extends FixtureBaseTest {
         }
     }
 
-    @Test
-    public void Save_SaveOnClusterThrows_False() throws IOException {
+    public void testSave_SaveOnClusterThrows_False() throws IOException {
         Document document = createDocument();
         try(MockedStatic<KnHelper> knHelperMockedStatic = mockStatic(KnHelper.class)) {
             knHelperMockedStatic.when(() -> KnHelper.saveOnCluster(any(), anyString(), anyBoolean())).thenThrow(new IOException("text"));
@@ -117,26 +109,22 @@ public class KnSaveInEditorListenerTest extends FixtureBaseTest {
         }
     }
 
-    @Test
-    public void IsFileToPush_VirtualFileIsNull_False() {
+    public void testIsFileToPush_VirtualFileIsNull_False() {
         assertFalse(knSaveInEditorListener.isFileToPush(project, null));
     }
 
-    @Test
-    public void IsFileToPush_VirtualFileWithMissingKnativeProperty_False() throws IOException {
+    public void testIsFileToPush_VirtualFileWithMissingKnativeProperty_False() throws IOException {
         VirtualFile virtualFile = createVirtualFile("");
         assertFalse(knSaveInEditorListener.isFileToPush(project, virtualFile));
 
     }
 
-    @Test
-    public void IsFileToPush_VirtualFileWithInvalidKnativeProperty_False() throws IOException {
+    public void testIsFileToPush_VirtualFileWithInvalidKnativeProperty_False() throws IOException {
         VirtualFile virtualFile = createVirtualFile("fake");
         assertFalse(knSaveInEditorListener.isFileToPush(project, virtualFile));
     }
 
-    @Test
-    public void IsFileToPush_VirtualFileIsValid_ParentMethodCalled() throws IOException {
+    public void testIsFileToPush_VirtualFileIsValid_ParentMethodCalled() throws IOException {
         VirtualFile virtualFile = createVirtualFile(NOTIFICATION_ID);
         FileEditorManager fileEditorManager = mock(FileEditorManager.class);
         try(MockedStatic<FileEditorManager> fileEditorManagerMockedStatic = mockStatic(FileEditorManager.class)) {

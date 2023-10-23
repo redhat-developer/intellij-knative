@@ -22,15 +22,13 @@ import static org.junit.Assert.assertEquals;
 public class KnServiceNodeTest extends BaseTest {
     private Service serviceIfTrue, serviceIfFalse;
 
-    @Before
     public void setUp() throws Exception {
         super.setUp();
         serviceIfTrue = new Service("true", null);
         serviceIfFalse = new Service("false", null);
     }
 
-    @Test
-    public void Constructor_KnServiceNode() {
+    public void testConstructor_KnServiceNode() {
         KnServiceNode knServiceNode = new KnServiceNode(knRootNode, knServingNode, getService());
         assertEquals("false", knServiceNode.getName());
         assertEquals(knRootNode, knServiceNode.getRootNode());

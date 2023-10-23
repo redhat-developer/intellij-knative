@@ -21,8 +21,7 @@ public class UndeployActionTest extends ActionTest {
 
     private static final String FUNCTION = "function";
 
-    @Test
-    public void ExecuteDelete_OneKnFunctionNodeSelected_DeleteOneFunction() throws IOException {
+    public void testExecuteDelete_OneKnFunctionNodeSelected_DeleteOneFunction() throws IOException {
         Map<String, Integer> typePerTimesCalled = new HashMap<>();
         typePerTimesCalled.put(FUNCTION, 1);
         executeUndeployAction(new ParentableNode[] {knFunctionNode}, typePerTimesCalled);

@@ -13,6 +13,7 @@ package com.redhat.devtools.intellij.knative;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.TestDialog;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
 import com.intellij.testFramework.fixtures.IdeaProjectTestFixture;
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
@@ -26,29 +27,22 @@ import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 
-public class BaseTest {
+public class BaseTest extends BasePlatformTestCase {
 
     private CodeInsightTestFixture myFixture;
     protected Project project;
     private TestDialog previousTestDialog;
     protected Kn kn;
 
-    @Before
     public void setUp() throws Exception {
-        IdeaTestFixtureFactory factory = IdeaTestFixtureFactory.getFixtureFactory();
-        TestFixtureBuilder<IdeaProjectTestFixture> fixtureBuilder = factory.createLightFixtureBuilder();
-        IdeaProjectTestFixture fixture = fixtureBuilder.getFixture();
-        myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture);
-        myFixture.setUp();
-        project = myFixture.getProject();
+        super.setUp();
         previousTestDialog = MessagesHelper.setTestDialog(message -> 0);
         kn = KnCliFactory.getInstance().getKn(project).get();
     }
 
-    @After
     public void tearDown() throws Exception {
         MessagesHelper.setTestDialog(previousTestDialog);
-        myFixture.tearDown();
+        super.tearDown();
     }
 
     protected String load(String name) throws IOException {

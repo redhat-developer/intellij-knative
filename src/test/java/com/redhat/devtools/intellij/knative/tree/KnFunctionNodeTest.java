@@ -19,8 +19,7 @@ import static org.junit.Assert.assertEquals;
 
 public class KnFunctionNodeTest extends BaseTest {
 
-    @Test
-    public void Constructor_KnFunctionNode() {
+    public void testConstructor_KnFunctionNode() {
         KnFunctionNode knFunctionNode = new KnFunctionNode(knRootNode, knRootNode, getFunction());
         assertEquals("name", knFunctionNode.getFunction().getName());
         assertEquals(knRootNode, knFunctionNode.getRootNode());
