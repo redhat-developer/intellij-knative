@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class KnServiceTest extends BaseTest {
+public class KnServiceTest extends ITKnBaseTest {
 
     public void testCreateServiceAndDelete() throws IOException {
         final String serviceName = "test1";

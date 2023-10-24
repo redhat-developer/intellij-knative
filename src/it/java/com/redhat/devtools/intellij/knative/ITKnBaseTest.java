@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
 
-public class BaseTest extends BasePlatformTestCase {
+public abstract class ITKnBaseTest extends BasePlatformTestCase {
 
     protected Project project;
     private TestDialog previousTestDialog;
