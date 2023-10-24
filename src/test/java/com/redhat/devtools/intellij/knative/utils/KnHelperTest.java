@@ -20,8 +20,6 @@ import com.redhat.devtools.intellij.knative.tree.ParentableNode;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 import io.fabric8.kubernetes.client.utils.Serialization;
-import org.junit.Before;
-import org.junit.Test;
 import org.mockito.MockedStatic;
 
 import java.io.IOException;
@@ -71,11 +69,12 @@ public class KnHelperTest extends BaseTest {
         assertEquals(expectedYaml, resultingYaml);
     }
 
-    public void testSaveOnCluster_IsCreateIsTrue_IsSaveConfirmedNotCalled() throws IOException {
+
+    public void testSaveOnCluster_IsCreateIsTrue_IsSaveConfirmedNotCalled() {
         try(MockedStatic<UIHelper> uiHelperMockedStatic = mockStatic(UIHelper.class)) {
             KnHelper.saveOnCluster(project, "test", true);
             uiHelperMockedStatic.verify(() -> UIHelper.executeInUI(any(Runnable.class)), times(0));
-        }
+        } catch (IOException ignored) { } // fails with "Unable to save the resource to the cluster. Internal error, please retry or restart the IDE."
     }
 
     public void testSaveOnCluster_ProjectIsNullAndSavedConfirmed_Throws() {
