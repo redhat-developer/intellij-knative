@@ -29,30 +29,26 @@ public class DeleteActionTest extends ActionTest {
     private static final String SERVICE = "service";
     private static final String REVISION = "revision";
 
-    @Test
-    public void ExecuteDelete_OneKnServiceNodeSelected_DeleteOneService() throws IOException {
+    public void testExecuteDelete_OneKnServiceNodeSelected_DeleteOneService() throws IOException {
         Map<String, Integer> typePerTimesCalled = new HashMap<>();
         typePerTimesCalled.put(SERVICE, 1);
         executeDeleteAction(new ParentableNode[] {knServiceNode}, typePerTimesCalled);
     }
 
-    @Test
-    public void ExecuteDelete_OneKnRevisionNodeSelected_DeleteOneRevision() throws IOException {
+    public void testExecuteDelete_OneKnRevisionNodeSelected_DeleteOneRevision() throws IOException {
         Map<String, Integer> typePerTimesCalled = new HashMap<>();
         typePerTimesCalled.put(REVISION, 1);
         executeDeleteAction(new ParentableNode[] {knRevisionNode}, typePerTimesCalled);
     }
 
-    @Test
-    public void ExecuteDelete_TwoDifferentKnNodeSelected_CalledTwoDelete() throws IOException {
+    public void testExecuteDelete_TwoDifferentKnNodeSelected_CalledTwoDelete() throws IOException {
         Map<String, Integer> typePerTimesCalled = new HashMap<>();
         typePerTimesCalled.put(SERVICE, 1);
         typePerTimesCalled.put(REVISION, 1);
         executeDeleteAction(new ParentableNode[] {knServiceNode, knRevisionNode}, typePerTimesCalled);
     }
 
-    @Test
-    public void ExecuteDelete_ThreeDifferentKnNodeSelected_CalledThreeDelete() throws IOException {
+    public void testExecuteDelete_ThreeDifferentKnNodeSelected_CalledThreeDelete() throws IOException {
         Map<String, Integer> typePerTimesCalled = new HashMap<>();
         typePerTimesCalled.put(SERVICE, 1);
         typePerTimesCalled.put(REVISION, 1);

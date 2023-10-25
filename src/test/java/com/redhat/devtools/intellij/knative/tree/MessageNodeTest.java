@@ -18,16 +18,14 @@ import static org.junit.Assert.assertEquals;
 
 public class MessageNodeTest extends BaseTest {
 
-    @Test
-    public void Constructor_ParentIsRoot_MessageNode() {
+    public void testConstructor_ParentIsRoot_MessageNode() {
         MessageNode messageNode = new MessageNode(knRootNode, knRootNode, "test");
         assertEquals("test", messageNode.getName());
         assertEquals(knRootNode, messageNode.getRootNode());
         assertEquals(knRootNode, messageNode.getParent());
     }
 
-    @Test
-    public void Constructor_ParentIsNotRoot_MessageNode() {
+    public void testConstructor_ParentIsNotRoot_MessageNode() {
         MessageNode messageNode = new MessageNode(knRootNode, knServingNode, "test");
         assertEquals("test", messageNode.getName());
         assertEquals(knRootNode, messageNode.getRootNode());

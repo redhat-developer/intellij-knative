@@ -28,8 +28,7 @@ import static org.mockito.Mockito.when;
 
 public class KnRootTest extends BaseTest {
 
-    @Test
-    public void Constructor_KnRootNode() {
+    public void testConstructor_KnRootNode() {
         knRootNode = KnRootNode.getInstance(project);
         assertNull(knRootNode.getKn());
         assertEquals(project, knRootNode.getProject());

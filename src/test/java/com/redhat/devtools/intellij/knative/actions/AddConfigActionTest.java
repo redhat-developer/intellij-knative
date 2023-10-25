@@ -43,14 +43,12 @@ public class AddConfigActionTest extends ActionTest {
 
     private Function function;
 
-    @Before
     public void setUp() throws Exception {
         super.setUp();
         function = mock(Function.class);
     }
 
-    @Test
-    public void AddEnvActionPerformed_SelectedHasNotLocalPath_DoNothing() throws IOException {
+    public void testAddEnvActionPerformed_SelectedHasNotLocalPath_DoNothing() throws IOException {
         AnAction action = new AddEnvAction();
         when(function.getLocalPath()).thenReturn("");
         AnActionEvent anActionEvent = createAddConfigActionEvent();
@@ -61,8 +59,7 @@ public class AddConfigActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void AddVolumeActionPerformed_SelectedHasNotLocalPath_DoNothing() throws IOException {
+    public void testAddVolumeActionPerformed_SelectedHasNotLocalPath_DoNothing() throws IOException {
         AnAction action = new AddVolumeAction();
         when(function.getLocalPath()).thenReturn("");
         AnActionEvent anActionEvent = createAddConfigActionEvent();
@@ -73,8 +70,7 @@ public class AddConfigActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasLocalPath_StartEnvAddWorkflow() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasLocalPath_StartEnvAddWorkflow() throws IOException, InterruptedException {
         AnAction action = new AddEnvAction();
         when(function.getLocalPath()).thenReturn("path");
         AnActionEvent anActionEvent = createAddConfigActionEvent();
@@ -87,8 +83,7 @@ public class AddConfigActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasLocalPath_StartVolumeAddWorkflow() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasLocalPath_StartVolumeAddWorkflow() throws IOException, InterruptedException {
         AnAction action = new AddVolumeAction();
         when(function.getLocalPath()).thenReturn("path");
         AnActionEvent anActionEvent = createAddConfigActionEvent();
@@ -101,8 +96,7 @@ public class AddConfigActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void IsVisible_SelectHasNoLocalPath_False() {
+    public void testIsVisible_SelectHasNoLocalPath_False() {
         AddEnvAction action = new AddEnvAction();
         setKnFunctionNode();
         when(function.getLocalPath()).thenReturn("");
@@ -110,8 +104,7 @@ public class AddConfigActionTest extends ActionTest {
         assertFalse(isVisible);
     }
 
-    @Test
-    public void IsVisible_SelectHasLocalPathButNotKnativeReady_False() {
+    public void testIsVisible_SelectHasLocalPathButNotKnativeReady_False() {
         AddEnvAction action = new AddEnvAction();
         setKnFunctionNode();
         when(function.getLocalPath()).thenReturn("path");
@@ -122,8 +115,7 @@ public class AddConfigActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void IsVisible_SelectHasLocalPathAndKnativeReady_True() {
+    public void testIsVisible_SelectHasLocalPathAndKnativeReady_True() {
         AddEnvAction action = new AddEnvAction();
         setKnFunctionNode();
         when(function.getLocalPath()).thenReturn("path");
@@ -134,8 +126,7 @@ public class AddConfigActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void IsVisible_SelectedIsNotFunctionNode_False() {
+    public void testIsVisible_SelectedIsNotFunctionNode_False() {
         AddEnvAction action = new AddEnvAction();
         boolean isVisible = action.isVisible(knEventingNode);
         assertFalse(isVisible);

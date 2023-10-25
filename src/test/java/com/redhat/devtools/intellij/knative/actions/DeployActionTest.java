@@ -54,7 +54,6 @@ public class DeployActionTest extends ActionTest {
     private Path pathFuncFile;
     private JsonNode jsonNode;
 
-    @Before
     public void setUp() throws Exception {
         super.setUp();
         function = mock(Function.class);
@@ -62,8 +61,7 @@ public class DeployActionTest extends ActionTest {
         jsonNode = mock(JsonNode.class);
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasNotLocalPath_DoNothing() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasNotLocalPath_DoNothing() throws IOException, InterruptedException {
         AnAction action = new DeployAction();
         AnActionEvent anActionEvent = createDeployActionEvent();
         when(function.getLocalPath()).thenReturn("");
@@ -88,8 +86,7 @@ public class DeployActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasLocalPathAndImageSpecified_DoDeploy() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasLocalPathAndImageSpecified_DoDeploy() throws IOException, InterruptedException {
         AnAction action = new DeployAction();
         AnActionEvent anActionEvent = createDeployActionEvent();
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
@@ -120,8 +117,7 @@ public class DeployActionTest extends ActionTest {
 
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasLocalPathAndRegistrySpecified_DoDeploy() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasLocalPathAndRegistrySpecified_DoDeploy() throws IOException, InterruptedException {
         AnAction action = new DeployAction();
         AnActionEvent anActionEvent = createDeployActionEvent();
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
@@ -151,8 +147,7 @@ public class DeployActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasLocalPathAndHasFuncFileWithoutRegistryAndImageSpecified_UIAskForImage() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasLocalPathAndHasFuncFileWithoutRegistryAndImageSpecified_UIAskForImage() throws IOException, InterruptedException {
         AnAction action = new DeployAction();
         AnActionEvent anActionEvent = createDeployActionEvent();
 
@@ -190,8 +185,7 @@ public class DeployActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasLocalPathAndHasNoFuncFile_UIAskForImage() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasLocalPathAndHasNoFuncFile_UIAskForImage() throws IOException, InterruptedException {
         AnAction action = new DeployAction();
         AnActionEvent anActionEvent = createDeployActionEvent();
 
@@ -225,8 +219,7 @@ public class DeployActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasLocalPathAndFailOpeningFuncFile_UIAskForImage() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasLocalPathAndFailOpeningFuncFile_UIAskForImage() throws IOException, InterruptedException {
         AnAction action = new DeployAction();
         AnActionEvent anActionEvent = createDeployActionEvent();
 
@@ -262,8 +255,7 @@ public class DeployActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasLocalPathAndHasFuncFileWithoutRegistryAndImageSpecifiedAndImageInsertedByUserIsEmptyString_doNothing() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasLocalPathAndHasFuncFileWithoutRegistryAndImageSpecifiedAndImageInsertedByUserIsEmptyString_doNothing() throws IOException, InterruptedException {
         AnAction action = new DeployAction();
         AnActionEvent anActionEvent = createDeployActionEvent();
 

@@ -24,8 +24,7 @@ public class KnSinkDescriptorTest extends BaseTest {
     @Mock
     private NodeDescriptor<?> parentDescriptor;
 
-    @Test
-    public void Update_with_missing_sink_should_add_error_message() {
+    public void testUpdate_with_missing_sink_should_add_error_message() {
         when(knSinkNode.getName()).thenReturn(null);
         KnSinkDescriptor descriptor = new KnSinkDescriptor(project, knSinkNode, parentDescriptor);
         PresentationData presentationData = new PresentationData();
@@ -34,8 +33,7 @@ public class KnSinkDescriptorTest extends BaseTest {
         assertEquals("Sink Not Found", presentationData.getColoredText().get(0).getText());
     }
 
-    @Test
-    public void Update_should_use_sink_name() {
+    public void testUpdate_should_use_sink_name() {
         when(knSinkNode.getName()).thenReturn("Foo");
         KnSinkDescriptor descriptor = new KnSinkDescriptor(project, knSinkNode, parentDescriptor);
         PresentationData presentationData = new PresentationData();

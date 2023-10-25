@@ -16,7 +16,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.ContentManager;
 import com.intellij.ui.treeStructure.Tree;
-import com.redhat.devtools.intellij.knative.FixtureBaseTest;
+import com.redhat.devtools.intellij.knative.BaseTest;
 import com.redhat.devtools.intellij.knative.func.FuncActionPipelineManager;
 import com.redhat.devtools.intellij.knative.kn.Service;
 import com.redhat.devtools.intellij.knative.kn.ServiceStatus;
@@ -36,7 +36,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public abstract class ActionTest extends FixtureBaseTest {
+public abstract class ActionTest extends BaseTest {
 
     protected Tree tree;
     protected TreeSelectionModel model;
@@ -50,7 +50,6 @@ public abstract class ActionTest extends FixtureBaseTest {
     protected FuncActionPipelineManager manager;
 
 
-    @Before
     public void setUp() throws Exception {
         super.setUp();
 

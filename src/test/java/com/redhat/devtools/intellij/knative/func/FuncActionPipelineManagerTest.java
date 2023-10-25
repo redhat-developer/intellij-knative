@@ -11,7 +11,7 @@
 package com.redhat.devtools.intellij.knative.func;
 
 import com.intellij.terminal.TerminalExecutionConsole;
-import com.redhat.devtools.intellij.knative.FixtureBaseTest;
+import com.redhat.devtools.intellij.knative.BaseTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedConstruction;
@@ -23,10 +23,9 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mockConstruction;
 
-public class FuncActionPipelineManagerTest extends FixtureBaseTest {
+public class FuncActionPipelineManagerTest extends BaseTest {
     private FuncActionPipeline pipeline;
 
-    @Before
     public void setUp() throws Exception {
         super.setUp();
         pipeline = new FuncActionPipeline("name", project, function) {
@@ -42,8 +41,7 @@ public class FuncActionPipelineManagerTest extends FixtureBaseTest {
         };
     }
 
-    @Test
-    public void OptimizePipeline_PipelineWithTwoTaskAndNoPreviousBuild_OptimizedPipelineHaveTwoTasks() throws IOException {
+    public void testOptimizePipeline_PipelineWithTwoTaskAndNoPreviousBuild_OptimizedPipelineHaveTwoTasks() throws IOException {
         List<FuncActionTask> tasks = new ArrayList<>();
         tasks.add(new BuildFuncActionTask((task) -> {}));
         tasks.add(new FuncActionTask("test", (task) -> {}));
@@ -57,8 +55,7 @@ public class FuncActionPipelineManagerTest extends FixtureBaseTest {
         }
     }
 
-    @Test
-    public void OptimizePipeline_PipelineWithTwoTaskAndPreviousBuildSuccessful_OptimizedPipelineHaveOneTask() throws IOException {
+    public void testOptimizePipeline_PipelineWithTwoTaskAndPreviousBuildSuccessful_OptimizedPipelineHaveOneTask() throws IOException {
         List<FuncActionTask> tasks = new ArrayList<>();
         tasks.add(new BuildFuncActionTask((task) -> {}));
         tasks.add(new FuncActionTask("test", (task) -> {}));
@@ -74,8 +71,7 @@ public class FuncActionPipelineManagerTest extends FixtureBaseTest {
         }
     }
 
-    @Test
-    public void OptimizePipeline_PipelineWithTwoTaskAndPreviousBuildFailed_OptimizedPipelineHaveTwoTasks() throws IOException {
+    public void testOptimizePipeline_PipelineWithTwoTaskAndPreviousBuildFailed_OptimizedPipelineHaveTwoTasks() throws IOException {
         List<FuncActionTask> tasks = new ArrayList<>();
         tasks.add(new BuildFuncActionTask((task) -> {}));
         tasks.add(new FuncActionTask("test", (task) -> {}));

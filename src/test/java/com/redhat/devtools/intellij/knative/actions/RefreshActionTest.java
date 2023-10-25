@@ -33,8 +33,7 @@ import static org.mockito.Mockito.when;
 
 public class RefreshActionTest extends ActionTest {
 
-    @Test
-    public void ActionPerformed_EventNotFromTree_Nothing() {
+    public void testActionPerformed_EventNotFromTree_Nothing() {
         AnAction action = new RefreshAction();
         AnActionEvent anActionEvent = mock(AnActionEvent.class);
         when(anActionEvent.getData(PlatformDataKeys.CONTEXT_COMPONENT)).thenReturn(null);
@@ -43,8 +42,7 @@ public class RefreshActionTest extends ActionTest {
         verify(knTreeStructure, never()).fireModified(any());
     }
 
-    @Test
-    public void ActionPerformed_EventFromTreeWithoutKnTreeStructure_Nothing() {
+    public void testActionPerformed_EventFromTreeWithoutKnTreeStructure_Nothing() {
         AnAction action = new RefreshAction();
         AnActionEvent anActionEvent = mock(AnActionEvent.class);
         when(anActionEvent.getData(PlatformDataKeys.CONTEXT_COMPONENT)).thenReturn(tree);
@@ -52,8 +50,7 @@ public class RefreshActionTest extends ActionTest {
         verify(knTreeStructure, never()).fireModified(any());
     }
 
-    @Test
-    public void ActionPerformed_EventFromToolbar_Refresh() {
+    public void testActionPerformed_EventFromToolbar_Refresh() {
         AnAction action = new RefreshAction();
         AnActionEvent anActionEvent = createRefreshActionEvent(knTreeStructure);
         when(anActionEvent.getPlace()).thenReturn(Constants.TOOLBAR_PLACE);
@@ -63,8 +60,7 @@ public class RefreshActionTest extends ActionTest {
         verify(knTreeStructure).fireModified(knRootNode);
     }
 
-    @Test
-    public void ActionPerformed_EventFromTree_Refresh() {
+    public void testActionPerformed_EventFromTree_Refresh() {
         AnAction action = new RefreshAction();
         AnActionEvent anActionEvent = createRefreshActionEvent(knTreeStructure);
         try(MockedStatic<StructureTreeAction> structureTreeActionMockedStatic = mockStatic(StructureTreeAction.class)) {
@@ -79,8 +75,7 @@ public class RefreshActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void Update_EventNotFromToolbarAndNotFromTree_NotEnabled() {
+    public void testUpdate_EventNotFromToolbarAndNotFromTree_NotEnabled() {
         presentation = new Presentation();
         AnAction action = new RefreshAction();
         AnActionEvent anActionEvent = mock(AnActionEvent.class);
@@ -91,8 +86,7 @@ public class RefreshActionTest extends ActionTest {
         assertFalse(presentation.isEnabledAndVisible());
     }
 
-    @Test
-    public void Update_EventFromToolbarWithoutTreeView_NotEnabled() {
+    public void testUpdate_EventFromToolbarWithoutTreeView_NotEnabled() {
         AnAction action = new RefreshAction();
         AnActionEvent anActionEvent = createRefreshActionEvent(null);
         when(anActionEvent.getPlace()).thenReturn(Constants.TOOLBAR_PLACE);
@@ -102,8 +96,7 @@ public class RefreshActionTest extends ActionTest {
         assertFalse(presentation.isEnabled());
     }
 
-    @Test
-    public void Update_EventFromToolbarWithKnTreeStructure_Enabled() {
+    public void testUpdate_EventFromToolbarWithKnTreeStructure_Enabled() {
         AnAction action = new RefreshAction();
         AnActionEvent anActionEvent = createRefreshActionEvent(knTreeStructure);
         when(anActionEvent.getPlace()).thenReturn(Constants.TOOLBAR_PLACE);
@@ -112,8 +105,7 @@ public class RefreshActionTest extends ActionTest {
         assertTrue(presentation.isEnabled());
     }
 
-    @Test
-    public void Update_EventFromToolbarWithoutKnTreeStructure_NotEnabled() {
+    public void testUpdate_EventFromToolbarWithoutKnTreeStructure_NotEnabled() {
         AnAction action = new RefreshAction();
         AnActionEvent anActionEvent = createRefreshActionEvent(null);
         when(anActionEvent.getPlace()).thenReturn(Constants.TOOLBAR_PLACE);
@@ -122,8 +114,7 @@ public class RefreshActionTest extends ActionTest {
         assertFalse(presentation.isEnabled());
     }
 
-    @Test
-    public void Update_EventFromTreeWithValidSelectedNode_Enabled() {
+    public void testUpdate_EventFromTreeWithValidSelectedNode_Enabled() {
         AnAction action = new RefreshAction();
         AnActionEvent anActionEvent = createRefreshActionEvent(null);
 

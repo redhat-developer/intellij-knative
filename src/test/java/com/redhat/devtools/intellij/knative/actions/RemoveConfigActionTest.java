@@ -43,14 +43,12 @@ public class RemoveConfigActionTest extends ActionTest {
 
     private Function function;
 
-    @Before
     public void setUp() throws Exception {
         super.setUp();
         function = mock(Function.class);
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasNotLocalPath_DoNothing() throws IOException {
+    public void testActionPerformed_SelectedHasNotLocalPath_DoNothing() throws IOException {
         AnAction action = new RemoveEnvAction();
         when(function.getLocalPath()).thenReturn("");
         AnActionEvent anActionEvent = createRemoveConfigActionEvent();
@@ -62,8 +60,7 @@ public class RemoveConfigActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasLocalPath_StartRemoveEnvWorkflow() {
+    public void testActionPerformed_SelectedHasLocalPath_StartRemoveEnvWorkflow() {
         AnAction action = new RemoveEnvAction();
         when(function.getLocalPath()).thenReturn("path");
         AnActionEvent anActionEvent = createRemoveConfigActionEvent();
@@ -77,8 +74,7 @@ public class RemoveConfigActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void IsVisible_SelectHasNoLocalPath_False() {
+    public void testIsVisible_SelectHasNoLocalPath_False() {
         RemoveEnvAction action = new RemoveEnvAction();
         setKnFunctionNode();
         when(function.getLocalPath()).thenReturn("");
@@ -86,8 +82,7 @@ public class RemoveConfigActionTest extends ActionTest {
         assertFalse(isVisible);
     }
 
-    @Test
-    public void IsVisible_SelectHasLocalPathButNotEnvsSection_False() {
+    public void testIsVisible_SelectHasLocalPathButNotEnvsSection_False() {
         RemoveEnvAction action = new RemoveEnvAction();
         setKnFunctionNode();
         when(function.getLocalPath()).thenReturn("path");
@@ -98,8 +93,7 @@ public class RemoveConfigActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void IsVisible_SelectHasLocalPathButEmptyEnvsSection_False() {
+    public void testIsVisible_SelectHasLocalPathButEmptyEnvsSection_False() {
         RemoveEnvAction action = new RemoveEnvAction();
         setKnFunctionNode();
         when(function.getLocalPath()).thenReturn("path");
@@ -112,8 +106,7 @@ public class RemoveConfigActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void IsVisible_SelectHasLocalPathAndAtleastAnEnv_True() {
+    public void testIsVisible_SelectHasLocalPathAndAtleastAnEnv_True() {
         RemoveEnvAction action = new RemoveEnvAction();
         setKnFunctionNode();
         when(function.getLocalPath()).thenReturn("path");
@@ -126,8 +119,7 @@ public class RemoveConfigActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void IsVisible_SelectedIsNotFunctionNode_False() {
+    public void testIsVisible_SelectedIsNotFunctionNode_False() {
         RemoveEnvAction action = new RemoveEnvAction();
         boolean isVisible = action.isVisible(knEventingNode);
         assertFalse(isVisible);

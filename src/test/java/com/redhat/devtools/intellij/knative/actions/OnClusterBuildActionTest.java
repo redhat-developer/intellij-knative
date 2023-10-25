@@ -64,7 +64,6 @@ public class OnClusterBuildActionTest extends ActionTest {
     private VirtualFile virtualFile;
     private GitRepoModel gitRepoModel;
 
-    @Before
     public void setUp() throws Exception {
         super.setUp();
         function = mock(Function.class);
@@ -80,8 +79,7 @@ public class OnClusterBuildActionTest extends ActionTest {
         gitRepoModel = mock(GitRepoModel.class);
     }
 
-    @Test
-    public void ActionPerformed_NoGitRemoteAndBranchIsSelected_DoNothing() throws IOException, InterruptedException {
+    public void testActionPerformed_NoGitRemoteAndBranchIsSelected_DoNothing() throws IOException, InterruptedException {
         AnAction action = new OnClusterBuildAction();
         AnActionEvent anActionEvent = createOnClusterBuildActionEvent();
         when(function.getLocalPath()).thenReturn("");
@@ -108,8 +106,7 @@ public class OnClusterBuildActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasNotLocalPath_DoNothing() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasNotLocalPath_DoNothing() throws IOException, InterruptedException {
         AnAction action = new OnClusterBuildAction();
         AnActionEvent anActionEvent = createOnClusterBuildActionEvent();
         when(function.getLocalPath()).thenReturn("");
@@ -146,8 +143,7 @@ public class OnClusterBuildActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasLocalPathAndImageSpecified_DoDeploy() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasLocalPathAndImageSpecified_DoDeploy() throws IOException, InterruptedException {
         AnAction action = new OnClusterBuildAction();
         AnActionEvent anActionEvent = createOnClusterBuildActionEvent();
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
@@ -195,8 +191,7 @@ public class OnClusterBuildActionTest extends ActionTest {
 
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasLocalPathAndUserSelectAutoDiscovery_DoDeploy() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasLocalPathAndUserSelectAutoDiscovery_DoDeploy() throws IOException, InterruptedException {
         AnAction action = new OnClusterBuildAction();
         AnActionEvent anActionEvent = createOnClusterBuildActionEvent();
         try(MockedStatic<TreeHelper> treeHelperMockedStatic = mockStatic(TreeHelper.class)) {
@@ -243,8 +238,7 @@ public class OnClusterBuildActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasLocalPathAndHasFuncFileWithoutRegistryAndImageSpecified_UIAskForImage() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasLocalPathAndHasFuncFileWithoutRegistryAndImageSpecified_UIAskForImage() throws IOException, InterruptedException {
         AnAction action = new OnClusterBuildAction();
         AnActionEvent anActionEvent = createOnClusterBuildActionEvent();
 
@@ -292,8 +286,7 @@ public class OnClusterBuildActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasLocalPathAndHasNoFuncFile_UIAskForImage() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasLocalPathAndHasNoFuncFile_UIAskForImage() throws IOException, InterruptedException {
         AnAction action = new OnClusterBuildAction();
         AnActionEvent anActionEvent = createOnClusterBuildActionEvent();
 
@@ -337,8 +330,7 @@ public class OnClusterBuildActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasLocalPathAndFailOpeningFuncFile_UIAskForImage() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasLocalPathAndFailOpeningFuncFile_UIAskForImage() throws IOException, InterruptedException {
         AnAction action = new OnClusterBuildAction();
         AnActionEvent anActionEvent = createOnClusterBuildActionEvent();
 
@@ -384,8 +376,7 @@ public class OnClusterBuildActionTest extends ActionTest {
         }
     }
 
-    @Test
-    public void ActionPerformed_SelectedHasLocalPathAndHasFuncFileWithoutRegistryAndImageSpecifiedAndImageInsertedByUserIsEmptyString_doNothing() throws IOException, InterruptedException {
+    public void testActionPerformed_SelectedHasLocalPathAndHasFuncFileWithoutRegistryAndImageSpecifiedAndImageInsertedByUserIsEmptyString_doNothing() throws IOException, InterruptedException {
         AnAction action = new OnClusterBuildAction();
         AnActionEvent anActionEvent = createOnClusterBuildActionEvent();
 

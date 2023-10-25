@@ -12,7 +12,7 @@ package com.redhat.devtools.intellij.knative.kubernetes;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.psi.PsiFile;
-import com.redhat.devtools.intellij.knative.FixtureBaseTest;
+import com.redhat.devtools.intellij.knative.BaseTest;
 import java.io.IOException;
 import org.jetbrains.yaml.YAMLFileType;
 import org.junit.Before;
@@ -22,18 +22,16 @@ import org.junit.Test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class KnativeHighlightInfoFilterTest extends FixtureBaseTest {
+public class KnativeHighlightInfoFilterTest extends BaseTest {
     private static final String RESOURCE_PATH = "kubernetes/";
     private KnativeHighlightInfoFilter knativeHighlightInfoFilter;
 
-    @Before
     public void setUp() throws Exception {
         super.setUp();
         knativeHighlightInfoFilter = new KnativeHighlightInfoFilter();
     }
 
-    @Test
-    public void IsCustomFile_PsiFileIsKnative_True() throws IOException {
+    public void testIsCustomFile_PsiFileIsKnative_True() throws IOException {
         String yaml = load(RESOURCE_PATH + "service.yaml");
         PsiFile psiFile = myFixture.configureByText(YAMLFileType.YML, yaml);
         ApplicationManager.getApplication().runReadAction(() -> {
@@ -42,8 +40,7 @@ public class KnativeHighlightInfoFilterTest extends FixtureBaseTest {
         });
     }
 
-    @Test
-    public void IsCustomFile_PsiFileIsUnknown_False() throws IOException {
+    public void testIsCustomFile_PsiFileIsUnknown_False() throws IOException {
         String yaml = load(RESOURCE_PATH + "tekton.yaml");
         PsiFile psiFile = myFixture.configureByText(YAMLFileType.YML, yaml);
         ApplicationManager.getApplication().runReadAction(() -> {

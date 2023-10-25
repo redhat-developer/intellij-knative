@@ -30,7 +30,6 @@ public class KnNodeComparatorTest extends BaseTest {
     private KnRevisionDescriptor knRevisionDescriptor, knRevisionDescriptor1, knRevisionDescriptor2;
     private LabelAndIconDescriptor labelAndIconDescriptor;
 
-    @Before
     public void setUp() throws Exception {
         super.setUp();
         knNodeComparator = new KnNodeComparator();
@@ -49,28 +48,23 @@ public class KnNodeComparatorTest extends BaseTest {
         labelAndIconDescriptor = new LabelAndIconDescriptor(project, knRootNode, "test", AllIcons.Plugins.Disabled, null);
     }
 
-    @Test
-    public void Compare_TwoObjectEquals_0() {
+    public void testCompare_TwoObjectEquals_0() {
         assertEquals(0, knNodeComparator.compare(knRevisionDescriptor, knRevisionDescriptor1));
     }
 
-    @Test
-    public void Compare_FirstObjectIsNotKnRevisionDescriptor_0() {
+    public void testCompare_FirstObjectIsNotKnRevisionDescriptor_0() {
         assertEquals(0, knNodeComparator.compare(labelAndIconDescriptor, knRevisionDescriptor));
     }
 
-    @Test
-    public void Compare_SecondObjectIsNotKnRevisionDescriptor_0() {
+    public void testCompare_SecondObjectIsNotKnRevisionDescriptor_0() {
         assertEquals(0, knNodeComparator.compare(knRevisionDescriptor, labelAndIconDescriptor));
     }
 
-    @Test
-    public void Compare_BothObjectsAreKnRevisionDescriptor_Minus1() {
+    public void testCompare_BothObjectsAreKnRevisionDescriptor_Minus1() {
         assertEquals(-1, knNodeComparator.compare(knRevisionDescriptor2, knRevisionDescriptor));
     }
 
-    @Test
-    public void Compare_BothObjectsAreKnRevisionDescriptor_1() {
+    public void testCompare_BothObjectsAreKnRevisionDescriptor_1() {
         assertEquals(1, knNodeComparator.compare(knRevisionDescriptor, knRevisionDescriptor2));
     }
 }

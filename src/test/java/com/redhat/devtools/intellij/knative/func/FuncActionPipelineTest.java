@@ -11,7 +11,7 @@
 package com.redhat.devtools.intellij.knative.func;
 
 import com.intellij.terminal.TerminalExecutionConsole;
-import com.redhat.devtools.intellij.knative.FixtureBaseTest;
+import com.redhat.devtools.intellij.knative.BaseTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedConstruction;
@@ -24,10 +24,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.mockConstruction;
 
-public class FuncActionPipelineTest extends FixtureBaseTest {
+public class FuncActionPipelineTest extends BaseTest {
     private FuncActionPipeline pipeline;
 
-    @Before
     public void setUp() throws Exception {
         super.setUp();
         pipeline = new FuncActionPipeline("name", project, function) {
@@ -38,8 +37,7 @@ public class FuncActionPipelineTest extends FixtureBaseTest {
         };
     }
 
-    @Test
-    public void SetTasks_TwoTasks() throws IOException {
+    public void testSetTasks_TwoTasks() throws IOException {
         List<FuncActionTask> tasks = new ArrayList<>();
         tasks.add(new BuildFuncActionTask((task) -> {}));
         tasks.add(new FuncActionTask("test", (task) -> {}));
@@ -55,8 +53,7 @@ public class FuncActionPipelineTest extends FixtureBaseTest {
         }
     }
 
-    @Test
-    public void FireTerminatedStep_FailedTask_SkippedRemaining() throws IOException {
+    public void testFireTerminatedStep_FailedTask_SkippedRemaining() throws IOException {
         List<FuncActionTask> tasks = new ArrayList<>();
         BuildFuncActionTask buildTask = new BuildFuncActionTask((task) -> {});
 
@@ -72,8 +69,7 @@ public class FuncActionPipelineTest extends FixtureBaseTest {
         }
     }
 
-    @Test
-    public void FireTerminatedStep_LastTaskFinished_SetEndTime() throws IOException {
+    public void testFireTerminatedStep_LastTaskFinished_SetEndTime() throws IOException {
         List<FuncActionTask> tasks = new ArrayList<>();
         BuildFuncActionTask buildTask = new BuildFuncActionTask((task) -> {});
         FuncActionTask finalTask = new FuncActionTask("test", (task) -> {});
@@ -90,8 +86,7 @@ public class FuncActionPipelineTest extends FixtureBaseTest {
         }
     }
 
-    @Test
-    public void FireTerminatedStep_IntermediateTaskFinished_SetNextOneAsExecuting() throws IOException {
+    public void testFireTerminatedStep_IntermediateTaskFinished_SetNextOneAsExecuting() throws IOException {
         List<FuncActionTask> tasks = new ArrayList<>();
         BuildFuncActionTask buildTask = new BuildFuncActionTask((task) -> {});
         FuncActionTask finalTask = new FuncActionTask("test", (task) -> {});

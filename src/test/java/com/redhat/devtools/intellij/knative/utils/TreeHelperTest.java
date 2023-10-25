@@ -18,7 +18,7 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentManager;
 import com.intellij.ui.treeStructure.Tree;
 import com.redhat.devtools.intellij.knative.Constants;
-import com.redhat.devtools.intellij.knative.FixtureBaseTest;
+import com.redhat.devtools.intellij.knative.BaseTest;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
 import javax.swing.JViewport;
@@ -42,7 +42,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class TreeHelperTest extends FixtureBaseTest {
+public class TreeHelperTest extends BaseTest {
     private ToolWindowManager toolWindowManager;
     private ToolWindow toolWindow;
     private ContentManager contentManager;
@@ -53,7 +53,6 @@ public class TreeHelperTest extends FixtureBaseTest {
     private Tree tree;
     private MockedStatic<ToolWindowManager> toolWindowManagerMockedStatic;
 
-    @Before
     public void setUp() throws Exception {
         super.setUp();
         toolWindowManager = mock(ToolWindowManager.class);
@@ -68,37 +67,31 @@ public class TreeHelperTest extends FixtureBaseTest {
         tree = mock(Tree.class);
     }
 
-    @After
     public void tearDown() throws Exception {
         toolWindowManagerMockedStatic.close();
-        myFixture.tearDown();
+        super.tearDown();
     }
 
-    @Test
-    public void TrimErrorMessage_ErrorMessageLongerThan130_ErrorMessageTrimmed() {
+    public void testTrimErrorMessage_ErrorMessageLongerThan130_ErrorMessageTrimmed() {
         String longErrorMessage = StringUtils.repeat("a", 140);
         String resultingErrorMessage = longErrorMessage.substring(0, 130) + "...";
         assertEquals(resultingErrorMessage, TreeHelper.trimErrorMessage(longErrorMessage));
     }
 
-    @Test
-    public void TrimErrorMessage_ErrorMessageShorterThan130_ErrorMessage() {
+    public void testTrimErrorMessage_ErrorMessageShorterThan130_ErrorMessage() {
         String errorMessage = "aaaa";
         assertEquals(errorMessage, TreeHelper.trimErrorMessage(errorMessage));
     }
 
-    @Test
-    public void GetTree_ProjectIsNull_Null() {
+    public void testGetTree_ProjectIsNull_Null() {
         assertNull(TreeHelper.getTree(null, KNATIVE_TOOL_WINDOW_ID));
     }
 
-    @Test
-    public void GetTree_ProjectWithoutWindow_Null() {
+    public void testGetTree_ProjectWithoutWindow_Null() {
         assertNull(TreeHelper.getTree(project, KNATIVE_TOOL_WINDOW_ID));
     }
 
-    @Test
-    public void GetTree_ProjectWithNoContent_Null() {
+    public void testGetTree_ProjectWithNoContent_Null() {
         when(toolWindowManager.getToolWindow("Knative")).thenReturn(toolWindow);
         when(toolWindow.getContentManager()).thenReturn(contentManager);
         when(contentManager.getContent(0)).thenReturn(null);
@@ -108,8 +101,7 @@ public class TreeHelperTest extends FixtureBaseTest {
         verify(contentManager).getContent(0);
     }
 
-    @Test
-    public void GetTree_ProjectWithoutToolPanel_Null() {
+    public void testGetTree_ProjectWithoutToolPanel_Null() {
         when(toolWindowManager.getToolWindow("Knative")).thenReturn(toolWindow);
         when(toolWindow.getContentManager()).thenReturn(contentManager);
         when(contentManager.getContent(0)).thenReturn(content);
@@ -121,8 +113,7 @@ public class TreeHelperTest extends FixtureBaseTest {
         verify(content).getComponent();
     }
 
-    @Test
-    public void GetTree_ProjectWithoutScrollPanel_Null() {
+    public void testGetTree_ProjectWithoutScrollPanel_Null() {
         when(toolWindowManager.getToolWindow("Knative")).thenReturn(toolWindow);
         when(toolWindow.getContentManager()).thenReturn(contentManager);
         when(contentManager.getContent(0)).thenReturn(content);
@@ -136,8 +127,7 @@ public class TreeHelperTest extends FixtureBaseTest {
         verify(simpleToolWindowPanel).getContent();
     }
 
-    @Test
-    public void GetTree_ProjectWithoutViewPort_Null() {
+    public void testGetTree_ProjectWithoutViewPort_Null() {
         when(toolWindowManager.getToolWindow("Knative")).thenReturn(toolWindow);
         when(toolWindow.getContentManager()).thenReturn(contentManager);
         when(contentManager.getContent(0)).thenReturn(content);
@@ -153,8 +143,7 @@ public class TreeHelperTest extends FixtureBaseTest {
         verify(jbScrollPane).getViewport();
     }
 
-    @Test
-    public void GetTree_ProjectWithoutView_Null() {
+    public void testGetTree_ProjectWithoutView_Null() {
         when(toolWindowManager.getToolWindow("Knative")).thenReturn(toolWindow);
         when(toolWindow.getContentManager()).thenReturn(contentManager);
         when(contentManager.getContent(0)).thenReturn(content);
@@ -172,61 +161,52 @@ public class TreeHelperTest extends FixtureBaseTest {
         verify(jViewport).getView();
     }
 
-    @Test
-    public void GetTree_Project_Tree() {
+    public void testGetTree_Project_Tree() {
         getTree(KNATIVE_TOOL_WINDOW_ID);
         Tree resultingTree = TreeHelper.getTree(project, KNATIVE_TOOL_WINDOW_ID);
         assertNotNull(resultingTree);
         assertEquals(tree, resultingTree);
     }
 
-    @Test
-    public void GetKnTreeStructure_ProjectIsNull_Null() {
+    public void testGetKnTreeStructure_ProjectIsNull_Null() {
         assertNull(TreeHelper.getKnTreeStructure(null));
     }
 
-    @Test
-    public void GetKnTreeStructure_ProjectWithoutClientProperty_Null() {
+    public void testGetKnTreeStructure_ProjectWithoutClientProperty_Null() {
         getTree(KNATIVE_TOOL_WINDOW_ID);
         when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(null);
         assertNull(TreeHelper.getKnTreeStructure(project));
     }
 
-    @Test
-    public void GetKnTreeStructure_Project_KnTreeStructure() {
+    public void testGetKnTreeStructure_Project_KnTreeStructure() {
         getKnTreeStructure();
         KnTreeStructure resultingStructure = TreeHelper.getKnTreeStructure(project);
         assertNotNull(resultingStructure);
         assertEquals(knTreeStructure, resultingStructure);
     }
 
-    @Test
-    public void GetKnFunctionsTreeStructure_ProjectIsNull_Null() {
+    public void testGetKnFunctionsTreeStructure_ProjectIsNull_Null() {
         assertNull(TreeHelper.getKnFunctionsTreeStructure(null));
     }
 
-    @Test
-    public void GetKnFunctionsTreeStructure_ProjectWithoutClientProperty_Null() {
+    public void testGetKnFunctionsTreeStructure_ProjectWithoutClientProperty_Null() {
         getTree(KNATIVE_FUNC_TOOL_WINDOW_ID);
         when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(null);
         assertNull(TreeHelper.getKnFunctionsTreeStructure(project));
     }
 
-    @Test
-    public void GetKnFunctionsTreeStructure_Project_KnTreeStructure() {
+    public void testGetKnFunctionsTreeStructure_Project_KnTreeStructure() {
         getKnFunctionsTreeStructure();
         KnTreeStructure resultingStructure = TreeHelper.getKnFunctionsTreeStructure(project);
         assertNotNull(resultingStructure);
         assertEquals(knFunctionsTreeStructure, resultingStructure);
     }
 
-    @Test
-    public void GetKn_ProjectNotValid_Null() {
+    public void testGetKn_ProjectNotValid_Null() {
         assertNull(TreeHelper.getKn(null));
     }
 
-    @Test
-    public void GetKn_Project_Kn() {
+    public void testGetKn_Project_Kn() {
         when(knTreeStructure.getRootElement()).thenReturn(knRootNode);
         when(knRootNode.getKn()).thenReturn(kn);
         getKnTreeStructure();
@@ -235,29 +215,25 @@ public class TreeHelperTest extends FixtureBaseTest {
         assertEquals(kn, resultingKn);
     }
 
-    @Test
-    public void Refresh_ProjectIsNull_Nothing() {
+    public void testRefresh_ProjectIsNull_Nothing() {
         TreeHelper.refresh(null, parentableNode);
         verify(knTreeStructure, never()).fireModified(any());
     }
 
-    @Test
-    public void Refresh_NodeIsNull_Nothing() {
+    public void testRefresh_NodeIsNull_Nothing() {
         getKnTreeStructure();
         TreeHelper.refresh(project, null);
         verify(knTreeStructure, never()).fireModified(any());
     }
 
-    @Test
-    public void Refresh_ProjectWithoutTreeStructure_Nothing() {
+    public void testRefresh_ProjectWithoutTreeStructure_Nothing() {
         getTree(KNATIVE_TOOL_WINDOW_ID);
         when(tree.getClientProperty(Constants.STRUCTURE_PROPERTY)).thenReturn(null);
         TreeHelper.refresh(project, parentableNode);
         verify(knTreeStructure, never()).fireModified(any());
     }
 
-    @Test
-    public void Refresh_ProjectAndNodeAreValid_Refresh() {
+    public void testRefresh_ProjectAndNodeAreValid_Refresh() {
         getKnTreeStructure();
         TreeHelper.refresh(project, parentableNode);
         verify(knTreeStructure).fireModified(any());

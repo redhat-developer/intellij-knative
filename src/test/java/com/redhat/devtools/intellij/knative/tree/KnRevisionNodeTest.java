@@ -20,8 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 public class KnRevisionNodeTest extends BaseTest {
 
-    @Test
-    public void Constructor_KnRevisionNode() {
+    public void testConstructor_KnRevisionNode() {
         Revision revision = new Revision("revision", Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap());
         KnRevisionNode knRevisionNode = new KnRevisionNode(knRootNode, knServiceNode, revision);
         assertEquals("revision", knRevisionNode.getName());

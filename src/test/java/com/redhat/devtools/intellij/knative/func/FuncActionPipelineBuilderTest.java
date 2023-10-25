@@ -11,7 +11,7 @@
 package com.redhat.devtools.intellij.knative.func;
 
 import com.intellij.terminal.TerminalExecutionConsole;
-import com.redhat.devtools.intellij.knative.FixtureBaseTest;
+import com.redhat.devtools.intellij.knative.BaseTest;
 import org.junit.Test;
 import org.mockito.MockedConstruction;
 
@@ -22,9 +22,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mockConstruction;
 
 
-public class FuncActionPipelineBuilderTest extends FixtureBaseTest {
-    @Test
-    public void CreateBuildPipeline_BuildFuncActionPipeline() throws IOException {
+public class FuncActionPipelineBuilderTest extends BaseTest {
+    public void testCreateBuildPipeline_BuildFuncActionPipeline() throws IOException {
         try (MockedConstruction<TerminalExecutionConsole> ignored = mockConstruction(TerminalExecutionConsole.class)) {
             IFuncActionPipeline buildPipeline = new FuncActionPipelineBuilder()
                     .createBuildPipeline(project, function)
@@ -36,8 +35,7 @@ public class FuncActionPipelineBuilderTest extends FixtureBaseTest {
         }
     }
 
-    @Test
-    public void CreateRunPipeline_RunFuncActionPipeline() throws IOException {
+    public void testCreateRunPipeline_RunFuncActionPipeline() throws IOException {
         try (MockedConstruction<TerminalExecutionConsole> ignored = mockConstruction(TerminalExecutionConsole.class)) {
             IFuncActionPipeline runPipeline = new FuncActionPipelineBuilder()
                     .createRunPipeline(project, function)
@@ -50,8 +48,7 @@ public class FuncActionPipelineBuilderTest extends FixtureBaseTest {
         }
     }
 
-    @Test
-    public void CreateDeployPipeline_DeployFuncActionPipeline() throws IOException {
+    public void testCreateDeployPipeline_DeployFuncActionPipeline() throws IOException {
         try (MockedConstruction<TerminalExecutionConsole> ignored = mockConstruction(TerminalExecutionConsole.class)) {
             IFuncActionPipeline deployPipeline = new FuncActionPipelineBuilder()
                     .createDeployPipeline(project, function)

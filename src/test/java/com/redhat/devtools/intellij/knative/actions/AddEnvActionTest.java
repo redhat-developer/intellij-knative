@@ -21,8 +21,7 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 public class AddEnvActionTest extends ActionTest {
 
-    @Test
-    public void AddConfig_AddEnvIsCalled() throws IOException {
+    public void testAddConfig_AddEnvIsCalled() throws IOException {
         AddEnvAction action = new AddEnvAction();
         action.doAddConfig(kn, "path");
         verify(kn, times(1)).addEnv(anyString());
