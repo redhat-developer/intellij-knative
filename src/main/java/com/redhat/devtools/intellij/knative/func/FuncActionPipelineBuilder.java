@@ -11,11 +11,11 @@
 package com.redhat.devtools.intellij.knative.func;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.util.Consumer;
 import com.redhat.devtools.intellij.knative.kn.Function;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class FuncActionPipelineBuilder {
 

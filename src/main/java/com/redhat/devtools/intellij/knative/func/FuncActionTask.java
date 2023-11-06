@@ -15,10 +15,8 @@ import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessListener;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Key;
 import com.intellij.terminal.TerminalExecutionConsole;
 import com.intellij.ui.AnimatedIcon;
-import com.intellij.util.Consumer;
 import com.redhat.devtools.intellij.common.model.ProcessHandlerInput;
 import com.redhat.devtools.intellij.common.utils.ExecProcessHandler;
 import com.redhat.devtools.intellij.knative.kn.Function;
@@ -28,6 +26,7 @@ import javax.swing.Icon;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class FuncActionTask implements IFuncAction {
@@ -51,7 +50,7 @@ public class FuncActionTask implements IFuncAction {
     }
 
     public void doExecute() {
-        this.doExecute.consume(this);
+        this.doExecute.accept(this);
     }
 
     public void init(FuncActionPipeline pipeline) {
@@ -59,8 +58,7 @@ public class FuncActionTask implements IFuncAction {
         stateIcon = new Icon[]{ AllIcons.Actions.Profile };
         state = new String[]{"Waiting to start"};
         TerminalExecutionConsole commonTerminalExecutionConsole = new TerminalExecutionConsole(pipeline.getProject(), null);
-        ProcessListener processListener = buildProcessListener();
-        setProcessListener(processListener);
+        setProcessListener(buildProcessListener());
         setTerminalExecutionConsole(commonTerminalExecutionConsole);
         setProcessHandlerFunction();
     }
