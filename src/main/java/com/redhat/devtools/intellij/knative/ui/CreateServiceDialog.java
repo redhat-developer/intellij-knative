@@ -15,11 +15,11 @@ import com.google.common.base.Strings;
 import com.intellij.CommonBundle;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.colors.EditorFontType;
+import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.fileEditor.impl.text.PsiAwareTextEditorImpl;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
-import com.intellij.openapi.ui.Divider;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.testFramework.LightVirtualFile;
@@ -31,7 +31,6 @@ import com.intellij.ui.components.JBTabbedPane;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.UIHelper;
 import com.redhat.devtools.intellij.common.utils.YAMLHelper;
-import com.redhat.devtools.intellij.knative.telemetry.TelemetryService;
 import com.redhat.devtools.intellij.knative.utils.EditorHelper;
 import com.redhat.devtools.intellij.knative.utils.KnHelper;
 import com.redhat.devtools.intellij.knative.utils.UIUtils;
@@ -71,7 +70,6 @@ import java.util.Collection;
 import static com.redhat.devtools.intellij.knative.Constants.YAML_FIRST_IMAGE_PATH;
 import static com.redhat.devtools.intellij.knative.Constants.YAML_NAME_PATH;
 import static com.redhat.devtools.intellij.knative.Constants.borderSearchFieldColor;
-import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymizeResource;
 
 public class CreateServiceDialog extends DialogWrapper {
     private final Logger logger = LoggerFactory.getLogger(CreateServiceDialog.class);
@@ -79,7 +77,7 @@ public class CreateServiceDialog extends DialogWrapper {
     private JPanel footerPanel, logPanel;
     private Project project;
     private JButton cancelButton, saveButton;
-    private PsiAwareTextEditorImpl editor;
+    private TextEditor editor;
     private OnePixelSplitter splitterPanel;
     private JTextArea txtAreaEventLog;
     private Runnable refreshFunction;
@@ -374,7 +372,7 @@ public class CreateServiceDialog extends DialogWrapper {
                 try {
                     KnHelper.saveOnCluster(this.project, editor.getEditor().getDocument().getText(), true);
                     UIHelper.executeInUI(refreshFunction);
-                    UIHelper.executeInUI(() -> super.doOKAction());
+                    UIHelper.executeInUI(super::doOKAction);
                     telemetry
                             .success()
                             .send();

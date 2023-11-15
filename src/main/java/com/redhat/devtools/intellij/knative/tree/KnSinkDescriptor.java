@@ -16,17 +16,13 @@ import com.intellij.ide.util.treeView.PresentableNodeDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.ui.SimpleTextAttributes;
-import com.redhat.devtools.intellij.knative.kn.BaseSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
 
 public class KnSinkDescriptor extends PresentableNodeDescriptor<KnSinkNode> {
-    private static final Icon BROKER_ICON = IconLoader.findIcon("/images/broker.svg");
-    private static final Icon CHANNEL_ICON = IconLoader.findIcon("/images/channel.svg");
-    private static final Icon SERVICE_ICON = IconLoader.findIcon("/images/service.svg");
-    private static final Icon LINK_ICON = IconLoader.findIcon("/images/link.svg");
+    private static final Icon SERVICE_ICON = IconLoader.findIcon("/images/service.svg", KnSinkDescriptor.class);
 
     private final KnSinkNode node;
 
@@ -42,13 +38,9 @@ public class KnSinkDescriptor extends PresentableNodeDescriptor<KnSinkNode> {
             presentation.addText("Sink Not Found", SimpleTextAttributes.ERROR_ATTRIBUTES);
         } else {
             presentation.setPresentableText(node.getName());
-            presentation.setIcon(getIcon(node.getSource()));
+            presentation.setIcon(SERVICE_ICON);
         }
 
-    }
-
-    private Icon getIcon(BaseSource source) {
-        return SERVICE_ICON;
     }
 
     @Override

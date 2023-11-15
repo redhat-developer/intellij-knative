@@ -16,10 +16,10 @@ import com.intellij.execution.process.ProcessListener;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.util.Key;
 import com.intellij.ui.AnimatedIcon;
-import com.intellij.util.Consumer;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class RunFuncActionTask extends FuncActionTask {
@@ -33,6 +33,7 @@ public class RunFuncActionTask extends FuncActionTask {
         this.callbackWhenListeningReady = callbackWhenListeningReady;
     }
 
+    @Override
     protected ProcessListener buildProcessListener() {
         Supplier<FuncActionTask> thisSupplier = () -> this;
         return new ProcessAdapter() {
@@ -59,10 +60,9 @@ public class RunFuncActionTask extends FuncActionTask {
 
             @Override
             public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
-                if (event.getText().contains("Function started on port")) {
-                    if (callbackWhenListeningReady != null) {
+                if (event.getText().contains("Function started on port") && (callbackWhenListeningReady != null)) {
                         callbackWhenListeningReady.run();
-                    }
+
                 }
             }
         };

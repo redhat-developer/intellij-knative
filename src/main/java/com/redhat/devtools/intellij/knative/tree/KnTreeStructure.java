@@ -39,9 +39,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class KnTreeStructure extends AbstractKnTreeStructure implements ConfigWatcher.Listener {
 
-    private static final Icon SERVICE_ICON = IconLoader.findIcon("/images/service.svg");
-    private static final Icon REVISION_ICON = IconLoader.findIcon("/images/revision.svg");
-    private static final Icon SOURCE_ICON = IconLoader.findIcon("/images/source-generic.svg");
+    private static final Icon SERVICE_ICON = IconLoader.findIcon("/images/service.svg", KnTreeStructure.class);
+    private static final Icon REVISION_ICON = IconLoader.findIcon("/images/revision.svg", KnTreeStructure.class);
+    private static final Icon SOURCE_ICON = IconLoader.findIcon("/images/source-generic.svg", KnTreeStructure.class);
 
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private Config config;
