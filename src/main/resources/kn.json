@@ -18,7 +18,7 @@
           "cmdFileName": "kn-darwin-amd64",
           "dlFileName": "kn-darwin-amd64"
         },
-        "osx-arm64": {
+        "osx-aarch64": {
           "url": "https://github.com/knative/client/releases/download/knative-v1.8.1/kn-darwin-arm64",
           "cmdFileName": "kn-darwin-arm64",
           "dlFileName": "kn-darwin-arm64"
