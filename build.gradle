@@ -48,7 +48,7 @@ intellij {
                'yaml',
                'org.jetbrains.plugins.github',
                'com.intellij.kubernetes:' + versionsMap[ideaVersion],
-               'com.redhat.devtools.intellij.telemetry:1.0.0.44',
+               'com.redhat.devtools.intellij.telemetry:1.1.0.52',
                'com.redhat.devtools.intellij.kubernetes:1.2.0.271']
     updateSinceUntilBuild = false
 }
