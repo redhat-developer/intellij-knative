@@ -98,11 +98,6 @@ public class FunctionProjectBuilder extends WebProjectTemplate {
             public void addSettingsListener(@NotNull ProjectGeneratorPeer.SettingsListener listener) {
                 ProjectGeneratorPeer.super.addSettingsListener(listener);
             }
-
-            @Override
-            public void addSettingsStateListener(@NotNull WebProjectGenerator.SettingsStateListener listener) {
-
-            }
         };
     }
 }
