@@ -11,30 +11,23 @@
 package com.redhat.devtools.intellij.knative.utils;
 
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentManager;
 import com.intellij.ui.treeStructure.Tree;
-import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.BaseTest;
+import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.kn.Kn;
 import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
-import javax.swing.JViewport;
-import org.apache.commons.lang.StringUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import org.mockito.MockedStatic;
 
+import javax.swing.*;
 
 import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_FUNC_TOOL_WINDOW_ID;
-import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_LOCAL_FUNC_TOOL_WINDOW_ID;
 import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_TOOL_WINDOW_ID;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -73,7 +66,7 @@ public class TreeHelperTest extends BaseTest {
     }
 
     public void testTrimErrorMessage_ErrorMessageLongerThan130_ErrorMessageTrimmed() {
-        String longErrorMessage = StringUtils.repeat("a", 140);
+        String longErrorMessage = StringUtil.repeat("a", 140);
         String resultingErrorMessage = longErrorMessage.substring(0, 130) + "...";
         assertEquals(resultingErrorMessage, TreeHelper.trimErrorMessage(longErrorMessage));
     }

@@ -69,12 +69,6 @@ public class BuildRunDeployWindowToolFactory implements ToolWindowFactory {
     public boolean shouldBeAvailable(@NotNull Project project) {
         return true;
     }
-
-    @Override
-    public boolean isDoNotActivateOnStart() {
-        return true;
-    }
-
 }
 
 class ContentChangeManagerListener implements ContentManagerListener {
