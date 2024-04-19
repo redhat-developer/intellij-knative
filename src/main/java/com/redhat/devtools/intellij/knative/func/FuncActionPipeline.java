@@ -48,7 +48,7 @@ public abstract class FuncActionPipeline implements IFuncActionPipeline {
         this.startTime = System.currentTimeMillis();
         this.endTime = -1;
         this.actionTasks = new ArrayList<>();
-        this.stateIcon = new Icon[]{new AnimatedIcon.FS()};
+        this.stateIcon = new Icon[]{new AnimatedIcon.Default()};
         this.state = new String[]{"run tasks ..."};
         this.listenerList = new ArrayList<>();
     }

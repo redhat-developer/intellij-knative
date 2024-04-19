@@ -14,6 +14,7 @@ import com.intellij.icons.AllIcons;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.Function;
 import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
@@ -33,7 +34,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.Icon;
-import org.apache.commons.codec.binary.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -249,9 +249,9 @@ public class KnTreeStructure extends AbstractKnTreeStructure implements ConfigWa
     private boolean hasServerChanged(NamedContext newContext, NamedContext currentContext) {
         return newContext == null
                 || currentContext == null
-                || !StringUtils.equals(currentContext.getContext().getCluster(), newContext.getContext().getCluster())
-                || !StringUtils.equals(currentContext.getContext().getUser(), newContext.getContext().getUser())
-                || !StringUtils.equals(currentContext.getContext().getNamespace(), newContext.getContext().getNamespace());
+                || !StringUtil.equals(currentContext.getContext().getCluster(), newContext.getContext().getCluster())
+                || !StringUtil.equals(currentContext.getContext().getUser(), newContext.getContext().getUser())
+                || !StringUtil.equals(currentContext.getContext().getNamespace(), newContext.getContext().getNamespace());
     }
 
     private boolean hasNewToken(NamedContext newContext, Config newConfig, NamedContext currentContext, Config currentConfig) {
@@ -267,7 +267,7 @@ public class KnTreeStructure extends AbstractKnTreeStructure implements ConfigWa
             return false;
         }
         String currentToken = KubeConfigUtils.getUserToken(currentConfig, currentContext.getContext());
-        return !StringUtils.equals(newToken, currentToken);
+        return !StringUtil.equals(newToken, currentToken);
     }
 
     protected void refresh() {
