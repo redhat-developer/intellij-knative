@@ -69,7 +69,7 @@ public class FuncActionTask implements IFuncAction {
             @Override
             public void startNotified(@NotNull ProcessEvent event) {
                 startTime = System.currentTimeMillis();
-                stateIcon = new Icon[]{new AnimatedIcon.FS()};
+                stateIcon = new Icon[]{new AnimatedIcon.Default()};
                 state = new String[]{""};
                 FuncActionTask.this.pipeline.fireChangeRunningStep();
             }
