@@ -26,24 +26,16 @@ import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.tree.AsyncTreeModel;
 import com.intellij.ui.tree.StructureTreeModel;
 import com.intellij.ui.treeStructure.Tree;
-import com.redhat.devtools.intellij.common.compat.PopupHandlerAdapter;
-import com.redhat.devtools.intellij.common.listener.TreePopupMenuListener;
 import com.redhat.devtools.intellij.common.tree.MutableModelSynchronizer;
 import com.redhat.devtools.intellij.common.utils.IDEAContentFactory;
 import com.redhat.devtools.intellij.knative.Constants;
 import com.redhat.devtools.intellij.knative.listener.KnTreeDoubleClickListener;
 import com.redhat.devtools.intellij.knative.tree.AbstractKnTreeStructure;
 import com.redhat.devtools.intellij.knative.tree.KnNodeComparator;
-import com.redhat.devtools.intellij.knative.tree.KnTreeStructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.Icon;
-
-import java.lang.reflect.InvocationTargetException;
-
-import static com.redhat.devtools.intellij.knative.Constants.FUNCTIONS_ACTION_GROUP_ID;
-import static com.redhat.devtools.intellij.knative.Constants.KNATIVE_TOOLBAR_ACTION_GROUP_ID;
+import javax.swing.*;
 
 public abstract class KnBaseWindowTool<T extends AbstractKnTreeStructure> {
 
@@ -82,11 +74,7 @@ public abstract class KnBaseWindowTool<T extends AbstractKnTreeStructure> {
         Content content = createContent(toolWindow, panel, toolbarActionGroup);
 
         Tree tree = createTree(content, structure, true);
-        try {
-            PopupHandlerAdapter.install(tree, actionGroup, ActionPlaces.MAIN_MENU);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
+        PopupHandler.installPopupMenu(tree, actionGroup, ActionPlaces.MAIN_MENU);
         panel.setContent(new JBScrollPane(tree));
         new KnTreeDoubleClickListener(tree);
     }
