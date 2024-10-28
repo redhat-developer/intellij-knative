@@ -4,6 +4,7 @@
 [![License](https://img.shields.io/github/license/redhat-developer/intellij-knative?style=for-the-badge)](https://github.com/redhat-developer/intellij-knative/blob/main/LICENSE)
 
 # IntelliJ plugin for Knative & Serverless Functions
+## NOTE: This plugin is no longer maintained and is officially deprecated.
 
 [Knative](https://knative.dev/docs/) is an Open-Source Enterprise-level solution to build Serverless and Event Driven Applications. Thus running Serverless Containers in Kubernetes environments.
 

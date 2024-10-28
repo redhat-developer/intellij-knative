@@ -93,7 +93,7 @@
     ]]>
     </change-notes>
 
-    <idea-version since-build="223"/>
+    <idea-version since-build="223" until-build="242.*"/>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
